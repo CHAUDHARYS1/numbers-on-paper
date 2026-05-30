@@ -224,16 +224,6 @@ export default function InvoiceEditorPage() {
             <button className={[styles.mobileTab, tab === 'edit' ? styles.mobileTabActive : ''].join(' ')} onClick={() => setTab('edit')}>Edit</button>
             <button className={[styles.mobileTab, tab === 'preview' ? styles.mobileTabActive : ''].join(' ')} onClick={() => setTab('preview')}>Preview</button>
           </div>
-          <select
-            className={styles.statusSelect}
-            value={status}
-            onChange={e => setStatus(e.target.value)}
-          >
-            <option value="draft">Draft</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
           <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
             {isNew ? 'Save invoice' : 'Save changes'}
           </Button>

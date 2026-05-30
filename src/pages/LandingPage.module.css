@@ -199,14 +199,21 @@
 }
 
 @media (max-width: 768px) {
-  .hero { grid-template-columns: 1fr; padding: var(--space-12) var(--space-4); gap: var(--space-10); }
-  .heroHeadline { font-size: 36px; }
+  .hero { grid-template-columns: 1fr; padding: var(--space-10) var(--space-4); gap: var(--space-8); }
+  .heroHeadline { font-size: 32px; }
+  .heroSub { font-size: 15px; }
   .heroVisual { order: -1; }
-  .featureGrid { grid-template-columns: 1fr; }
+  .featureGrid { grid-template-columns: 1fr 1fr; }
   .pricingCard { grid-template-columns: 1fr; }
   .pricingLeft { border-right: none; border-bottom: 1px solid var(--color-border-default); padding: var(--space-6); }
   .pricingList { padding: var(--space-6); }
   .navInner { padding: 0 var(--space-4); }
   .sectionInner { padding: 0 var(--space-4); }
   .footerInner { flex-direction: column; gap: var(--space-3); text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .heroHeadline { font-size: 28px; letter-spacing: -0.5px; }
+  .featureGrid { grid-template-columns: 1fr; }
+  .navLogin { display: none; }
 }

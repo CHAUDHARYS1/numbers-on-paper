@@ -89,7 +89,17 @@
   0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
 }
 
+.tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 @media (max-width: 768px) {
-  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .statsGrid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+  .statCard { padding: var(--space-4); }
+  .statVal { font-size: 20px; }
   .table th, .table td { padding: var(--space-3) var(--space-4); }
+  .table th:nth-child(3), .table td:nth-child(3) { display: none; }
+}
+
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .statIcon { width: 28px; height: 28px; margin-bottom: var(--space-2); }
 }

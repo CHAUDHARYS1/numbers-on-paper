@@ -147,9 +147,63 @@
 .skeleton { height: 20px; background: var(--color-bg-subtle); border-radius: var(--radius-sm); animation: shimmer 1.5s ease-in-out infinite; }
 @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-@media (max-width: 768px) {
+.hideSmall { display: table-cell; }
+.mobileCards { display: none; }
+
+.mobileCard {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.mobileCard:last-child { border-bottom: none; }
+
+.mobileCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobileCardClient {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.mobileCardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.mobileCardAmount {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.mobileCardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-default);
+  margin-top: var(--space-1);
+}
+
+@media (max-width: 640px) {
   .filterBar { flex-direction: column; align-items: stretch; }
   .searchWrap { max-width: 100%; }
-  .table th:nth-child(3), .table td:nth-child(3),
-  .table th:nth-child(4), .table td:nth-child(4) { display: none; }
+  .statusTabs { overflow-x: auto; }
+  .table { display: none; }
+  .mobileCards { display: block; }
+}
+
+@media (max-width: 768px) {
+  .filterBar { flex-wrap: wrap; }
+  .hideSmall { display: none; }
 }

@@ -85,32 +85,34 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Invoice</th>
-                  <th>Client</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map(inv => (
-                  <tr key={inv.id} className={styles.tableRow} onClick={() => {}}>
-                    <td>
-                      <Link to={`/invoices/${inv.id}/edit`} className={styles.invNum}>
-                        {inv.invoice_number}
-                      </Link>
-                    </td>
-                    <td className={styles.clientName}>{inv.bill_to?.name || '—'}</td>
-                    <td className={styles.dateCell}>{inv.issue_date || '—'}</td>
-                    <td><Badge variant={inv.status} /></td>
-                    <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Invoice</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {invoices.map(inv => (
+                    <tr key={inv.id} className={styles.tableRow}>
+                      <td>
+                        <Link to={`/invoices/${inv.id}/edit`} className={styles.invNum}>
+                          {inv.invoice_number}
+                        </Link>
+                      </td>
+                      <td className={styles.clientName}>{inv.bill_to?.name || '—'}</td>
+                      <td className={styles.dateCell}>{inv.issue_date || '—'}</td>
+                      <td><Badge variant={inv.status} /></td>
+                      <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardBody>
       </Card>

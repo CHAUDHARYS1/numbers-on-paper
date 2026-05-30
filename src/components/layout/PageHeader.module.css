@@ -3,11 +3,11 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--color-text-primary);
   letter-spacing: -0.4px;
@@ -21,3 +21,9 @@
 }
 
 .action { flex-shrink: 0; padding-top: 2px; }
+
+@media (max-width: 640px) {
+  .header { flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-5); }
+  .action { width: 100%; }
+  .action > * { width: 100%; justify-content: center; }
+}

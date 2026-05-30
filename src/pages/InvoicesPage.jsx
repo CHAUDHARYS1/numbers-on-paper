@@ -114,13 +114,14 @@ export default function InvoicesPage() {
               )}
             </div>
           ) : (
+            {/* Desktop table */}
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>Invoice #</th>
                   <th>Client</th>
-                  <th>Issue date</th>
-                  <th>Due date</th>
+                  <th className={styles.hideSmall}>Issue date</th>
+                  <th className={styles.hideSmall}>Due date</th>
                   <th>Status</th>
                   <th style={{ textAlign: 'right' }}>Amount</th>
                   <th></th>
@@ -129,43 +130,29 @@ export default function InvoicesPage() {
               <tbody>
                 {filtered.map(inv => (
                   <tr key={inv.id} className={styles.tableRow}>
-                    <td>
-                      <span className={styles.invNum}>{inv.invoice_number}</span>
-                    </td>
+                    <td><span className={styles.invNum}>{inv.invoice_number}</span></td>
                     <td>
                       <div className={styles.clientName}>{inv.bill_to?.name || '—'}</div>
-                      {inv.bill_to?.organization && (
-                        <div className={styles.clientOrg}>{inv.bill_to.organization}</div>
-                      )}
+                      {inv.bill_to?.organization && <div className={styles.clientOrg}>{inv.bill_to.organization}</div>}
                     </td>
-                    <td className={styles.dateCell}>{inv.issue_date || '—'}</td>
-                    <td className={styles.dateCell}>{inv.due_date || '—'}</td>
+                    <td className={[styles.dateCell, styles.hideSmall].join(' ')}>{inv.issue_date || '—'}</td>
+                    <td className={[styles.dateCell, styles.hideSmall].join(' ')}>{inv.due_date || '—'}</td>
                     <td><Badge variant={inv.status} /></td>
                     <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
                     <td className={styles.actions}>
                       {confirmId === inv.id ? (
                         <>
                           <span className={styles.confirmText}>Delete?</span>
-                          <button
-                            className={styles.confirmBtn}
-                            onClick={() => handleDelete(inv.id)}
-                            disabled={deletingId === inv.id}
-                          >
+                          <button className={styles.confirmBtn} onClick={() => handleDelete(inv.id)} disabled={deletingId === inv.id}>
                             {deletingId === inv.id ? 'Deleting…' : 'Yes'}
                           </button>
-                          <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>
-                            Cancel
-                          </button>
+                          <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>Cancel</button>
                         </>
                       ) : (
                         <>
                           <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                           <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
-                          <button
-                            className={styles.deleteBtn}
-                            onClick={() => setConfirmId(inv.id)}
-                            aria-label="Delete invoice"
-                          >
+                          <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
                             <Trash2 size={14} />
                           </button>
                         </>
@@ -175,6 +162,43 @@ export default function InvoicesPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile cards */}
+            <div className={styles.mobileCards}>
+              {filtered.map(inv => (
+                <div key={inv.id} className={styles.mobileCard}>
+                  <div className={styles.mobileCardTop}>
+                    <span className={styles.invNum}>{inv.invoice_number}</span>
+                    <Badge variant={inv.status} />
+                  </div>
+                  <div className={styles.mobileCardClient}>{inv.bill_to?.name || '—'}</div>
+                  {inv.bill_to?.organization && <div className={styles.clientOrg}>{inv.bill_to.organization}</div>}
+                  <div className={styles.mobileCardMeta}>
+                    {inv.due_date && <span>Due {inv.due_date}</span>}
+                    <span className={styles.mobileCardAmount}>{fmt(inv.total)}</span>
+                  </div>
+                  <div className={styles.mobileCardActions}>
+                    {confirmId === inv.id ? (
+                      <>
+                        <span className={styles.confirmText}>Delete?</span>
+                        <button className={styles.confirmBtn} onClick={() => handleDelete(inv.id)} disabled={deletingId === inv.id}>
+                          {deletingId === inv.id ? 'Deleting…' : 'Yes'}
+                        </button>
+                        <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>Cancel</button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
+                        <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                        <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardBody>
       </Card>
