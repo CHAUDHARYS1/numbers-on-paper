@@ -87,9 +87,55 @@
 .clientOrg { font-size: 12px; color: var(--color-text-muted); margin-top: 1px; }
 .dateCell { color: var(--color-text-secondary); font-size: 13px; white-space: nowrap; }
 .amountCell { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
-.actions { white-space: nowrap; }
+.actions { white-space: nowrap; text-align: right; }
 .actionLink { font-size: 13px; color: var(--color-text-brand); margin-left: var(--space-4); text-decoration: none; font-weight: 500; }
 .actionLink:hover { text-decoration: underline; }
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  margin-left: var(--space-3);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.deleteBtn:hover { color: var(--color-danger-text); background: var(--color-danger-bg); }
+
+.confirmText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-danger-text);
+  margin-left: var(--space-3);
+}
+.confirmBtn {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-left: var(--space-2);
+  transition: opacity var(--transition-fast);
+}
+.confirmBtn:hover { opacity: 0.8; }
+.cancelBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  margin-left: var(--space-2);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+.cancelBtn:hover { color: var(--color-text-primary); background: var(--color-bg-subtle); }
 
 /* Empty */
 .empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--space-16) var(--space-6); }

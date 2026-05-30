@@ -1,13 +1,15 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Eye, Save, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, Save, ArrowLeft, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import { useToast } from '@/context/ToastContext'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import InvoicePreview from '@/components/invoice/InvoicePreview'
+import ClientSelect from '@/components/invoice/ClientSelect'
 import styles from './InvoiceEditorPage.module.css'
 
 const DEFAULT_ITEM = () => ({
@@ -42,11 +44,15 @@ export default function InvoiceEditorPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate  = useNavigate()
+  const toast     = useToast()
   const isNew     = !id
 
-  const [profile, setProfile] = useState(null)
-  const [saving,  setSaving]  = useState(false)
-  const [tab,     setTab]     = useState('edit') // 'edit' | 'preview' (mobile)
+  const [profile,  setProfile]  = useState(null)
+  const [clients,  setClients]  = useState([])
+  const [clientId, setClientId] = useState('')
+  const [saving,   setSaving]   = useState(false)
+  const [savingClient, setSavingClient] = useState(false)
+  const [tab,      setTab]      = useState('edit') // 'edit' | 'preview' (mobile)
 
   // Form state
   const [invoiceNumber, setInvoiceNumber] = useState('')
@@ -77,6 +83,9 @@ export default function InvoiceEditorPage() {
         }
       })
 
+    supabase.from('clients').select('*').eq('user_id', user.id).order('name')
+      .then(({ data }) => setClients(data || []))
+
     if (isNew) {
       supabase.rpc('next_invoice_number', { p_user_id: user.id })
         .then(({ data }) => setInvoiceNumber(data || 'INV-000001'))
@@ -89,6 +98,7 @@ export default function InvoiceEditorPage() {
           setDueDate(data.due_date || '')
           setStatus(data.status)
           setBillTo(data.bill_to || {})
+          setClientId(data.client_id || '')
           setLineItems(data.line_items?.length ? data.line_items : [DEFAULT_ITEM()])
           setDiscountType(data.discount_type || 'fixed')
           setDiscountValue(data.discount_value || 0)
@@ -114,6 +124,51 @@ export default function InvoiceEditorPage() {
   const addItem    = () => setLineItems(p => [...p, DEFAULT_ITEM()])
   const removeItem = (idx) => setLineItems(p => p.filter((_, i) => i !== idx))
 
+  const handleClientSelect = (id) => {
+    setClientId(id)
+    if (!id) {
+      setBillTo({ name: '', organization: '', address: '', city: '', state: '', zip: '' })
+      return
+    }
+    const client = clients.find(c => c.id === id)
+    if (!client) return
+    setBillTo({
+      name:         client.name,
+      organization: client.organization || '',
+      address:      client.address_line1 || '',
+      city:         client.city || '',
+      state:        client.state || '',
+      zip:          client.zip || '',
+    })
+  }
+
+  const handleSaveClient = async () => {
+    if (!billTo.name?.trim()) return
+    setSavingClient(true)
+    const payload = {
+      user_id:      user.id,
+      name:         billTo.name.trim(),
+      organization: billTo.organization || null,
+      address_line1: billTo.address || null,
+      city:         billTo.city || null,
+      state:        billTo.state || null,
+      zip:          billTo.zip || null,
+    }
+    if (clientId) payload.id = clientId
+    const { data, error } = await supabase.from('clients').upsert(payload).select().single()
+    setSavingClient(false)
+    if (error) {
+      toast.error('Failed to save client.')
+    } else {
+      setClients(prev => {
+        const exists = prev.find(c => c.id === data.id)
+        return exists ? prev.map(c => c.id === data.id ? data : c) : [...prev, data].sort((a, b) => a.name.localeCompare(b.name))
+      })
+      setClientId(data.id)
+      toast.success(`${data.name} saved to clients!`)
+    }
+  }
+
   const { subtotal, discountAmount, taxAmount, total } = calcTotals(lineItems, discountType, discountValue, taxRate)
 
   const invoiceData = {
@@ -127,6 +182,7 @@ export default function InvoiceEditorPage() {
       address: `${profile.address_line1 || ''}${profile.address_line2 ? ', ' + profile.address_line2 : ''}`,
       city: profile.city, state: profile.state, zip: profile.zip,
       phone: profile.phone, email: profile.email,
+      logo_url: profile.logo_url || null,
     } : {},
     bill_to: billTo,
     line_items: lineItems,
@@ -137,7 +193,7 @@ export default function InvoiceEditorPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const payload = { ...invoiceData, user_id: user.id }
+    const payload = { ...invoiceData, user_id: user.id, client_id: clientId || null }
     let error
     if (isNew) {
       ({ error } = await supabase.from('invoices').insert(payload))
@@ -145,7 +201,12 @@ export default function InvoiceEditorPage() {
       ({ error } = await supabase.from('invoices').update(payload).eq('id', id))
     }
     setSaving(false)
-    if (!error) navigate('/invoices')
+    if (error) {
+      toast.error('Failed to save invoice. Please try again.')
+    } else {
+      toast.success(isNew ? 'Invoice created!' : 'Invoice updated!')
+      navigate('/invoices')
+    }
   }
 
   const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0)
@@ -212,14 +273,26 @@ export default function InvoiceEditorPage() {
             <CardHeader title="Bill to" />
             <CardBody>
               <div className={styles.stack}>
-                <Input label="Client name" placeholder="DePaul University" value={billTo.name} onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
-                <Input label="Organization" placeholder="The Illinois Coalition…" value={billTo.organization} onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
-                <Input label="Address" placeholder="123 Main St" value={billTo.address} onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
+                <ClientSelect clients={clients} value={clientId} onChange={handleClientSelect} />
+                <Input label="Client name" placeholder="Full name" value={billTo.name} onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
+                <Input label="Organization" placeholder="Company or organization" value={billTo.organization} onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
+                <Input label="Address" placeholder="Street address" value={billTo.address} onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
                 <div className={styles.row3}>
                   <Input label="City" value={billTo.city} onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
                   <Input label="State" value={billTo.state} onChange={e => setBillTo(p => ({...p, state: e.target.value}))} />
                   <Input label="ZIP" value={billTo.zip} onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
                 </div>
+                {billTo.name?.trim() && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<UserCheck size={14} />}
+                    loading={savingClient}
+                    onClick={handleSaveClient}
+                  >
+                    {clientId ? 'Update client' : 'Save as client'}
+                  </Button>
+                )}
               </div>
             </CardBody>
           </Card>

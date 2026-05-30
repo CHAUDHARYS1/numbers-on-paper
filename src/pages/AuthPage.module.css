@@ -73,6 +73,12 @@
   margin-bottom: var(--space-6);
 }
 
+.nameRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
 .errorMsg {
   font-size: 13px;
   color: var(--color-danger-text);

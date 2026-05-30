@@ -20,8 +20,11 @@ export default function InvoicePreview({ data = {}, id }) {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.brandCol}>
-          <div className={styles.logoBox}>
-            {bill_from.business ? bill_from.business.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : 'SC'}
+          <div className={[styles.logoBox, bill_from.logo_url ? styles.logoBoxImg : ''].join(' ')}>
+            {bill_from.logo_url
+              ? <img src={bill_from.logo_url} alt="" className={styles.logoImg} />
+              : bill_from.business ? bill_from.business.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : 'NP'
+            }
           </div>
           <div>
             <div className={styles.bizName}>{bill_from.business || 'SC Design and Consultation'}</div>

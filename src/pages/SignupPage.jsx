@@ -8,20 +8,23 @@ import styles from './AuthPage.module.css'
 export default function SignupPage() {
   const { signUp } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail]       = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm]   = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [done, setDone]         = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName]   = useState('')
+  const [email, setEmail]         = useState('')
+  const [password, setPassword]   = useState('')
+  const [confirm, setConfirm]     = useState('')
+  const [error, setError]         = useState('')
+  const [loading, setLoading]     = useState(false)
+  const [done, setDone]           = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    if (!firstName.trim() || !lastName.trim()) { setError('Please enter your first and last name.'); return }
     if (password !== confirm) { setError('Passwords do not match.'); return }
     if (password.length < 8)  { setError('Password must be at least 8 characters.'); return }
     setLoading(true)
-    const { error } = await signUp(email, password)
+    const { error } = await signUp(email, password, firstName.trim(), lastName.trim())
     setLoading(false)
     if (error) { setError(error.message); return }
     setDone(true)
@@ -52,6 +55,26 @@ export default function SignupPage() {
         <p className={styles.sub}>Start invoicing in minutes</p>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
+          <div className={styles.nameRow}>
+            <Input
+              label="First name"
+              type="text"
+              placeholder="Jane"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              required
+              autoComplete="given-name"
+            />
+            <Input
+              label="Last name"
+              type="text"
+              placeholder="Smith"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              required
+              autoComplete="family-name"
+            />
+          </div>
           <Input
             label="Email"
             type="email"

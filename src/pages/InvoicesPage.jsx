@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Filter } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import { useToast } from '@/context/ToastContext'
 import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
@@ -17,10 +18,13 @@ function fmt(n) {
 
 export default function InvoicesPage() {
   const { user } = useAuth()
-  const [invoices, setInvoices] = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [search, setSearch]     = useState('')
-  const [status, setStatus]     = useState('all')
+  const toast = useToast()
+  const [invoices,   setInvoices]   = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [search,     setSearch]     = useState('')
+  const [status,     setStatus]     = useState('all')
+  const [confirmId,  setConfirmId]  = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -31,6 +35,19 @@ export default function InvoicesPage() {
       .order('created_at', { ascending: false })
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
+
+  const handleDelete = async (id) => {
+    setDeletingId(id)
+    const { error } = await supabase.from('invoices').delete().eq('id', id)
+    setDeletingId(null)
+    setConfirmId(null)
+    if (error) {
+      toast.error('Failed to delete invoice.')
+    } else {
+      setInvoices(prev => prev.filter(inv => inv.id !== id))
+      toast.success('Invoice deleted.')
+    }
+  }
 
   const filtered = invoices.filter(inv => {
     const matchStatus = status === 'all' || inv.status === status
@@ -126,8 +143,33 @@ export default function InvoicesPage() {
                     <td><Badge variant={inv.status} /></td>
                     <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
                     <td className={styles.actions}>
-                      <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
-                      <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                      {confirmId === inv.id ? (
+                        <>
+                          <span className={styles.confirmText}>Delete?</span>
+                          <button
+                            className={styles.confirmBtn}
+                            onClick={() => handleDelete(inv.id)}
+                            disabled={deletingId === inv.id}
+                          >
+                            {deletingId === inv.id ? 'Deleting…' : 'Yes'}
+                          </button>
+                          <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
+                          <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => setConfirmId(inv.id)}
+                            aria-label="Delete invoice"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}

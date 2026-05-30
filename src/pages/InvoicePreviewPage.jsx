@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download, Edit2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/context/ToastContext'
 import Button from '@/components/ui/Button'
 import InvoicePreview from '@/components/invoice/InvoicePreview'
 import styles from './InvoicePreviewPage.module.css'
@@ -9,6 +10,7 @@ import styles from './InvoicePreviewPage.module.css'
 export default function InvoicePreviewPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [invoice, setInvoice] = useState(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
@@ -20,16 +22,22 @@ export default function InvoicePreviewPage() {
 
   const handleDownload = async () => {
     setDownloading(true)
-    const { default: html2pdf } = await import('html2pdf.js')
-    const el = document.getElementById('invoice-print')
-    await html2pdf().set({
-      margin:      [10, 10, 10, 10],
-      filename:    `${invoice?.invoice_number || 'invoice'}.pdf`,
-      image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    }).from(el).save()
-    setDownloading(false)
+    try {
+      const { default: html2pdf } = await import('html2pdf.js')
+      const el = document.getElementById('invoice-print')
+      await html2pdf().set({
+        margin:      [10, 10, 10, 10],
+        filename:    `${invoice?.invoice_number || 'invoice'}.pdf`,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(el).save()
+      toast.success('PDF downloaded!')
+    } catch {
+      toast.error('Failed to generate PDF. Please try again.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   if (loading) return <div className={styles.loading}>Loading…</div>

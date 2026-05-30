@@ -149,6 +149,27 @@
   text-overflow: ellipsis;
 }
 
+.bottomActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+.themeToggle:hover { color: var(--color-text-primary); }
+.themeToggle:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; border-radius: var(--radius-sm); }
+
 .signOutBtn {
   display: flex;
   align-items: center;
@@ -162,6 +183,21 @@
   transition: color var(--transition-fast);
 }
 .signOutBtn:hover { color: var(--color-danger-text); }
+
+.topBarTheme {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.topBarTheme:hover { color: var(--color-text-primary); background: var(--color-bg-subtle); }
+.topBarTheme:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 
 /* ─── Main ────────────────────────────────────────────────────── */
 .main {

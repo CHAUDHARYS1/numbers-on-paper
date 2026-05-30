@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/context/ToastContext'
 import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
-import { Save } from 'lucide-react'
+import { Save, Upload } from 'lucide-react'
 import styles from './SettingsPage.module.css'
 
 export default function SettingsPage() {
   const { user } = useAuth()
-  const [saving,  setSaving]  = useState(false)
-  const [saved,   setSaved]   = useState(false)
+  const toast = useToast()
+  const [saving,        setSaving]        = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
   const [profile, setProfile] = useState({
     full_name: '', business_name: '', tagline: 'Web Design & Consultation',
     address_line1: '', address_line2: '', city: '', state: '', zip: '',
@@ -32,12 +34,46 @@ export default function SettingsPage() {
     [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
   }))
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file.')
+      return
+    }
+    setUploadingLogo(true)
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/logo.${ext}`
+    const { error: uploadError } = await supabase.storage.from('logos').upload(path, file, { upsert: true })
+    if (uploadError) {
+      toast.error('Failed to upload logo. Make sure the logos storage bucket exists in Supabase.')
+      setUploadingLogo(false)
+      return
+    }
+    const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(path)
+    const logoUrl = `${publicUrl}?t=${Date.now()}`
+    setProfile(p => ({ ...p, logo_url: logoUrl }))
+    await supabase.from('profiles').update({ logo_url: logoUrl }).eq('id', user.id)
+    setUploadingLogo(false)
+    toast.success('Logo uploaded!')
+    e.target.value = ''
+  }
+
+  const handleRemoveLogo = async () => {
+    setProfile(p => ({ ...p, logo_url: null }))
+    await supabase.from('profiles').update({ logo_url: null }).eq('id', user.id)
+    toast.success('Logo removed.')
+  }
+
   const handleSave = async () => {
     setSaving(true)
-    await supabase.from('profiles').upsert({ ...profile, id: user.id })
+    const { error } = await supabase.from('profiles').upsert({ ...profile, id: user.id })
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    if (error) {
+      toast.error('Failed to save settings. Please try again.')
+    } else {
+      toast.success('Settings saved!')
+    }
   }
 
   return (
@@ -47,7 +83,7 @@ export default function SettingsPage() {
         description="Manage your business profile and invoice defaults"
         action={
           <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
-            {saved ? 'Saved!' : 'Save changes'}
+            Save changes
           </Button>
         }
       />
@@ -58,6 +94,34 @@ export default function SettingsPage() {
           <CardHeader title="Business profile" description="This info appears on your invoices" />
           <CardBody>
             <div className={styles.stack}>
+              {/* Logo upload */}
+              <div className={styles.logoSection}>
+                <div className={styles.logoPreview}>
+                  {profile.logo_url
+                    ? <img src={profile.logo_url} alt="Company logo" className={styles.logoPreviewImg} />
+                    : <span className={styles.logoPlaceholderText}>No logo</span>
+                  }
+                </div>
+                <div className={styles.logoInfo}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="logo-upload"
+                    className={styles.fileInputHidden}
+                    onChange={handleLogoUpload}
+                    disabled={uploadingLogo}
+                  />
+                  <label htmlFor="logo-upload" className={styles.logoUploadLabel}>
+                    <Upload size={13} />
+                    {uploadingLogo ? 'Uploading…' : profile.logo_url ? 'Change logo' : 'Upload logo'}
+                  </label>
+                  {profile.logo_url && (
+                    <button className={styles.logoRemoveBtn} onClick={handleRemoveLogo}>Remove</button>
+                  )}
+                  <p className={styles.logoHint}>PNG, JPG or SVG · Shown on all invoices</p>
+                </div>
+              </div>
+
               <div className={styles.row2}>
                 <Input label="Your name" placeholder="Shital Chaudhary" value={profile.full_name} onChange={set('full_name')} />
                 <Input label="Business name" placeholder="SC Design and Consultation" value={profile.business_name} onChange={set('business_name')} />

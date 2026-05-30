@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, FileText, Plus, Settings,
-  LogOut, Menu, X, ChevronRight
+  LogOut, Menu, X, Moon, Sun
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTheme } from '@/context/ThemeContext'
 import styles from './AppShell.module.css'
 
 const NAV_ITEMS = [
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
 export default function AppShell({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { user, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -86,10 +88,20 @@ export default function AppShell({ children }) {
               <span className={styles.userEmail}>{user?.email}</span>
             </div>
           </div>
-          <button className={styles.signOutBtn} onClick={handleSignOut}>
-            <LogOut size={15} aria-hidden="true" />
-            Sign out
-          </button>
+          <div className={styles.bottomActions}>
+            <button
+              className={styles.themeToggle}
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
+            <button className={styles.signOutBtn} onClick={handleSignOut}>
+              <LogOut size={15} aria-hidden="true" />
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -105,6 +117,13 @@ export default function AppShell({ children }) {
             <Menu size={20} />
           </button>
           <span className={styles.topBarLogo}>Numbers on Paper</span>
+          <button
+            className={styles.topBarTheme}
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
 
         <div className={styles.content}>
