@@ -1,0 +1,95 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.statCard {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.statIcon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.stat_brand .statIcon   { background: var(--color-brand-50);   color: var(--color-brand-600);   }
+.stat_success .statIcon { background: var(--color-success-bg);  color: var(--color-success-text); }
+.stat_warning .statIcon { background: var(--color-warning-bg);  color: var(--color-warning-text); }
+.stat_neutral .statIcon { background: var(--color-neutral-100); color: var(--color-neutral-600);  }
+
+.statVal {
+  font-size: 24px; font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  letter-spacing: -0.5px;
+  margin-bottom: var(--space-1);
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th {
+  font-size: 12px; font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+  text-align: left;
+}
+.table td {
+  padding: var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+.tableRow:last-child td { border-bottom: none; }
+.tableRow:hover td { background: var(--color-bg-subtle); }
+.tableRow { cursor: pointer; transition: background var(--transition-fast); }
+
+.invNum { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-brand); font-weight: 500; }
+.clientName { color: var(--color-text-primary); }
+.dateCell { color: var(--color-text-secondary); font-size: 13px; }
+.amountCell { font-family: var(--font-mono); font-weight: 500; }
+
+.viewAll { font-size: 13px; font-weight: 500; color: var(--color-text-brand); text-decoration: none; }
+.viewAll:hover { text-decoration: underline; }
+
+/* Empty */
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: var(--space-16) var(--space-6);
+}
+.emptyIcon { color: var(--color-text-muted); margin-bottom: var(--space-4); }
+.emptyTitle { font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-2); }
+.emptySub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: var(--space-6); }
+
+/* Skeleton */
+.skeletonWrap { padding: var(--space-4) var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); }
+.skeleton {
+  height: 20px; background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .table th, .table td { padding: var(--space-3) var(--space-4); }
+}

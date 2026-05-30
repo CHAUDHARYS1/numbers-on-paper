@@ -1,0 +1,71 @@
+.invoice {
+  background: white;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-5); }
+.brandCol { display: flex; align-items: center; gap: var(--space-3); }
+.logoBox {
+  width: 40px; height: 40px;
+  background: var(--color-brand-50); color: var(--color-brand-800);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; flex-shrink: 0;
+}
+.bizName { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+.bizTagline { font-size: 11px; color: var(--color-text-muted); margin-top: 1px; }
+.docCol { text-align: right; }
+.invNumber { font-size: 17px; font-weight: 600; color: var(--color-brand-600); font-family: var(--font-mono); margin-bottom: 2px; }
+.invDate { font-size: 12px; color: var(--color-text-muted); margin-bottom: var(--space-2); }
+
+.divider { height: 1px; background: var(--color-border-default); margin: var(--space-4) 0; }
+
+/* Meta grid */
+.metaGrid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+.metaCell {}
+.metaLabel { font-size: 10px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-2); }
+.metaVal { font-size: 12px; color: var(--color-text-primary); line-height: 1.6; }
+
+/* Table */
+.tableWrap {}
+.tableLabel { font-size: 10px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-3); }
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  font-size: 11px; font-weight: 600; color: var(--color-text-muted);
+  text-align: left; padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+.table td { font-size: 12px; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-default); }
+.table tr:last-child td { border-bottom: none; }
+.itemCell { font-weight: 500; }
+.descCell { color: var(--color-text-secondary); }
+.dateCell { color: var(--color-text-secondary); white-space: nowrap; }
+.numCell { text-align: right; font-family: var(--font-mono); }
+.amtCell { text-align: right; font-family: var(--font-mono); font-weight: 500; }
+.emptyRow { text-align: center; color: var(--color-text-muted); padding: var(--space-4) !important; }
+
+/* Footer */
+.footer { display: flex; justify-content: space-between; gap: var(--space-4); align-items: flex-end; }
+.contactBox {}
+.contactRow { display: flex; gap: var(--space-4); font-size: 12px; margin-top: var(--space-1); }
+.contactLbl { color: var(--color-text-muted); min-width: 40px; }
+
+.totalsBox { min-width: 180px; }
+.totalRow { display: flex; justify-content: space-between; gap: var(--space-6); font-size: 12px; color: var(--color-text-secondary); padding: 2px 0; }
+.totalRow span:last-child { font-family: var(--font-mono); }
+.grandTotal {
+  font-weight: 600; font-size: 13px; color: var(--color-text-primary);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-2); margin-top: var(--space-1);
+}
+.grandTotal span:last-child { color: var(--color-brand-600); }
+
+/* Notes */
+.notes { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border-default); }
+.notesText { font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; margin-top: var(--space-2); }

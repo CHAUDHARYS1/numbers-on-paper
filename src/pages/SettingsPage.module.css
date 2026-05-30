@@ -1,0 +1,31 @@
+.sections { display: flex; flex-direction: column; gap: var(--space-6); max-width: 720px; }
+.stack { display: flex; flex-direction: column; gap: var(--space-4); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.row3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--space-3); }
+
+.fieldLabel { display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--space-1); }
+.textarea {
+  width: 100%; min-height: 80px; padding: var(--space-3); resize: vertical;
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-md);
+  font-size: 14px; font-family: var(--font-body); color: var(--color-text-primary); line-height: 1.6;
+}
+.textarea:focus { outline: none; border-color: var(--color-border-brand); box-shadow: 0 0 0 3px var(--color-brand-50); }
+
+/* Toggle group */
+.toggleGroup { display: flex; flex-direction: column; gap: var(--space-1); }
+.toggleRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-default);
+  cursor: pointer;
+  gap: var(--space-4);
+}
+.toggleRow:last-child { border-bottom: none; }
+.toggleLabel { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.toggleHint { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
+.toggle { width: 40px; height: 22px; accent-color: var(--color-brand-600); cursor: pointer; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .row2 { grid-template-columns: 1fr; }
+  .row3 { grid-template-columns: 1fr 1fr; }
+}
