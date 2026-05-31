@@ -23,6 +23,7 @@ export default function InvoicesPage() {
   const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState('')
   const [status,     setStatus]     = useState('all')
+  const [client,     setClient]     = useState('all')
   const [confirmId,  setConfirmId]  = useState(null)
   const [deletingId, setDeletingId] = useState(null)
 
@@ -49,14 +50,21 @@ export default function InvoicesPage() {
     }
   }
 
+  const clients = [...new Map(
+    invoices
+      .filter(inv => inv.bill_to?.name)
+      .map(inv => [inv.bill_to.name, inv.bill_to.name])
+  ).values()].sort()
+
   const filtered = invoices.filter(inv => {
     const matchStatus = status === 'all' || inv.status === status
+    const matchClient = client === 'all' || inv.bill_to?.name === client
     const q = search.toLowerCase()
     const matchSearch = !q ||
       inv.invoice_number?.toLowerCase().includes(q) ||
       inv.bill_to?.name?.toLowerCase().includes(q) ||
       inv.bill_to?.organization?.toLowerCase().includes(q)
-    return matchStatus && matchSearch
+    return matchStatus && matchClient && matchSearch
   })
 
   return (
@@ -82,6 +90,19 @@ export default function InvoicesPage() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
+        {clients.length > 0 && (
+          <select
+            className={styles.clientSelect}
+            value={client}
+            onChange={e => setClient(e.target.value)}
+            aria-label="Filter by client"
+          >
+            <option value="all">All clients</option>
+            {clients.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        )}
         <div className={styles.statusTabs} role="tablist" aria-label="Filter by status">
           {STATUS_FILTERS.map(s => (
             <button
@@ -106,8 +127,8 @@ export default function InvoicesPage() {
           ) : filtered.length === 0 ? (
             <div className={styles.empty}>
               <p className={styles.emptyTitle}>No invoices found</p>
-              <p className={styles.emptySub}>{search || status !== 'all' ? 'Try adjusting your filters.' : 'Create your first invoice to get started.'}</p>
-              {!search && status === 'all' && (
+              <p className={styles.emptySub}>{search || status !== 'all' || client !== 'all' ? 'Try adjusting your filters.' : 'Create your first invoice to get started.'}</p>
+              {!search && status === 'all' && client === 'all' && (
                 <Link to="/invoices/new">
                   <Button variant="primary" size="md" icon={<Plus size={15} />}>New invoice</Button>
                 </Link>

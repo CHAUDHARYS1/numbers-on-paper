@@ -1,4 +1,4 @@
-.field { display: flex; flex-direction: column; gap: var(--space-1); }
+.field { display: flex; flex-direction: column; gap: var(--space-1); width: 100%; min-width: 0; }
 
 .label {
   font-size: 13px;
@@ -17,6 +17,7 @@
   background: var(--color-bg-surface);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 100%;
+  min-width: 0;
 }
 .input::placeholder { color: var(--color-text-muted); }
 .input:focus {
@@ -36,6 +37,10 @@
 .hint {
   font-size: 11px;
   color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .input { font-size: 16px; }
 }
 
 .error {

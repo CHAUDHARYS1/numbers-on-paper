@@ -137,6 +137,7 @@
 
 /* ─── Reset ────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+input, select, textarea, button { max-width: 100%; }
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 
@@ -154,6 +155,10 @@ a:hover { text-decoration: underline; }
 
 button { font-family: var(--font-body); cursor: pointer; }
 input, textarea, select { font-family: var(--font-body); }
+
+@media (max-width: 768px) {
+  input, textarea, select { font-size: 16px; }
+}
 
 /* ─── Utility Classes ───────────────────────────────────────────── */
 .font-mono { font-family: var(--font-mono); }

@@ -293,6 +293,7 @@ export default function InvoiceEditorPage() {
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addItem}>Add item</Button>
             } />
             <CardBody style={{ padding: 0 }}>
+              {/* Desktop table */}
               <div className={styles.lineItemsTable}>
                 <div className={styles.lineItemHead}>
                   <span>Item</span>
@@ -314,6 +315,50 @@ export default function InvoiceEditorPage() {
                     <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
                       <Trash2 size={14} />
                     </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mobile cards */}
+              <div className={styles.lineItemsMobile}>
+                {lineItems.map((item, idx) => (
+                  <div key={item.id} className={styles.lineItemCard}>
+                    <div className={styles.lineItemCardHeader}>
+                      <input
+                        className={styles.lineItemCardTitle}
+                        placeholder="Item name"
+                        value={item.item}
+                        onChange={e => updateItem(idx, 'item', e.target.value)}
+                      />
+                      <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <textarea
+                      className={styles.lineItemCardDesc}
+                      placeholder="Description (optional)"
+                      value={item.description}
+                      onChange={e => updateItem(idx, 'description', e.target.value)}
+                      rows={2}
+                    />
+                    <div className={styles.lineItemCardMeta}>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Date</label>
+                        <input className={styles.lineItemCardInput} type="date" value={item.date} onChange={e => updateItem(idx, 'date', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Hours</label>
+                        <input className={styles.lineItemCardInput} type="number" min="0" placeholder="0" value={item.hours} onChange={e => updateItem(idx, 'hours', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Rate ($)</label>
+                        <input className={styles.lineItemCardInput} type="number" min="0" placeholder="50" value={item.rate} onChange={e => updateItem(idx, 'rate', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Amount</label>
+                        <span className={styles.lineItemCardAmount}>{fmt(item.amount)}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
