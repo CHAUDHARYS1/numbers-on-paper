@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, Edit2, Printer, Send } from 'lucide-react'
+import { ArrowLeft, Download, Edit2, Printer, Send, Mail } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -72,6 +72,9 @@ export default function InvoicePreviewPage() {
         <div className={styles.actions}>
           <Link to={`/invoices/${id}/edit`}>
             <Button variant="secondary" size="md" icon={<Edit2 size={15} />}>Edit</Button>
+          </Link>
+          <Link to={`/invoices/${id}/email-preview`}>
+            <Button variant="secondary" size="md" icon={<Mail size={15} />}>Preview email</Button>
           </Link>
           <Button variant="secondary" size="md" icon={<Printer size={15} />} onClick={handlePrint}>
             Print
