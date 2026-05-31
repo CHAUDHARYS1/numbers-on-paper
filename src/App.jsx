@@ -23,9 +23,9 @@ function PrivateRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading, mfaPending } = useAuth()
   if (loading) return null
-  return user ? <Navigate to="/dashboard" replace /> : children
+  return (user && !mfaPending) ? <Navigate to="/dashboard" replace /> : children
 }
 
 export default function App() {

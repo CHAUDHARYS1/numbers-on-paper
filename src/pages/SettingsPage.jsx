@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/context/ToastContext'
@@ -6,14 +8,311 @@ import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
-import { Save, Upload } from 'lucide-react'
+import { Save, Upload, Lock, ShieldCheck, Trash2 } from 'lucide-react'
 import styles from './SettingsPage.module.css'
 
+// ── Change Password ────────────────────────────────────────────────
+
+function PasswordSection({ user, toast }) {
+  const [form, setForm]     = useState({ current: '', next: '', confirm: '' })
+  const [showPw, setShowPw] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const setField = f => e => setForm(p => ({ ...p, [f]: e.target.value }))
+
+  const handleChange = async (e) => {
+    e.preventDefault()
+    if (form.next !== form.confirm) { toast.error("New passwords don't match."); return }
+    if (form.next.length < 8) { toast.error('New password must be at least 8 characters.'); return }
+    setSaving(true)
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: user.email, password: form.current })
+    if (authErr) { toast.error('Current password is incorrect.'); setSaving(false); return }
+    const { error } = await supabase.auth.updateUser({ password: form.next })
+    setSaving(false)
+    if (error) { toast.error('Failed to update password.'); return }
+    toast.success('Password updated!')
+    setForm({ current: '', next: '', confirm: '' })
+  }
+
+  return (
+    <div className={styles.subsection}>
+      <div className={styles.subsectionHead}>
+        <Lock size={16} />
+        <div>
+          <div className={styles.subsectionTitle}>Change password</div>
+          <div className={styles.subsectionHint}>Use at least 8 characters.</div>
+        </div>
+      </div>
+      <form onSubmit={handleChange} className={styles.pwForm} noValidate>
+        <Input
+          label="Current password"
+          type={showPw ? 'text' : 'password'}
+          value={form.current}
+          onChange={setField('current')}
+          autoComplete="current-password"
+          required
+        />
+        <div className={styles.row2}>
+          <Input
+            label="New password"
+            type={showPw ? 'text' : 'password'}
+            value={form.next}
+            onChange={setField('next')}
+            autoComplete="new-password"
+            required
+          />
+          <Input
+            label="Confirm new password"
+            type={showPw ? 'text' : 'password'}
+            value={form.confirm}
+            onChange={setField('confirm')}
+            autoComplete="new-password"
+            required
+          />
+        </div>
+        <div className={styles.pwActions}>
+          <label className={styles.showPwLabel}>
+            <input type="checkbox" checked={showPw} onChange={e => setShowPw(e.target.checked)} />
+            Show passwords
+          </label>
+          <Button type="submit" variant="secondary" size="sm" loading={saving}>
+            Update password
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+// ── Two-Factor Authentication ──────────────────────────────────────
+
+function TwoFactorSection({ toast }) {
+  const [factors,    setFactors]    = useState([])
+  const [step,       setStep]       = useState('idle') // idle | verifying | confirming-disable
+  const [enrollData, setEnrollData] = useState(null)   // { id, qrCode, secret }
+  const [code,       setCode]       = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [fetching,   setFetching]   = useState(true)
+
+  const loadFactors = useCallback(async () => {
+    const { data } = await supabase.auth.mfa.listFactors()
+    setFactors(data?.totp?.filter(f => f.status === 'verified') ?? [])
+    setFetching(false)
+  }, [])
+
+  useEffect(() => { loadFactors() }, [loadFactors])
+
+  const isEnabled = factors.length > 0
+
+  const handleEnable = async () => {
+    setLoading(true)
+    // Clean up any leftover unverified factors before enrolling
+    const { data: all } = await supabase.auth.mfa.listFactors()
+    for (const f of all?.totp ?? []) {
+      if (f.status !== 'verified') await supabase.auth.mfa.unenroll({ factorId: f.id })
+    }
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: 'totp',
+      friendlyName: 'Authenticator app',
+    })
+    setLoading(false)
+    if (error) { toast.error('Failed to set up 2FA. Please try again.'); return }
+    setEnrollData({ id: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret })
+    setStep('verifying')
+    setCode('')
+  }
+
+  const handleVerify = async (e) => {
+    e.preventDefault()
+    if (!/^\d{6}$/.test(code)) { toast.error('Enter the 6-digit code from your authenticator app.'); return }
+    setLoading(true)
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: enrollData.id, code })
+    setLoading(false)
+    if (error) { toast.error('Invalid code. Please try again.'); setCode(''); return }
+    toast.success('Two-factor authentication enabled!')
+    setStep('idle')
+    setEnrollData(null)
+    setCode('')
+    await loadFactors()
+  }
+
+  const handleCancelEnroll = async () => {
+    if (enrollData?.id) await supabase.auth.mfa.unenroll({ factorId: enrollData.id })
+    setStep('idle')
+    setEnrollData(null)
+    setCode('')
+  }
+
+  const handleDisableConfirm = async () => {
+    setLoading(true)
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: factors[0].id })
+    setLoading(false)
+    if (error) { toast.error('Failed to disable 2FA. Please try again.'); return }
+    toast.success('Two-factor authentication disabled.')
+    setStep('idle')
+    await loadFactors()
+  }
+
+  return (
+    <div className={styles.subsection}>
+      <div className={styles.subsectionHead}>
+        <ShieldCheck size={16} />
+        <div>
+          <div className={styles.subsectionTitle}>Two-factor authentication</div>
+          <div className={styles.subsectionHint}>
+            {isEnabled
+              ? 'Your account is protected with an authenticator app.'
+              : 'Add an extra layer of security when signing in.'}
+          </div>
+        </div>
+        {!fetching && (
+          <span className={isEnabled ? styles.mfaBadgeOn : styles.mfaBadgeOff}>
+            {isEnabled ? 'Enabled' : 'Disabled'}
+          </span>
+        )}
+      </div>
+
+      {step === 'idle' && !fetching && (
+        <div className={styles.mfaIdle}>
+          {isEnabled ? (
+            <Button variant="secondary" size="sm" onClick={() => setStep('confirming-disable')}>
+              Disable 2FA
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" loading={loading} onClick={handleEnable}>
+              Enable 2FA
+            </Button>
+          )}
+        </div>
+      )}
+
+      {step === 'verifying' && enrollData && (
+        <div className={styles.mfaEnrollWrap}>
+          <p className={styles.mfaStep}>
+            <strong>Step 1.</strong> Scan this QR code with Google Authenticator, Authy, or any TOTP app.
+          </p>
+          <img src={enrollData.qrCode} alt="QR code for authenticator app setup" className={styles.qrImg} />
+          <details className={styles.secretDetails}>
+            <summary>Can't scan? Enter the setup key manually</summary>
+            <code className={styles.secretCode}>{enrollData.secret}</code>
+          </details>
+          <p className={styles.mfaStep}>
+            <strong>Step 2.</strong> Enter the 6-digit code your app shows to confirm setup.
+          </p>
+          <form onSubmit={handleVerify} className={styles.mfaVerifyForm} noValidate>
+            <Input
+              label="Authentication code"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              placeholder="000000"
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+              autoComplete="one-time-code"
+              autoFocus
+            />
+            <div className={styles.mfaActions}>
+              <Button type="button" variant="ghost" size="sm" onClick={handleCancelEnroll}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" loading={loading}>
+                Confirm &amp; enable
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {step === 'confirming-disable' && (
+        <div className={styles.mfaDisableConfirm}>
+          <p className={styles.mfaDisableText}>
+            Disabling 2FA removes the extra security layer from your account. Are you sure?
+          </p>
+          <div className={styles.mfaActions}>
+            <Button variant="ghost" size="sm" onClick={() => setStep('idle')}>Cancel</Button>
+            <Button variant="danger" size="sm" loading={loading} onClick={handleDisableConfirm}>
+              Yes, disable 2FA
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Delete Account Modal ───────────────────────────────────────────
+
+function DeleteAccountModal({ user, onCancel, toast, navigate, signOut }) {
+  const [password, setPassword] = useState('')
+  const [loading,  setLoading]  = useState(false)
+
+  useEffect(() => {
+    const handle = (e) => { if (e.key === 'Escape') onCancel() }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [onCancel])
+
+  const handleDelete = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: user.email, password })
+    if (authErr) { toast.error('Incorrect password.'); setLoading(false); return }
+    const { error } = await supabase.rpc('delete_user')
+    if (error) { toast.error('Could not delete account. Please contact support.'); setLoading(false); return }
+    await signOut()
+    navigate('/')
+  }
+
+  return createPortal(
+    <div
+      className={styles.modalBackdrop}
+      onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-account-title"
+    >
+      <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
+        <div className={styles.modalIcon}><Trash2 size={22} /></div>
+        <h2 className={styles.modalTitle} id="delete-account-title">Delete account</h2>
+        <p className={styles.modalMsg}>
+          This will permanently delete your account, all invoices, and client data.
+          This action <strong>cannot be undone</strong>.
+        </p>
+        <form onSubmit={handleDelete} className={styles.modalForm} noValidate>
+          <Input
+            label="Enter your password to confirm"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
+            autoFocus
+            required
+          />
+          <div className={styles.modalActions}>
+            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="danger" size="sm" loading={loading}>
+              Delete my account
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
+// ── Settings Page ──────────────────────────────────────────────────
+
 export default function SettingsPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const toast = useToast()
+  const navigate = useNavigate()
   const [saving,        setSaving]        = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [deleteOpen,    setDeleteOpen]    = useState(false)
+
   const [profile, setProfile] = useState({
     full_name: '', business_name: '', tagline: 'Web Design & Consultation',
     address_line1: '', address_line2: '', city: '', state: '', zip: '',
@@ -21,6 +320,7 @@ export default function SettingsPage() {
     default_rate: 50,
     show_tax: false, show_discount: false, show_notes: true,
     tax_rate: 0, payment_terms: 'Net 30', notes_default: '',
+    notif_invoice_due: true, notif_payment_received: true, notif_weekly_summary: false,
   })
 
   useEffect(() => {
@@ -37,10 +337,7 @@ export default function SettingsPage() {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file.')
-      return
-    }
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file.'); return }
     setUploadingLogo(true)
     const ext = file.name.split('.').pop()
     const path = `${user.id}/logo.${ext}`
@@ -69,18 +366,15 @@ export default function SettingsPage() {
     setSaving(true)
     const { error } = await supabase.from('profiles').upsert({ ...profile, id: user.id })
     setSaving(false)
-    if (error) {
-      toast.error('Failed to save settings. Please try again.')
-    } else {
-      toast.success('Settings saved!')
-    }
+    if (error) { toast.error('Failed to save settings. Please try again.') }
+    else { toast.success('Settings saved!') }
   }
 
   return (
     <div>
       <PageHeader
         title="Settings"
-        description="Manage your business profile and invoice defaults"
+        description="Manage your business profile, security, and notifications"
         action={
           <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
             Save changes
@@ -89,12 +383,12 @@ export default function SettingsPage() {
       />
 
       <div className={styles.sections}>
-        {/* Business profile */}
+
+        {/* ── Business profile ── */}
         <Card>
           <CardHeader title="Business profile" description="This info appears on your invoices" />
           <CardBody>
             <div className={styles.stack}>
-              {/* Logo upload */}
               <div className={styles.logoSection}>
                 <div className={styles.logoPreview}>
                   {profile.logo_url
@@ -121,7 +415,6 @@ export default function SettingsPage() {
                   <p className={styles.logoHint}>PNG, JPG or SVG · Shown on all invoices</p>
                 </div>
               </div>
-
               <div className={styles.row2}>
                 <Input label="Your name" placeholder="Shital Chaudhary" value={profile.full_name} onChange={set('full_name')} />
                 <Input label="Business name" placeholder="SC Design and Consultation" value={profile.business_name} onChange={set('business_name')} />
@@ -142,7 +435,7 @@ export default function SettingsPage() {
           </CardBody>
         </Card>
 
-        {/* Invoice defaults */}
+        {/* ── Invoice defaults ── */}
         <Card>
           <CardHeader title="Invoice defaults" description="Applied automatically when creating a new invoice" />
           <CardBody>
@@ -165,7 +458,7 @@ export default function SettingsPage() {
           </CardBody>
         </Card>
 
-        {/* Template options */}
+        {/* ── Template options ── */}
         <Card>
           <CardHeader title="Template options" description="Toggle which sections appear on invoices by default" />
           <CardBody>
@@ -177,7 +470,6 @@ export default function SettingsPage() {
                 </div>
                 <input type="checkbox" className={styles.toggle} checked={profile.show_discount} onChange={set('show_discount')} />
               </label>
-
               <label className={styles.toggleRow}>
                 <div>
                   <div className={styles.toggleLabel}>Show tax</div>
@@ -185,13 +477,11 @@ export default function SettingsPage() {
                 </div>
                 <input type="checkbox" className={styles.toggle} checked={profile.show_tax} onChange={set('show_tax')} />
               </label>
-
               {profile.show_tax && (
                 <div className={styles.taxRateWrap}>
                   <Input label="Default tax rate (%)" type="number" min="0" max="100" step="0.01" value={profile.tax_rate} onChange={set('tax_rate')} />
                 </div>
               )}
-
               <label className={styles.toggleRow}>
                 <div>
                   <div className={styles.toggleLabel}>Show notes & terms</div>
@@ -202,7 +492,85 @@ export default function SettingsPage() {
             </div>
           </CardBody>
         </Card>
+
+        {/* ── Account & security ── */}
+        <Card>
+          <CardHeader title="Account & security" description="Manage your password and two-factor authentication" />
+          <CardBody>
+            <PasswordSection user={user} toast={toast} />
+            <div className={styles.sectionDivider} />
+            <TwoFactorSection toast={toast} />
+          </CardBody>
+        </Card>
+
+        {/* ── Email notifications ── */}
+        <Card>
+          <CardHeader
+            title="Email notifications"
+            description="Choose which emails you receive from us"
+          />
+          <CardBody>
+            <div className={styles.toggleGroup}>
+              <label className={styles.toggleRow}>
+                <div>
+                  <div className={styles.toggleLabel}>Invoice due reminders</div>
+                  <div className={styles.toggleHint}>Get notified when a client invoice is approaching its due date</div>
+                </div>
+                <input type="checkbox" className={styles.toggle} checked={!!profile.notif_invoice_due} onChange={set('notif_invoice_due')} />
+              </label>
+              <label className={styles.toggleRow}>
+                <div>
+                  <div className={styles.toggleLabel}>Payment received</div>
+                  <div className={styles.toggleHint}>Confirmation email when you mark an invoice as paid</div>
+                </div>
+                <input type="checkbox" className={styles.toggle} checked={!!profile.notif_payment_received} onChange={set('notif_payment_received')} />
+              </label>
+              <label className={styles.toggleRow}>
+                <div>
+                  <div className={styles.toggleLabel}>Weekly summary</div>
+                  <div className={styles.toggleHint}>A weekly overview of your invoicing activity and outstanding balances</div>
+                </div>
+                <input type="checkbox" className={styles.toggle} checked={!!profile.notif_weekly_summary} onChange={set('notif_weekly_summary')} />
+              </label>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* ── Danger zone ── */}
+        <Card className={styles.dangerCard}>
+          <CardHeader title="Danger zone" description="Irreversible account actions" />
+          <CardBody>
+            <div className={styles.dangerRow}>
+              <div>
+                <div className={styles.dangerLabel}>Delete account</div>
+                <div className={styles.dangerText}>
+                  Permanently delete your account and all associated invoices, clients, and data.
+                  This cannot be undone.
+                </div>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Trash2 size={14} />}
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete account
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+
       </div>
+
+      {deleteOpen && (
+        <DeleteAccountModal
+          user={user}
+          onCancel={() => setDeleteOpen(false)}
+          toast={toast}
+          navigate={navigate}
+          signOut={signOut}
+        />
+      )}
     </div>
   )
 }
