@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, Edit2 } from 'lucide-react'
+import { ArrowLeft, Download, Edit2, Printer } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/context/ToastContext'
 import Button from '@/components/ui/Button'
@@ -19,6 +19,8 @@ export default function InvoicePreviewPage() {
     supabase.from('invoices').select('*').eq('id', id).single()
       .then(({ data }) => { setInvoice(data); setLoading(false) })
   }, [id])
+
+  const handlePrint = () => window.print()
 
   const handleDownload = async () => {
     setDownloading(true)
@@ -53,6 +55,9 @@ export default function InvoicePreviewPage() {
           <Link to={`/invoices/${id}/edit`}>
             <Button variant="secondary" size="md" icon={<Edit2 size={15} />}>Edit</Button>
           </Link>
+          <Button variant="secondary" size="md" icon={<Printer size={15} />} onClick={handlePrint}>
+            Print
+          </Button>
           <Button variant="primary" size="md" icon={<Download size={15} />} loading={downloading} onClick={handleDownload}>
             Download PDF
           </Button>

@@ -167,6 +167,40 @@ input, textarea, select { font-family: var(--font-body); }
 .text-brand { color: var(--color-text-brand); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
+/* ─── Print ─────────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything */
+  body * { visibility: hidden; }
+
+  /* Show only the invoice */
+  #invoice-print,
+  #invoice-print * { visibility: visible; }
+
+  #invoice-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 12mm !important;
+    font-size: 11pt !important;
+  }
+
+  /* Reset any mobile responsive overrides for print */
+  #invoice-print [class*="header"] { flex-direction: row !important; }
+  #invoice-print [class*="metaGrid"] { grid-template-columns: 1fr 1fr 1fr !important; }
+  #invoice-print [class*="footer"] { flex-direction: row !important; }
+  #invoice-print [class*="tableWrap"] { overflow: visible !important; }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
 /* ─── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Search, Trash2, Copy, CheckCircle } from 'lucide-react'
+import { Plus, Search, Trash2, Copy, CheckCircle, Printer } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -207,6 +207,9 @@ export default function InvoicesPage() {
                       )}
                       <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                       <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                      <Link to={`/invoices/${inv.id}/preview`} className={styles.iconBtn} aria-label="Print invoice" title="Print">
+                        <Printer size={14} />
+                      </Link>
                       <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
                         <Copy size={14} />
                       </button>
