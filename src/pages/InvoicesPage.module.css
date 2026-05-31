@@ -110,6 +110,51 @@
 .actionLink { font-size: 13px; color: var(--color-text-brand); margin-left: var(--space-4); text-decoration: none; font-weight: 500; }
 .actionLink:hover { text-decoration: underline; }
 
+/* Mark as paid */
+.markPaidBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 28px;
+  padding: 0 var(--space-3);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-right: var(--space-2);
+  transition: opacity var(--transition-fast);
+}
+.markPaidBtn:hover { opacity: 0.8; }
+.markPaidBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.markPaidBtn:focus-visible { outline: 2px solid var(--color-success-text); outline-offset: 2px; }
+
+.mobileMarkPaidBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 40px;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-bottom: var(--space-2);
+  transition: opacity var(--transition-fast);
+}
+.mobileMarkPaidBtn:hover { opacity: 0.85; }
+.mobileMarkPaidBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mobileMarkPaidBtn:focus-visible { outline: 2px solid var(--color-success-text); outline-offset: 2px; }
+
 .iconBtn {
   background: none;
   border: none;

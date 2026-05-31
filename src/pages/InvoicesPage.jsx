@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Search, Trash2, Copy } from 'lucide-react'
+import { Plus, Search, Trash2, Copy, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -28,6 +28,7 @@ export default function InvoicesPage() {
   const [client,     setClient]     = useState('all')
   const [invoiceToDelete, setInvoiceToDelete] = useState(null)
   const [deleting,        setDeleting]        = useState(false)
+  const [markingPaidId,   setMarkingPaidId]   = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -38,6 +39,21 @@ export default function InvoicesPage() {
       .order('created_at', { ascending: false })
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
+
+  const handleMarkPaid = async (inv) => {
+    setMarkingPaidId(inv.id)
+    const { error } = await supabase
+      .from('invoices')
+      .update({ status: 'paid' })
+      .eq('id', inv.id)
+    setMarkingPaidId(null)
+    if (error) {
+      toast.error('Failed to update invoice.')
+    } else {
+      setInvoices(prev => prev.map(i => i.id === inv.id ? { ...i, status: 'paid' } : i))
+      toast.success(`${inv.invoice_number} marked as paid!`)
+    }
+  }
 
   const handleDuplicate = (inv) => {
     navigate('/invoices/new', { state: { duplicate: inv } })
@@ -177,6 +193,18 @@ export default function InvoicesPage() {
                     <td><Badge variant={inv.status} /></td>
                     <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
                     <td className={styles.actions}>
+                      {['unpaid', 'overdue'].includes(inv.status) && (
+                        <button
+                          className={styles.markPaidBtn}
+                          onClick={() => handleMarkPaid(inv)}
+                          disabled={markingPaidId === inv.id}
+                          aria-label="Mark as paid"
+                          title="Mark as paid"
+                        >
+                          <CheckCircle size={14} />
+                          {markingPaidId === inv.id ? 'Saving…' : 'Mark paid'}
+                        </button>
+                      )}
                       <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                       <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
                       <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
@@ -205,6 +233,16 @@ export default function InvoicesPage() {
                     {inv.due_date && <span>Due {inv.due_date}</span>}
                     <span className={styles.mobileCardAmount}>{fmt(inv.total)}</span>
                   </div>
+                  {['unpaid', 'overdue'].includes(inv.status) && (
+                    <button
+                      className={styles.mobileMarkPaidBtn}
+                      onClick={() => handleMarkPaid(inv)}
+                      disabled={markingPaidId === inv.id}
+                    >
+                      <CheckCircle size={15} />
+                      {markingPaidId === inv.id ? 'Saving…' : 'Mark as paid'}
+                    </button>
+                  )}
                   <div className={styles.mobileCardActions}>
                     <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                     <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
