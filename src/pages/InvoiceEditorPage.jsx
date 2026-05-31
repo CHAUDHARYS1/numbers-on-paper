@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Plus, Trash2, Save, ArrowLeft, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
@@ -44,8 +44,10 @@ export default function InvoiceEditorPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate  = useNavigate()
+  const location  = useLocation()
   const toast     = useToast()
   const isNew     = !id
+  const duplicate = location.state?.duplicate ?? null
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
@@ -89,6 +91,19 @@ export default function InvoiceEditorPage() {
     if (isNew) {
       supabase.rpc('next_invoice_number', { p_user_id: user.id })
         .then(({ data }) => setInvoiceNumber(data || 'INV-000001'))
+
+      if (duplicate) {
+        setBillTo(duplicate.bill_to || {})
+        setClientId(duplicate.client_id || '')
+        setLineItems(duplicate.line_items?.length ? duplicate.line_items.map(item => ({ ...item, id: crypto.randomUUID() })) : [DEFAULT_ITEM()])
+        setDiscountType(duplicate.discount_type || 'fixed')
+        setDiscountValue(duplicate.discount_value || 0)
+        setTaxRate(duplicate.tax_rate || 0)
+        setNotes(duplicate.notes || '')
+        setShowDiscount(duplicate.show_discount ?? false)
+        setShowTax(duplicate.show_tax ?? false)
+        setShowNotes(duplicate.show_notes ?? true)
+      }
     } else {
       supabase.from('invoices').select('*').eq('id', id).single()
         .then(({ data }) => {
@@ -213,6 +228,11 @@ export default function InvoiceEditorPage() {
 
   return (
     <div className={styles.page}>
+      {duplicate && (
+        <div className={styles.duplicateBanner}>
+          Duplicated from <strong>{duplicate.invoice_number}</strong> — review and save when ready.
+        </div>
+      )}
       {/* Page top bar */}
       <div className={styles.topBar}>
         <button className={styles.back} onClick={() => navigate('/invoices')}>

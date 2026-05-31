@@ -110,6 +110,25 @@
 .actionLink { font-size: 13px; color: var(--color-text-brand); margin-left: var(--space-4); text-decoration: none; font-weight: 500; }
 .actionLink:hover { text-decoration: underline; }
 
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--space-2);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  width: 36px;
+  height: 36px;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.iconBtn:hover { color: var(--color-text-primary); background: var(--color-bg-subtle); }
+.iconBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
 .deleteBtn {
   background: none;
   border: none;

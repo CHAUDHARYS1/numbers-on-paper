@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Plus, Search, Trash2, Copy } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -19,6 +19,7 @@ function fmt(n) {
 export default function InvoicesPage() {
   const { user } = useAuth()
   const toast = useToast()
+  const navigate = useNavigate()
   const [invoices,   setInvoices]   = useState([])
   const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState('')
@@ -36,6 +37,10 @@ export default function InvoicesPage() {
       .order('created_at', { ascending: false })
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
+
+  const handleDuplicate = (inv) => {
+    navigate('/invoices/new', { state: { duplicate: inv } })
+  }
 
   const handleDelete = async (id) => {
     setDeletingId(id)
@@ -173,7 +178,10 @@ export default function InvoicesPage() {
                         <>
                           <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                           <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
-                          <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
+                          <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
+                            <Copy size={14} />
+                          </button>
+                          <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice" title="Delete">
                             <Trash2 size={14} />
                           </button>
                         </>
@@ -211,7 +219,10 @@ export default function InvoicesPage() {
                       <>
                         <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
                         <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
-                        <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
+                        <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
+                          <Copy size={14} />
+                        </button>
+                        <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice" title="Delete">
                           <Trash2 size={14} />
                         </button>
                       </>
