@@ -52,25 +52,21 @@
   align-items: center;
   justify-content: space-between;
 }
-.navLogo { display: flex; align-items: center; gap: var(--space-3); }
-.logoMark {
-  width: 32px; height: 32px;
-  background: var(--color-brand-600);
-  color: #fff;
-  border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600;
-}
-.logoName { font-size: 16px; font-weight: 600; color: var(--color-text-primary); letter-spacing: -0.3px; }
+.navLogo { display: flex; align-items: center; }
+.logoImg { height: 40px; width: auto; display: block; }
 .navActions { display: flex; align-items: center; gap: var(--space-3); }
+.navCtaShort { display: none; }
 .navLogin {
+  display: inline-flex; align-items: center; gap: var(--space-2);
   font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
   text-decoration: none; padding: 0 var(--space-3);
+  min-height: 40px;
   transition: color var(--transition-fast);
 }
 .navLogin:hover { color: var(--color-text-primary); text-decoration: none; }
+.navLogin:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; border-radius: var(--radius-md); }
 .navCta {
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; gap: var(--space-2);
   height: 40px; padding: 0 var(--space-4);
   background: var(--color-brand-600); color: #fff;
   border-radius: var(--radius-md); font-size: 14px; font-weight: 500;
@@ -251,5 +247,10 @@
 @media (max-width: 480px) {
   .heroHeadline { font-size: 28px; letter-spacing: -0.5px; }
   .featureGrid { grid-template-columns: 1fr; }
-  .navLogin { display: none; }
+  /* Sign in: icon only */
+  .navLoginLabel { display: none; }
+  .navLogin { padding: 0 var(--space-2); }
+  /* CTA: shorten label */
+  .navCtaFull { display: none; }
+  .navCtaShort { display: inline; }
 }

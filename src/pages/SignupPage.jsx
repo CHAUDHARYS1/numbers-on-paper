@@ -45,8 +45,7 @@ export default function SignupPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <Link to="/" className={styles.logoWrap}>
-          <div className={styles.logoMark}>In</div>
-          <span className={styles.logoName}>Numbers on Paper</span>
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
         </Link>
 
         <div className={styles.freeBadge}>Free forever — no credit card needed</div>

@@ -266,3 +266,93 @@
   .filterBar { flex-wrap: wrap; }
   .hideSmall { display: none; }
 }
+
+/* ── Sortable column headers ───────────────────────────────────── */
+.sortBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+.sortBtn:hover { color: var(--color-text-primary); }
+.sortBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+.sortBtnRight { margin-left: auto; }
+
+.sortIcon { color: var(--color-text-muted); opacity: 0.5; flex-shrink: 0; }
+.sortIconActive { color: var(--color-brand-600); flex-shrink: 0; }
+
+/* ── Click-to-filter cells ─────────────────────────────────────── */
+.filterCell {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+.filterCell:hover { opacity: 0.65; }
+.filterCell:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+.activeCell {
+  background: var(--color-brand-50);
+  color: var(--color-brand-600) !important;
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+  margin: -1px -4px;
+}
+
+/* ── Active filter chips ───────────────────────────────────────── */
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 var(--space-3);
+  background: var(--color-brand-50);
+  border: 1px solid var(--color-border-brand);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--color-brand-600);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.filterChip:hover { background: var(--color-brand-100); }
+.filterChip:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0 var(--space-1);
+  text-decoration: underline;
+}
+.clearAllBtn:hover { color: var(--color-text-primary); }
+.clearAllBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, FileText, Plus, Settings,
+  LayoutDashboard, FileText, Clock, Plus, Settings,
   LogOut, Menu, X, Moon, Sun
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -11,6 +11,7 @@ import styles from './AppShell.module.css'
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/invoices',  icon: FileText,        label: 'Invoices' },
+  { to: '/time',      icon: Clock,           label: 'Time' },
   { to: '/settings',  icon: Settings,        label: 'Settings' },
 ]
 
@@ -42,10 +43,7 @@ export default function AppShell({ children }) {
       <aside className={[styles.sidebar, mobileOpen ? styles.sidebarOpen : ''].join(' ')}>
         {/* Logo */}
         <div className={styles.logo}>
-          <div className={styles.logoMark}>In</div>
-          <div>
-            <span className={styles.logoName}>Numbers on Paper</span>
-          </div>
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.sidebarLogoImg} />
           <button
             className={styles.mobileClose}
             onClick={() => setMobileOpen(false)}
@@ -116,7 +114,7 @@ export default function AppShell({ children }) {
           >
             <Menu size={20} />
           </button>
-          <span className={styles.topBarLogo}>Numbers on Paper</span>
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.topBarLogoImg} />
           <button
             className={styles.topBarTheme}
             onClick={toggleTheme}

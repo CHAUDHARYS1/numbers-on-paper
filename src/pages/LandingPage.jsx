@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FileText, Zap, Shield, Download, ChevronRight, Check } from 'lucide-react'
+import { FileText, Zap, Shield, Download, ChevronRight, Check, LogIn, ArrowRight } from 'lucide-react'
 import styles from './LandingPage.module.css'
 
 const FEATURES = [
@@ -25,12 +25,18 @@ export default function LandingPage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <div className={styles.navLogo}>
-            <div className={styles.logoMark}>In</div>
-            <span className={styles.logoName}>Numbers on Paper</span>
+            <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
           </div>
           <div className={styles.navActions}>
-            <Link to="/login" className={styles.navLogin}>Sign in</Link>
-            <Link to="/signup" className={styles.navCta}>Get started free</Link>
+            <Link to="/login" className={styles.navLogin} aria-label="Sign in">
+              <LogIn size={15} />
+              <span className={styles.navLoginLabel}>Sign in</span>
+            </Link>
+            <Link to="/signup" className={styles.navCta}>
+              <span className={styles.navCtaFull}>Get started free</span>
+              <span className={styles.navCtaShort}>Get started</span>
+              <ArrowRight size={15} />
+            </Link>
           </div>
         </div>
       </header>
@@ -66,8 +72,8 @@ export default function LandingPage() {
           <div className={styles.mockupCard}>
             <div className={styles.mockupHeader}>
               <div>
-                <div className={styles.mockupTitle}>Invoice #INV-000006</div>
-                <div className={styles.mockupSub}>SC Design and Consultation</div>
+                <div className={styles.mockupTitle}>Invoice #INV-000042</div>
+                <div className={styles.mockupSub}>Pixel Studio</div>
               </div>
               <span className={styles.mockupBadgeUnpaid}>Unpaid</span>
             </div>
@@ -75,11 +81,11 @@ export default function LandingPage() {
             <div className={styles.mockupRow}>
               <div>
                 <div className={styles.mockupLabel}>Bill to</div>
-                <div className={styles.mockupVal}>DePaul University</div>
+                <div className={styles.mockupVal}>Orbit Creative</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div className={styles.mockupLabel}>Due</div>
-                <div className={styles.mockupVal}>June 30, 2026</div>
+                <div className={styles.mockupVal}>July 15, 2026</div>
               </div>
             </div>
             <div className={styles.mockupTable}>
@@ -87,9 +93,9 @@ export default function LandingPage() {
                 <span>Item</span><span>Hrs</span><span>Cost</span>
               </div>
               {[
-                ['Redesign — Brain Injury page', '4', '$200'],
-                ['Redesign — Treatment page',    '3', '$150'],
-                ['Redesign — Symptoms page',     '3', '$150'],
+                ['Homepage Redesign',   '6', '$600'],
+                ['Brand Consultation',  '2', '$200'],
+                ['Mobile Optimization', '4', '$400'],
               ].map(([item, hrs, cost]) => (
                 <div key={item} className={styles.mockupTableRow}>
                   <span>{item}</span><span>{hrs}</span><span>{cost}</span>
@@ -98,7 +104,7 @@ export default function LandingPage() {
             </div>
             <div className={styles.mockupTotal}>
               <span>Grand total</span>
-              <span className={styles.mockupTotalAmt}>$700.00</span>
+              <span className={styles.mockupTotalAmt}>$1,200.00</span>
             </div>
           </div>
         </div>
@@ -151,8 +157,7 @@ export default function LandingPage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerLogo}>
-            <div className={styles.logoMark}>In</div>
-            <span className={styles.logoName}>Numbers on Paper</span>
+            <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
           </div>
           <p className={styles.footerNote}>Built for freelancers. Free to use.</p>
         </div>

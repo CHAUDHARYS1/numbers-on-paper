@@ -26,19 +26,14 @@
 }
 .logoWrap:hover { text-decoration: none; }
 
-.logoMark {
-  width: 32px; height: 32px;
-  background: var(--color-brand-600);
-  color: #fff;
-  border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600;
+.logoImg {
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
-.logoName {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+[data-theme="dark"] .logoImg {
+  filter: brightness(0) invert(1);
 }
 
 .freeBadge {
