@@ -1,7 +1,7 @@
 .filterBar {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin-bottom: var(--space-5);
   flex-wrap: wrap;
 }
@@ -9,7 +9,7 @@
 .searchWrap {
   position: relative;
   flex: 1;
-  min-width: 200px;
+  min-width: 0;
   max-width: 360px;
 }
 .searchIcon {
@@ -39,6 +39,20 @@
   box-shadow: 0 0 0 3px var(--color-brand-50);
 }
 
+.clientSelect {
+  height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  min-width: 140px;
+}
+.clientSelect:focus { outline: none; border-color: var(--color-border-brand); }
+
 .statusTabs {
   display: flex;
   gap: 2px;
@@ -46,9 +60,11 @@
   padding: 3px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-default);
+  flex-wrap: wrap;
+  flex: 1;
 }
 .statusTab {
-  height: 28px;
+  height: 36px;
   padding: 0 var(--space-3);
   border: none;
   background: none;
@@ -59,8 +75,11 @@
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
   white-space: nowrap;
+  flex: 1;
+  text-align: center;
 }
 .statusTab:hover { background: var(--color-bg-surface); color: var(--color-text-primary); }
+.statusTab:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 .statusTabActive { background: var(--color-bg-surface) !important; color: var(--color-text-primary) !important; box-shadow: var(--shadow-xs); }
 
 /* Table */
@@ -91,51 +110,89 @@
 .actionLink { font-size: 13px; color: var(--color-text-brand); margin-left: var(--space-4); text-decoration: none; font-weight: 500; }
 .actionLink:hover { text-decoration: underline; }
 
+/* Mark as paid */
+.markPaidBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 28px;
+  padding: 0 var(--space-3);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-right: var(--space-2);
+  transition: opacity var(--transition-fast);
+}
+.markPaidBtn:hover { opacity: 0.8; }
+.markPaidBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.markPaidBtn:focus-visible { outline: 2px solid var(--color-success-text); outline-offset: 2px; }
+
+.mobileMarkPaidBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 40px;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-bottom: var(--space-2);
+  transition: opacity var(--transition-fast);
+}
+.mobileMarkPaidBtn:hover { opacity: 0.85; }
+.mobileMarkPaidBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mobileMarkPaidBtn:focus-visible { outline: 2px solid var(--color-success-text); outline-offset: 2px; }
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--space-2);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  width: 36px;
+  height: 36px;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.iconBtn:hover { color: var(--color-text-primary); background: var(--color-bg-subtle); }
+.iconBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
 .deleteBtn {
   background: none;
   border: none;
   color: var(--color-text-muted);
   cursor: pointer;
-  padding: 2px 4px;
-  margin-left: var(--space-3);
+  padding: 0;
+  margin-left: var(--space-2);
   border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   vertical-align: middle;
+  width: 36px;
+  height: 36px;
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 .deleteBtn:hover { color: var(--color-danger-text); background: var(--color-danger-bg); }
+.deleteBtn:focus-visible { outline: 2px solid var(--color-danger-border); outline-offset: 2px; }
 
-.confirmText {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-danger-text);
-  margin-left: var(--space-3);
-}
-.confirmBtn {
-  background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
-  color: var(--color-danger-text);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  margin-left: var(--space-2);
-  transition: opacity var(--transition-fast);
-}
-.confirmBtn:hover { opacity: 0.8; }
-.cancelBtn {
-  background: none;
-  border: none;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  margin-left: var(--space-2);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-}
-.cancelBtn:hover { color: var(--color-text-primary); background: var(--color-bg-subtle); }
 
 /* Empty */
 .empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: var(--space-16) var(--space-6); }
@@ -196,9 +253,11 @@
 }
 
 @media (max-width: 640px) {
-  .filterBar { flex-direction: column; align-items: stretch; }
-  .searchWrap { max-width: 100%; }
-  .statusTabs { overflow-x: auto; }
+  .filterBar { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .searchWrap { max-width: 100%; width: 100%; }
+  .clientSelect { width: 100%; min-width: 0; font-size: 16px; }
+  .statusTabs { width: 100%; flex-wrap: nowrap; }
+  .statusTab { flex: 1; font-size: 12px; padding: 0 var(--space-2); }
   .table { display: none; }
   .mobileCards { display: block; }
 }
@@ -207,3 +266,93 @@
   .filterBar { flex-wrap: wrap; }
   .hideSmall { display: none; }
 }
+
+/* ── Sortable column headers ───────────────────────────────────── */
+.sortBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+.sortBtn:hover { color: var(--color-text-primary); }
+.sortBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+.sortBtnRight { margin-left: auto; }
+
+.sortIcon { color: var(--color-text-muted); opacity: 0.5; flex-shrink: 0; }
+.sortIconActive { color: var(--color-brand-600); flex-shrink: 0; }
+
+/* ── Click-to-filter cells ─────────────────────────────────────── */
+.filterCell {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+.filterCell:hover { opacity: 0.65; }
+.filterCell:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+.activeCell {
+  background: var(--color-brand-50);
+  color: var(--color-brand-600) !important;
+  border-radius: var(--radius-sm);
+  padding: 1px 4px;
+  margin: -1px -4px;
+}
+
+/* ── Active filter chips ───────────────────────────────────────── */
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 var(--space-3);
+  background: var(--color-brand-50);
+  border: 1px solid var(--color-border-brand);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--color-brand-600);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.filterChip:hover { background: var(--color-brand-100); }
+.filterChip:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0 var(--space-1);
+  text-decoration: underline;
+}
+.clearAllBtn:hover { color: var(--color-text-primary); }
+.clearAllBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }

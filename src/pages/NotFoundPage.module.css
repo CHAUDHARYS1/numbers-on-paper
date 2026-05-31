@@ -3,14 +3,15 @@
   align-items: center; justify-content: center; text-align: center;
   padding: var(--space-8);
 }
-.code { font-size: 80px; font-weight: 600; color: var(--color-neutral-200); font-family: var(--font-mono); line-height: 1; margin-bottom: var(--space-4); }
-.title { font-size: 24px; font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-3); }
+.code { font-size: clamp(48px, 15vw, 80px); font-weight: 600; color: var(--color-neutral-200); font-family: var(--font-mono); line-height: 1; margin-bottom: var(--space-4); }
+.title { font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-3); }
 .sub { font-size: 15px; color: var(--color-text-secondary); margin-bottom: var(--space-8); }
 .back {
   display: inline-flex; align-items: center;
-  height: 40px; padding: 0 var(--space-6);
+  height: 44px; padding: 0 var(--space-6);
   background: var(--color-brand-600); color: #fff;
   border-radius: var(--radius-md); font-size: 15px; font-weight: 500;
   text-decoration: none; transition: background var(--transition-fast);
 }
 .back:hover { background: var(--color-brand-800); text-decoration: none; }
+.back:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }

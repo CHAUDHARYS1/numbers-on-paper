@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Save, ArrowLeft, UserCheck } from 'lucide-react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { Plus, Trash2, Save, ArrowLeft, UserCheck, Copy, Eye, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -12,6 +13,81 @@ import InvoicePreview from '@/components/invoice/InvoicePreview'
 import ClientSelect from '@/components/invoice/ClientSelect'
 import styles from './InvoiceEditorPage.module.css'
 
+// ── State sales-tax rates (base rate, %) ──────────────────────────
+const STATE_TAX_RATES = {
+  AL: 4, AK: 0, AZ: 5.6, AR: 6.5, CA: 7.25, CO: 2.9, CT: 6.35, DE: 0,
+  FL: 6, GA: 4, HI: 4, ID: 6, IL: 6.25, IN: 7, IA: 6, KS: 6.5,
+  KY: 6, LA: 4.45, ME: 5.5, MD: 6, MA: 6.25, MI: 6, MN: 6.875, MS: 7,
+  MO: 4.225, MT: 0, NE: 5.5, NV: 6.85, NH: 0, NJ: 6.625, NM: 5, NY: 4,
+  NC: 4.75, ND: 5, OH: 5.75, OK: 4.5, OR: 0, PA: 6, RI: 7, SC: 6,
+  SD: 4.5, TN: 7, TX: 6.25, UT: 5.95, VT: 6, VA: 5.3, WA: 6.5,
+  WV: 6, WI: 5, WY: 4, DC: 6,
+}
+
+// ── Notes quick-fill templates ────────────────────────────────────
+const NOTE_SNIPPETS = [
+  { label: 'Net 30',         text: 'Payment is due within 30 days of the invoice date. Thank you for your business!' },
+  { label: 'Net 15',         text: 'Payment is due within 15 days. A 1.5% monthly fee applies to balances past due.' },
+  { label: 'Due on receipt', text: 'Payment is due upon receipt of this invoice.' },
+  { label: '50% deposit',    text: 'A 50% deposit is required before work begins. The remaining balance is due upon project completion.' },
+  { label: 'IP transfer',    text: 'All intellectual property and deliverables transfer to the client upon receipt of full payment. Additional revisions beyond the agreed scope are billed at the standard hourly rate.' },
+]
+
+// ── Auto-growing textarea ─────────────────────────────────────────
+function AutoTextarea({ className, value, onChange, placeholder }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+  }, [value])
+  return (
+    <textarea
+      ref={ref}
+      className={className}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={1}
+    />
+  )
+}
+
+// ── Hours input with 0.5 step + scroll-wheel support ─────────────
+function HoursInput({ value, onChange, className }) {
+  const ref = useRef(null)
+  const cbRef = useRef(onChange)
+  cbRef.current = onChange
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const handler = (e) => {
+      e.preventDefault()
+      const delta = e.deltaY < 0 ? 0.5 : -0.5
+      const next = Math.max(0, Math.round(((parseFloat(el.value) || 0) + delta) * 2) / 2)
+      cbRef.current(String(next))
+    }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [])
+
+  return (
+    <input
+      ref={ref}
+      type="number"
+      min="0"
+      step="0.5"
+      placeholder="0"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className={className}
+    />
+  )
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
 const DEFAULT_ITEM = () => ({
   id: crypto.randomUUID(),
   item: '',
@@ -40,21 +116,23 @@ function calcTotals(lineItems, discountType, discountValue, taxRate) {
   return { subtotal, discountAmount, taxAmount, total }
 }
 
+// ── Page ──────────────────────────────────────────────────────────
 export default function InvoiceEditorPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate  = useNavigate()
+  const location  = useLocation()
   const toast     = useToast()
   const isNew     = !id
+  const duplicate = location.state?.duplicate ?? null
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
   const [clientId, setClientId] = useState('')
   const [saving,   setSaving]   = useState(false)
   const [savingClient, setSavingClient] = useState(false)
-  const [tab,      setTab]      = useState('edit') // 'edit' | 'preview' (mobile)
+  const [previewOpen, setPreviewOpen] = useState(false)
 
-  // Form state
   const [invoiceNumber, setInvoiceNumber] = useState('')
   const [issueDate,     setIssueDate]     = useState(new Date().toISOString().slice(0, 10))
   const [dueDate,       setDueDate]       = useState('')
@@ -69,7 +147,6 @@ export default function InvoiceEditorPage() {
   const [showTax,       setShowTax]       = useState(false)
   const [showNotes,     setShowNotes]     = useState(true)
 
-  // Load profile + invoice
   useEffect(() => {
     if (!user) return
     supabase.from('profiles').select('*').eq('id', user.id).single()
@@ -89,6 +166,19 @@ export default function InvoiceEditorPage() {
     if (isNew) {
       supabase.rpc('next_invoice_number', { p_user_id: user.id })
         .then(({ data }) => setInvoiceNumber(data || 'INV-000001'))
+
+      if (duplicate) {
+        setBillTo(duplicate.bill_to || {})
+        setClientId(duplicate.client_id || '')
+        setLineItems(duplicate.line_items?.length ? duplicate.line_items.map(i => ({ ...i, id: crypto.randomUUID() })) : [DEFAULT_ITEM()])
+        setDiscountType(duplicate.discount_type || 'fixed')
+        setDiscountValue(duplicate.discount_value || 0)
+        setTaxRate(duplicate.tax_rate || 0)
+        setNotes(duplicate.notes || '')
+        setShowDiscount(duplicate.show_discount ?? false)
+        setShowTax(duplicate.show_tax ?? false)
+        setShowNotes(duplicate.show_notes ?? true)
+      }
     } else {
       supabase.from('invoices').select('*').eq('id', id).single()
         .then(({ data }) => {
@@ -111,7 +201,15 @@ export default function InvoiceEditorPage() {
     }
   }, [user, id, isNew])
 
-  // Recalc amounts when line items change
+  useEffect(() => {
+    if (!previewOpen) return
+    const handle = (e) => { if (e.key === 'Escape') setPreviewOpen(false) }
+    document.addEventListener('keydown', handle)
+    return () => document.removeEventListener('keydown', handle)
+  }, [previewOpen])
+
+  // ── Line item helpers ─────────────────────────────────────────
+
   const updateItem = (idx, field, value) => {
     setLineItems(prev => {
       const next = [...prev]
@@ -121,24 +219,42 @@ export default function InvoiceEditorPage() {
     })
   }
 
-  const addItem    = () => setLineItems(p => [...p, DEFAULT_ITEM()])
-  const removeItem = (idx) => setLineItems(p => p.filter((_, i) => i !== idx))
+  const addItem       = () => setLineItems(p => [...p, DEFAULT_ITEM()])
+  const removeItem    = (idx) => setLineItems(p => p.filter((_, i) => i !== idx))
+  const duplicateItem = (idx) => setLineItems(prev => {
+    const copy = { ...prev[idx], id: crypto.randomUUID() }
+    const next = [...prev]
+    next.splice(idx + 1, 0, copy)
+    return next
+  })
+  const copyDateToAll = (date) => {
+    setLineItems(prev => prev.map(item => {
+      const updated = { ...item, date }
+      updated.amount = calcItem(updated)
+      return updated
+    }))
+  }
+
+  // ── Client helpers ────────────────────────────────────────────
 
   const handleClientSelect = (id) => {
     setClientId(id)
     if (!id) {
-      setBillTo({ name: '', organization: '', address: '', city: '', state: '', zip: '' })
+      setBillTo({ name: '', organization: '', address: '', city: '', state: '', zip: '', contact_name: '', contact_title: '', contact_email: '' })
       return
     }
     const client = clients.find(c => c.id === id)
     if (!client) return
     setBillTo({
-      name:         client.name,
-      organization: client.organization || '',
-      address:      client.address_line1 || '',
-      city:         client.city || '',
-      state:        client.state || '',
-      zip:          client.zip || '',
+      name:          client.name,
+      organization:  client.organization || '',
+      address:       client.address_line1 || '',
+      city:          client.city || '',
+      state:         client.state || '',
+      zip:           client.zip || '',
+      contact_name:  client.contact_name || '',
+      contact_title: client.contact_title || '',
+      contact_email: client.contact_email || '',
     })
   }
 
@@ -146,13 +262,11 @@ export default function InvoiceEditorPage() {
     if (!billTo.name?.trim()) return
     setSavingClient(true)
     const payload = {
-      user_id:      user.id,
-      name:         billTo.name.trim(),
-      organization: billTo.organization || null,
-      address_line1: billTo.address || null,
-      city:         billTo.city || null,
-      state:        billTo.state || null,
-      zip:          billTo.zip || null,
+      user_id: user.id, name: billTo.name.trim(),
+      organization: billTo.organization || null, address_line1: billTo.address || null,
+      city: billTo.city || null, state: billTo.state || null, zip: billTo.zip || null,
+      contact_name: billTo.contact_name || null, contact_title: billTo.contact_title || null,
+      contact_email: billTo.contact_email || null,
     }
     if (clientId) payload.id = clientId
     const { data, error } = await supabase.from('clients').upsert(payload).select().single()
@@ -169,20 +283,25 @@ export default function InvoiceEditorPage() {
     }
   }
 
+  // ── Tax state hint ────────────────────────────────────────────
+
+  const stateKey       = billTo.state?.trim().toUpperCase().slice(0, 2)
+  const suggestedRate  = stateKey in STATE_TAX_RATES ? STATE_TAX_RATES[stateKey] : undefined
+
+  // ── Totals ────────────────────────────────────────────────────
+
   const { subtotal, discountAmount, taxAmount, total } = calcTotals(lineItems, discountType, discountValue, taxRate)
 
   const invoiceData = {
     invoice_number: invoiceNumber,
-    issue_date: issueDate,
-    due_date: dueDate,
+    issue_date: issueDate || null,
+    due_date: dueDate || null,
     status,
     bill_from: profile ? {
-      name: profile.full_name,
-      business: profile.business_name,
+      name: profile.full_name, business: profile.business_name,
       address: `${profile.address_line1 || ''}${profile.address_line2 ? ', ' + profile.address_line2 : ''}`,
       city: profile.city, state: profile.state, zip: profile.zip,
-      phone: profile.phone, email: profile.email,
-      logo_url: profile.logo_url || null,
+      phone: profile.phone, email: profile.email, logo_url: profile.logo_url || null,
     } : {},
     bill_to: billTo,
     line_items: lineItems,
@@ -213,29 +332,36 @@ export default function InvoiceEditorPage() {
 
   return (
     <div className={styles.page}>
-      {/* Page top bar */}
+      {duplicate && (
+        <div className={styles.duplicateBanner}>
+          Duplicated from <strong>{duplicate.invoice_number}</strong> — review and save when ready.
+        </div>
+      )}
+
+      {/* ── Top bar ── */}
       <div className={styles.topBar}>
         <button className={styles.back} onClick={() => navigate('/invoices')}>
           <ArrowLeft size={16} /> Invoices
         </button>
         <div className={styles.topActions}>
-          {/* Mobile tab toggle */}
-          <div className={styles.mobileTabs}>
-            <button className={[styles.mobileTab, tab === 'edit' ? styles.mobileTabActive : ''].join(' ')} onClick={() => setTab('edit')}>Edit</button>
-            <button className={[styles.mobileTab, tab === 'preview' ? styles.mobileTabActive : ''].join(' ')} onClick={() => setTab('preview')}>Preview</button>
-          </div>
+          <button
+            className={styles.previewToggle}
+            onClick={() => setPreviewOpen(true)}
+            aria-label="Preview invoice"
+          >
+            <Eye size={14} />
+            Preview
+          </button>
           <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
             {isNew ? 'Save invoice' : 'Save changes'}
           </Button>
         </div>
       </div>
 
-      {/* Split layout */}
-      <div className={styles.split}>
-        {/* Form — left */}
-        <div className={[styles.formCol, tab === 'preview' ? styles.hideMobile : ''].join(' ')}>
+      {/* ── Form ── */}
+      <div className={styles.formCol}>
 
-          {/* Meta */}
+          {/* Invoice details */}
           <Card className={styles.section}>
             <CardHeader title="Invoice details" />
             <CardBody>
@@ -253,7 +379,7 @@ export default function InvoiceEditorPage() {
               </div>
               <div className={styles.row2}>
                 <Input label="Issue date" type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} />
-                <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                <Input label="Due date"   type="date" value={dueDate}   onChange={e => setDueDate(e.target.value)} />
               </div>
             </CardBody>
           </Card>
@@ -264,22 +390,21 @@ export default function InvoiceEditorPage() {
             <CardBody>
               <div className={styles.stack}>
                 <ClientSelect clients={clients} value={clientId} onChange={handleClientSelect} />
-                <Input label="Client name" placeholder="Full name" value={billTo.name} onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
-                <Input label="Organization" placeholder="Company or organization" value={billTo.organization} onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
-                <Input label="Address" placeholder="Street address" value={billTo.address} onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
+                <Input label="Client name"   placeholder="Full name"              value={billTo.name}         onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
+                <Input label="Organization"  placeholder="Company or organization" value={billTo.organization}  onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
+                <Input label="Address"       placeholder="Street address"          value={billTo.address}       onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
                 <div className={styles.row3}>
-                  <Input label="City" value={billTo.city} onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
+                  <Input label="City"  value={billTo.city}  onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
                   <Input label="State" value={billTo.state} onChange={e => setBillTo(p => ({...p, state: e.target.value}))} />
-                  <Input label="ZIP" value={billTo.zip} onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
+                  <Input label="ZIP"   value={billTo.zip}   onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
                 </div>
+                <div className={styles.row2}>
+                  <Input label="Contact name"  placeholder="Jane Smith"        value={billTo.contact_name  || ''} onChange={e => setBillTo(p => ({...p, contact_name: e.target.value}))} />
+                  <Input label="Contact title" placeholder="Project Manager"   value={billTo.contact_title || ''} onChange={e => setBillTo(p => ({...p, contact_title: e.target.value}))} />
+                </div>
+                <Input label="Contact email" type="email" placeholder="jane@company.com" value={billTo.contact_email || ''} onChange={e => setBillTo(p => ({...p, contact_email: e.target.value}))} />
                 {billTo.name?.trim() && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<UserCheck size={14} />}
-                    loading={savingClient}
-                    onClick={handleSaveClient}
-                  >
+                  <Button variant="secondary" size="sm" icon={<UserCheck size={14} />} loading={savingClient} onClick={handleSaveClient}>
                     {clientId ? 'Update client' : 'Save as client'}
                   </Button>
                 )}
@@ -293,34 +418,143 @@ export default function InvoiceEditorPage() {
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addItem}>Add item</Button>
             } />
             <CardBody style={{ padding: 0 }}>
+
+              {/* Desktop table */}
               <div className={styles.lineItemsTable}>
                 <div className={styles.lineItemHead}>
                   <span>Item</span>
                   <span>Description</span>
                   <span>Date</span>
-                  <span>Hrs</span>
-                  <span>Rate</span>
+                  <span style={{ textAlign: 'right' }}>Hrs</span>
+                  <span style={{ textAlign: 'right' }}>Rate</span>
                   <span style={{ textAlign: 'right' }}>Amount</span>
                   <span></span>
                 </div>
+
                 {lineItems.map((item, idx) => (
                   <div key={item.id} className={styles.lineItemRow}>
-                    <input className={styles.cellInput} placeholder="e.g. Redesign" value={item.item} onChange={e => updateItem(idx, 'item', e.target.value)} />
-                    <input className={styles.cellInput} placeholder="Description" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} />
-                    <input className={styles.cellInput} type="date" value={item.date} onChange={e => updateItem(idx, 'date', e.target.value)} />
-                    <input className={[styles.cellInput, styles.cellNum].join(' ')} type="number" min="0" placeholder="0" value={item.hours} onChange={e => updateItem(idx, 'hours', e.target.value)} />
-                    <input className={[styles.cellInput, styles.cellNum].join(' ')} type="number" min="0" placeholder="50" value={item.rate} onChange={e => updateItem(idx, 'rate', e.target.value)} />
+
+                    <AutoTextarea
+                      className={styles.cellTextarea}
+                      placeholder="e.g. Redesign"
+                      value={item.item}
+                      onChange={e => updateItem(idx, 'item', e.target.value)}
+                    />
+
+                    <AutoTextarea
+                      className={styles.cellTextarea}
+                      placeholder="Description (optional)"
+                      value={item.description}
+                      onChange={e => updateItem(idx, 'description', e.target.value)}
+                    />
+
+                    <div className={styles.dateCell}>
+                      <input
+                        className={styles.cellInput}
+                        type="date"
+                        value={item.date}
+                        onChange={e => updateItem(idx, 'date', e.target.value)}
+                      />
+                      {item.date && (
+                        <button
+                          className={styles.dateCopyBtn}
+                          onClick={() => copyDateToAll(item.date)}
+                          title="Copy this date to all rows"
+                        >
+                          <Copy size={10} /> copy to all
+                        </button>
+                      )}
+                    </div>
+
+                    <HoursInput
+                      value={item.hours}
+                      onChange={val => updateItem(idx, 'hours', val)}
+                      className={[styles.cellInput, styles.cellNum].join(' ')}
+                    />
+
+                    <input
+                      className={[styles.cellInput, styles.cellNum].join(' ')}
+                      type="number"
+                      min="0"
+                      placeholder="50"
+                      value={item.rate}
+                      onChange={e => updateItem(idx, 'rate', e.target.value)}
+                    />
+
                     <span className={styles.cellAmount}>{fmt(item.amount)}</span>
-                    <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
-                      <Trash2 size={14} />
-                    </button>
+
+                    <div className={styles.itemActions}>
+                      <button
+                        className={styles.dupBtn}
+                        onClick={() => duplicateItem(idx)}
+                        title="Duplicate row"
+                        aria-label="Duplicate item"
+                      >
+                        <Copy size={13} />
+                      </button>
+                      <button
+                        className={styles.removeBtn}
+                        onClick={() => removeItem(idx)}
+                        disabled={lineItems.length === 1}
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mobile cards */}
+              <div className={styles.lineItemsMobile}>
+                {lineItems.map((item, idx) => (
+                  <div key={item.id} className={styles.lineItemCard}>
+                    <div className={styles.lineItemCardHeader}>
+                      <input
+                        className={styles.lineItemCardTitle}
+                        placeholder="Item name"
+                        value={item.item}
+                        onChange={e => updateItem(idx, 'item', e.target.value)}
+                      />
+                      <button className={styles.dupBtn} onClick={() => duplicateItem(idx)} aria-label="Duplicate item" title="Duplicate">
+                        <Copy size={14} />
+                      </button>
+                      <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <textarea
+                      className={styles.lineItemCardDesc}
+                      placeholder="Description (optional)"
+                      value={item.description}
+                      onChange={e => updateItem(idx, 'description', e.target.value)}
+                      rows={2}
+                    />
+                    <div className={styles.lineItemCardMeta}>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Date</label>
+                        <input className={styles.lineItemCardInput} type="date" value={item.date} onChange={e => updateItem(idx, 'date', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Hours</label>
+                        <input className={styles.lineItemCardInput} type="number" min="0" step="0.5" placeholder="0" value={item.hours} onChange={e => updateItem(idx, 'hours', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Rate ($)</label>
+                        <input className={styles.lineItemCardInput} type="number" min="0" placeholder="50" value={item.rate} onChange={e => updateItem(idx, 'rate', e.target.value)} />
+                      </div>
+                      <div className={styles.lineItemCardField}>
+                        <label className={styles.lineItemCardLabel}>Amount</label>
+                        <span className={styles.lineItemCardAmount}>{fmt(item.amount)}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </CardBody>
           </Card>
 
-          {/* Totals + toggles */}
+          {/* Totals & options */}
           <Card className={styles.section}>
             <CardHeader title="Totals & options" />
             <CardBody>
@@ -353,12 +587,19 @@ export default function InvoiceEditorPage() {
               )}
 
               {showTax && (
-                <div style={{ marginTop: 'var(--space-4)', maxWidth: 200 }}>
+                <div className={styles.taxWrap}>
                   <Input label="Tax rate (%)" type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e => setTaxRate(e.target.value)} />
+                  {suggestedRate !== undefined && suggestedRate !== parseFloat(taxRate) && (
+                    <button
+                      className={styles.stateTaxHint}
+                      onClick={() => setTaxRate(suggestedRate)}
+                    >
+                      Use {stateKey} state rate: {suggestedRate}%
+                    </button>
+                  )}
                 </div>
               )}
 
-              {/* Totals summary */}
               <div className={styles.totalsSummary}>
                 <div className={styles.totalRow}><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
                 {showDiscount && <div className={styles.totalRow}><span>Discount</span><span>-{fmt(discountAmount)}</span></div>}
@@ -368,7 +609,7 @@ export default function InvoiceEditorPage() {
             </CardBody>
           </Card>
 
-          {/* Notes */}
+          {/* Notes & terms */}
           {showNotes && (
             <Card className={styles.section}>
               <CardHeader title="Notes & terms" />
@@ -380,19 +621,52 @@ export default function InvoiceEditorPage() {
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                 />
+                <div className={styles.notesSnippets}>
+                  <span className={styles.notesSnippetsLabel}>Quick fill:</span>
+                  <div className={styles.notesSnippetList}>
+                    {NOTE_SNIPPETS.map(s => (
+                      <button
+                        key={s.label}
+                        className={styles.notesSnippet}
+                        onClick={() => setNotes(s.text)}
+                        title={s.text}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </CardBody>
             </Card>
           )}
         </div>
 
-        {/* Preview — right */}
-        <div className={[styles.previewCol, tab === 'edit' ? styles.hideMobile : ''].join(' ')}>
-          <div className={styles.previewSticky}>
-            <div className={styles.previewLabel}>Live preview</div>
-            <InvoicePreview data={invoiceData} />
+      {previewOpen && createPortal(
+        <div
+          className={styles.previewBackdrop}
+          onClick={() => setPreviewOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Invoice preview"
+        >
+          <div className={styles.previewModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.previewModalHeader}>
+              <span className={styles.previewModalTitle}>Preview</span>
+              <button
+                className={styles.previewModalClose}
+                onClick={() => setPreviewOpen(false)}
+                aria-label="Close preview"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className={styles.previewModalBody}>
+              <InvoicePreview data={invoiceData} />
+            </div>
           </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

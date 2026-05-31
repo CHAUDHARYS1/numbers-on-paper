@@ -1,0 +1,230 @@
+.page { display: flex; flex-direction: column; gap: var(--space-5); }
+
+/* ── Log form ──────────────────────────────────────────────────── */
+.formCard { border-color: var(--color-border-brand); }
+
+.logForm { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.formMain { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.formMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.formField { display: flex; flex-direction: column; gap: var(--space-1); }
+.formLabel { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.formSelect {
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+}
+.formSelect:focus { outline: none; border-color: var(--color-border-brand); box-shadow: 0 0 0 3px var(--color-brand-50); }
+
+.formActions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+
+/* ── Stats strip ───────────────────────────────────────────────── */
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.statValue { font-size: 22px; font-weight: 600; color: var(--color-text-primary); font-family: var(--font-mono); letter-spacing: -0.5px; }
+.statValueAccent { color: var(--color-brand-600); }
+.statLabel { font-size: 12px; color: var(--color-text-muted); }
+.statDivider { width: 1px; height: 36px; background: var(--color-border-default); flex-shrink: 0; }
+
+/* ── Filters ───────────────────────────────────────────────────── */
+.filterRow { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+
+.filterTabs {
+  display: inline-flex;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-subtle);
+}
+.filterTab {
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.filterTab:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: -2px; }
+.filterTabActive { background: var(--color-bg-surface); color: var(--color-text-primary); box-shadow: var(--shadow-xs); }
+
+.filterSelect {
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+}
+.filterSelect:focus { outline: none; border-color: var(--color-border-brand); }
+
+/* ── Empty state ───────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-20) var(--space-8);
+  text-align: center;
+}
+.emptyIcon { color: var(--color-text-muted); }
+.emptyTitle { font-size: 16px; font-weight: 600; color: var(--color-text-primary); }
+.emptySub { font-size: 14px; color: var(--color-text-muted); max-width: 320px; line-height: 1.6; }
+
+.spinner {
+  display: inline-block;
+  width: 24px; height: 24px;
+  border: 2px solid var(--color-border-default);
+  border-top-color: var(--color-brand-600);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Table ─────────────────────────────────────────────────────── */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead tr {
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-subtle);
+}
+
+.table th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  vertical-align: middle;
+  color: var(--color-text-primary);
+}
+
+.table tbody tr:first-child td { border-top: none; }
+
+.thCheck, .tdCheck { width: 40px; padding-right: 0; }
+.thNum, .tdNum     { text-align: right; font-family: var(--font-mono); }
+.thDesc, .tdDesc   { min-width: 200px; }
+.thClient, .tdClient { min-width: 120px; color: var(--color-text-secondary); }
+.tdDate            { white-space: nowrap; color: var(--color-text-secondary); }
+.thActions, .tdActions { width: 44px; text-align: center; }
+
+.row { transition: background var(--transition-fast); }
+.row:hover { background: var(--color-bg-subtle); }
+.rowSelected { background: var(--color-brand-50) !important; }
+
+.na { color: var(--color-text-muted); }
+
+/* ── Status badges ─────────────────────────────────────────────── */
+.badgeOpen {
+  display: inline-block;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.badgeInvoiced {
+  display: inline-block;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+/* ── Delete button ─────────────────────────────────────────────── */
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.deleteBtn:hover { background: var(--color-danger-bg); color: var(--color-danger-text); }
+.deleteBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+/* ── Selection action bar ──────────────────────────────────────── */
+.selBar {
+  position: sticky;
+  bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-neutral-900);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  z-index: 50;
+  animation: slideUp 150ms ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.selInfo { font-size: 14px; margin: 0; }
+.selActions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .formMeta { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .formMeta { grid-template-columns: 1fr; }
+  .stats { flex-wrap: wrap; gap: var(--space-4); }
+  .statDivider { display: none; }
+  .selBar { flex-direction: column; align-items: flex-start; bottom: var(--space-3); }
+}

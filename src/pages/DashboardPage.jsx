@@ -7,6 +7,7 @@ import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
+import RevenueChart from '@/components/dashboard/RevenueChart'
 import styles from './DashboardPage.module.css'
 
 function fmt(n) {
@@ -25,7 +26,6 @@ export default function DashboardPage() {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(5)
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
 
@@ -64,6 +64,14 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Revenue chart */}
+      <Card style={{ marginBottom: 'var(--space-6)' }}>
+        <CardHeader title="Revenue" />
+        <CardBody>
+          <RevenueChart invoices={invoices} />
+        </CardBody>
+      </Card>
+
       {/* Recent invoices */}
       <Card>
         <CardHeader
@@ -97,7 +105,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {invoices.map(inv => (
+                  {invoices.slice(0, 5).map(inv => (
                     <tr key={inv.id} className={styles.tableRow}>
                       <td>
                         <Link to={`/invoices/${inv.id}/edit`} className={styles.invNum}>

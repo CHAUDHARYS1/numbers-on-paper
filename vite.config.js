@@ -4,9 +4,13 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  publicDir: 'assets',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  server: {
+    allowedHosts: true,
   },
 })
