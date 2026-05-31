@@ -1,7 +1,7 @@
 .filterBar {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   margin-bottom: var(--space-5);
   flex-wrap: wrap;
 }
@@ -9,7 +9,7 @@
 .searchWrap {
   position: relative;
   flex: 1;
-  min-width: 200px;
+  min-width: 0;
   max-width: 360px;
 }
 .searchIcon {
@@ -46,9 +46,11 @@
   padding: 3px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-default);
+  flex-wrap: wrap;
+  flex: 1;
 }
 .statusTab {
-  height: 28px;
+  height: 36px;
   padding: 0 var(--space-3);
   border: none;
   background: none;
@@ -59,8 +61,11 @@
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
   white-space: nowrap;
+  flex: 1;
+  text-align: center;
 }
 .statusTab:hover { background: var(--color-bg-surface); color: var(--color-text-primary); }
+.statusTab:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 .statusTabActive { background: var(--color-bg-surface) !important; color: var(--color-text-primary) !important; box-shadow: var(--shadow-xs); }
 
 /* Table */
@@ -96,15 +101,19 @@
   border: none;
   color: var(--color-text-muted);
   cursor: pointer;
-  padding: 2px 4px;
-  margin-left: var(--space-3);
+  padding: 0;
+  margin-left: var(--space-2);
   border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   vertical-align: middle;
+  width: 36px;
+  height: 36px;
   transition: color var(--transition-fast), background var(--transition-fast);
 }
 .deleteBtn:hover { color: var(--color-danger-text); background: var(--color-danger-bg); }
+.deleteBtn:focus-visible { outline: 2px solid var(--color-danger-border); outline-offset: 2px; }
 
 .confirmText {
   font-size: 13px;
@@ -196,9 +205,10 @@
 }
 
 @media (max-width: 640px) {
-  .filterBar { flex-direction: column; align-items: stretch; }
-  .searchWrap { max-width: 100%; }
-  .statusTabs { overflow-x: auto; }
+  .filterBar { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .searchWrap { max-width: 100%; width: 100%; }
+  .statusTabs { width: 100%; flex-wrap: nowrap; }
+  .statusTab { flex: 1; font-size: 12px; padding: 0 var(--space-2); }
   .table { display: none; }
   .mobileCards { display: block; }
 }

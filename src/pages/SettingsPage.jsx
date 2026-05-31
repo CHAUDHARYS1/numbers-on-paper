@@ -187,7 +187,7 @@ export default function SettingsPage() {
               </label>
 
               {profile.show_tax && (
-                <div style={{ marginLeft: 'auto', width: 160 }}>
+                <div className={styles.taxRateWrap}>
                   <Input label="Default tax rate (%)" type="number" min="0" max="100" step="0.01" value={profile.tax_rate} onChange={set('tax_rate')} />
                 </div>
               )}

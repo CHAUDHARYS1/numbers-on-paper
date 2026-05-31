@@ -146,6 +146,7 @@ body {
   line-height: 1.6;
   color: var(--color-text-primary);
   background: var(--color-bg-page);
+  overflow-x: hidden;
 }
 
 a { color: var(--color-text-link); text-decoration: none; }

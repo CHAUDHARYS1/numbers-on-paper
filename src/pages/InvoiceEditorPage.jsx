@@ -353,7 +353,7 @@ export default function InvoiceEditorPage() {
               )}
 
               {showTax && (
-                <div style={{ marginTop: 'var(--space-4)', maxWidth: 200 }}>
+                <div className={styles.taxWrap}>
                   <Input label="Tax rate (%)" type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e => setTaxRate(e.target.value)} />
                 </div>
               )}

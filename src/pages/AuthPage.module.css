@@ -79,6 +79,11 @@
   gap: var(--space-3);
 }
 
+@media (max-width: 480px) {
+  .card { padding: var(--space-6); }
+  .nameRow { grid-template-columns: 1fr; }
+}
+
 .errorMsg {
   font-size: 13px;
   color: var(--color-danger-text);

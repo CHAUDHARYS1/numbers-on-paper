@@ -114,7 +114,7 @@ export default function InvoicesPage() {
               )}
             </div>
           ) : (
-            {/* Desktop table */}
+            <>
             <table className={styles.table}>
               <thead>
                 <tr>
@@ -199,6 +199,7 @@ export default function InvoicesPage() {
                 </div>
               ))}
             </div>
+            </>
           )}
         </CardBody>
       </Card>

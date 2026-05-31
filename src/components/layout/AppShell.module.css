@@ -60,7 +60,13 @@
   color: var(--color-text-secondary);
   padding: var(--space-1);
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
 }
+.mobileClose:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 
 /* ─── New Invoice ──────────────────────────────────────────────── */
 .newInvoiceWrap { padding: var(--space-4) var(--space-4); }
@@ -206,6 +212,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .topBar {
@@ -228,13 +236,24 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: var(--space-1);
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
 }
+.hamburger:hover { background: var(--color-bg-subtle); }
+.hamburger:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 
 .topBarLogo {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 .content {
@@ -244,6 +263,7 @@
   width: 100%;
   margin: 0 auto;
 }
+
 
 /* ─── Mobile Overlay ──────────────────────────────────────────── */
 .overlay {
@@ -264,5 +284,5 @@
   .mobileClose { display: flex; }
   .main { margin-left: 0; }
   .topBar { display: flex; }
-  .content { padding: var(--space-4); }
+  .content { padding: var(--space-3); }
 }

@@ -30,3 +30,8 @@
 .action { flex-shrink: 0; }
 
 .body { padding: var(--space-6); }
+
+@media (max-width: 640px) {
+  .header { padding: var(--space-4); }
+  .body { padding: var(--space-4); }
+}
