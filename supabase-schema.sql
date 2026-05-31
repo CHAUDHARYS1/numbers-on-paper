@@ -72,6 +72,9 @@ create table public.clients (
   city          text,
   state         text,
   zip           text,
+  contact_name  text,
+  contact_title text,
+  contact_email text,
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
 );
