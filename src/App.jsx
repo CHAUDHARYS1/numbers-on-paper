@@ -9,6 +9,7 @@ import DashboardPage from '@/pages/DashboardPage'
 import InvoicesPage from '@/pages/InvoicesPage'
 import InvoiceEditorPage from '@/pages/InvoiceEditorPage'
 import InvoicePreviewPage from '@/pages/InvoicePreviewPage'
+import EmailPreviewPage from '@/pages/EmailPreviewPage'
 import SettingsPage from '@/pages/SettingsPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
@@ -22,9 +23,9 @@ function PrivateRoute({ children }) {
 }
 
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading, mfaPending } = useAuth()
   if (loading) return null
-  return user ? <Navigate to="/dashboard" replace /> : children
+  return (user && !mfaPending) ? <Navigate to="/dashboard" replace /> : children
 }
 
 export default function App() {
@@ -41,6 +42,7 @@ export default function App() {
       <Route path="/invoices/new" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell><InvoicePreviewPage /></AppShell></PrivateRoute>} />
+      <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/settings" element={<PrivateRoute><AppShell><SettingsPage /></AppShell></PrivateRoute>} />
 
       <Route path="*" element={<NotFoundPage />} />

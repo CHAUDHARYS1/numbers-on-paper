@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Plus, Trash2, Save, ArrowLeft, UserCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
@@ -44,8 +44,10 @@ export default function InvoiceEditorPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate  = useNavigate()
+  const location  = useLocation()
   const toast     = useToast()
   const isNew     = !id
+  const duplicate = location.state?.duplicate ?? null
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
@@ -89,6 +91,19 @@ export default function InvoiceEditorPage() {
     if (isNew) {
       supabase.rpc('next_invoice_number', { p_user_id: user.id })
         .then(({ data }) => setInvoiceNumber(data || 'INV-000001'))
+
+      if (duplicate) {
+        setBillTo(duplicate.bill_to || {})
+        setClientId(duplicate.client_id || '')
+        setLineItems(duplicate.line_items?.length ? duplicate.line_items.map(item => ({ ...item, id: crypto.randomUUID() })) : [DEFAULT_ITEM()])
+        setDiscountType(duplicate.discount_type || 'fixed')
+        setDiscountValue(duplicate.discount_value || 0)
+        setTaxRate(duplicate.tax_rate || 0)
+        setNotes(duplicate.notes || '')
+        setShowDiscount(duplicate.show_discount ?? false)
+        setShowTax(duplicate.show_tax ?? false)
+        setShowNotes(duplicate.show_notes ?? true)
+      }
     } else {
       supabase.from('invoices').select('*').eq('id', id).single()
         .then(({ data }) => {
@@ -127,18 +142,21 @@ export default function InvoiceEditorPage() {
   const handleClientSelect = (id) => {
     setClientId(id)
     if (!id) {
-      setBillTo({ name: '', organization: '', address: '', city: '', state: '', zip: '' })
+      setBillTo({ name: '', organization: '', address: '', city: '', state: '', zip: '', contact_name: '', contact_title: '', contact_email: '' })
       return
     }
     const client = clients.find(c => c.id === id)
     if (!client) return
     setBillTo({
-      name:         client.name,
-      organization: client.organization || '',
-      address:      client.address_line1 || '',
-      city:         client.city || '',
-      state:        client.state || '',
-      zip:          client.zip || '',
+      name:          client.name,
+      organization:  client.organization || '',
+      address:       client.address_line1 || '',
+      city:          client.city || '',
+      state:         client.state || '',
+      zip:           client.zip || '',
+      contact_name:  client.contact_name || '',
+      contact_title: client.contact_title || '',
+      contact_email: client.contact_email || '',
     })
   }
 
@@ -146,13 +164,16 @@ export default function InvoiceEditorPage() {
     if (!billTo.name?.trim()) return
     setSavingClient(true)
     const payload = {
-      user_id:      user.id,
-      name:         billTo.name.trim(),
-      organization: billTo.organization || null,
+      user_id:       user.id,
+      name:          billTo.name.trim(),
+      organization:  billTo.organization || null,
       address_line1: billTo.address || null,
-      city:         billTo.city || null,
-      state:        billTo.state || null,
-      zip:          billTo.zip || null,
+      city:          billTo.city || null,
+      state:         billTo.state || null,
+      zip:           billTo.zip || null,
+      contact_name:  billTo.contact_name || null,
+      contact_title: billTo.contact_title || null,
+      contact_email: billTo.contact_email || null,
     }
     if (clientId) payload.id = clientId
     const { data, error } = await supabase.from('clients').upsert(payload).select().single()
@@ -213,6 +234,11 @@ export default function InvoiceEditorPage() {
 
   return (
     <div className={styles.page}>
+      {duplicate && (
+        <div className={styles.duplicateBanner}>
+          Duplicated from <strong>{duplicate.invoice_number}</strong> — review and save when ready.
+        </div>
+      )}
       {/* Page top bar */}
       <div className={styles.topBar}>
         <button className={styles.back} onClick={() => navigate('/invoices')}>
@@ -272,6 +298,11 @@ export default function InvoiceEditorPage() {
                   <Input label="State" value={billTo.state} onChange={e => setBillTo(p => ({...p, state: e.target.value}))} />
                   <Input label="ZIP" value={billTo.zip} onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
                 </div>
+                <div className={styles.row2}>
+                  <Input label="Contact name" placeholder="Jane Smith" value={billTo.contact_name || ''} onChange={e => setBillTo(p => ({...p, contact_name: e.target.value}))} />
+                  <Input label="Contact title" placeholder="Project Manager" value={billTo.contact_title || ''} onChange={e => setBillTo(p => ({...p, contact_title: e.target.value}))} />
+                </div>
+                <Input label="Contact email" type="email" placeholder="jane@company.com" value={billTo.contact_email || ''} onChange={e => setBillTo(p => ({...p, contact_email: e.target.value}))} />
                 {billTo.name?.trim() && (
                   <Button
                     variant="secondary"

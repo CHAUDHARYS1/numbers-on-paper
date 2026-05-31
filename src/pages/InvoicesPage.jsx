@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Plus, Search, Trash2, Copy, CheckCircle, Printer } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -8,6 +8,7 @@ import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import styles from './InvoicesPage.module.css'
 
 const STATUS_FILTERS = ['all', 'draft', 'unpaid', 'paid', 'overdue']
@@ -19,13 +20,15 @@ function fmt(n) {
 export default function InvoicesPage() {
   const { user } = useAuth()
   const toast = useToast()
+  const navigate = useNavigate()
   const [invoices,   setInvoices]   = useState([])
   const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState('')
   const [status,     setStatus]     = useState('all')
   const [client,     setClient]     = useState('all')
-  const [confirmId,  setConfirmId]  = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
+  const [invoiceToDelete, setInvoiceToDelete] = useState(null)
+  const [deleting,        setDeleting]        = useState(false)
+  const [markingPaidId,   setMarkingPaidId]   = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -37,15 +40,35 @@ export default function InvoicesPage() {
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
 
-  const handleDelete = async (id) => {
-    setDeletingId(id)
-    const { error } = await supabase.from('invoices').delete().eq('id', id)
-    setDeletingId(null)
-    setConfirmId(null)
+  const handleMarkPaid = async (inv) => {
+    setMarkingPaidId(inv.id)
+    const { error } = await supabase
+      .from('invoices')
+      .update({ status: 'paid' })
+      .eq('id', inv.id)
+    setMarkingPaidId(null)
+    if (error) {
+      toast.error('Failed to update invoice.')
+    } else {
+      setInvoices(prev => prev.map(i => i.id === inv.id ? { ...i, status: 'paid' } : i))
+      toast.success(`${inv.invoice_number} marked as paid!`)
+    }
+  }
+
+  const handleDuplicate = (inv) => {
+    navigate('/invoices/new', { state: { duplicate: inv } })
+  }
+
+  const handleDelete = async () => {
+    if (!invoiceToDelete) return
+    setDeleting(true)
+    const { error } = await supabase.from('invoices').delete().eq('id', invoiceToDelete.id)
+    setDeleting(false)
+    setInvoiceToDelete(null)
     if (error) {
       toast.error('Failed to delete invoice.')
     } else {
-      setInvoices(prev => prev.filter(inv => inv.id !== id))
+      setInvoices(prev => prev.filter(inv => inv.id !== invoiceToDelete.id))
       toast.success('Invoice deleted.')
     }
   }
@@ -69,6 +92,15 @@ export default function InvoicesPage() {
 
   return (
     <div>
+      <ConfirmModal
+        isOpen={!!invoiceToDelete}
+        title="Delete invoice?"
+        message={`${invoiceToDelete?.invoice_number}${invoiceToDelete?.bill_to?.name ? ` · ${invoiceToDelete.bill_to.name}` : ''} will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete invoice"
+        onConfirm={handleDelete}
+        onCancel={() => setInvoiceToDelete(null)}
+        loading={deleting}
+      />
       <PageHeader
         title="Invoices"
         description="Create, manage, and track all your invoices"
@@ -161,23 +193,29 @@ export default function InvoicesPage() {
                     <td><Badge variant={inv.status} /></td>
                     <td style={{ textAlign: 'right' }} className={styles.amountCell}>{fmt(inv.total)}</td>
                     <td className={styles.actions}>
-                      {confirmId === inv.id ? (
-                        <>
-                          <span className={styles.confirmText}>Delete?</span>
-                          <button className={styles.confirmBtn} onClick={() => handleDelete(inv.id)} disabled={deletingId === inv.id}>
-                            {deletingId === inv.id ? 'Deleting…' : 'Yes'}
-                          </button>
-                          <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>Cancel</button>
-                        </>
-                      ) : (
-                        <>
-                          <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
-                          <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
-                          <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
-                            <Trash2 size={14} />
-                          </button>
-                        </>
+                      {['unpaid', 'overdue'].includes(inv.status) && (
+                        <button
+                          className={styles.markPaidBtn}
+                          onClick={() => handleMarkPaid(inv)}
+                          disabled={markingPaidId === inv.id}
+                          aria-label="Mark as paid"
+                          title="Mark as paid"
+                        >
+                          <CheckCircle size={14} />
+                          {markingPaidId === inv.id ? 'Saving…' : 'Mark paid'}
+                        </button>
                       )}
+                      <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
+                      <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                      <Link to={`/invoices/${inv.id}/preview`} className={styles.iconBtn} aria-label="Print invoice" title="Print">
+                        <Printer size={14} />
+                      </Link>
+                      <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
+                        <Copy size={14} />
+                      </button>
+                      <button className={styles.deleteBtn} onClick={() => setInvoiceToDelete(inv)} aria-label="Delete invoice" title="Delete">
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -198,24 +236,25 @@ export default function InvoicesPage() {
                     {inv.due_date && <span>Due {inv.due_date}</span>}
                     <span className={styles.mobileCardAmount}>{fmt(inv.total)}</span>
                   </div>
+                  {['unpaid', 'overdue'].includes(inv.status) && (
+                    <button
+                      className={styles.mobileMarkPaidBtn}
+                      onClick={() => handleMarkPaid(inv)}
+                      disabled={markingPaidId === inv.id}
+                    >
+                      <CheckCircle size={15} />
+                      {markingPaidId === inv.id ? 'Saving…' : 'Mark as paid'}
+                    </button>
+                  )}
                   <div className={styles.mobileCardActions}>
-                    {confirmId === inv.id ? (
-                      <>
-                        <span className={styles.confirmText}>Delete?</span>
-                        <button className={styles.confirmBtn} onClick={() => handleDelete(inv.id)} disabled={deletingId === inv.id}>
-                          {deletingId === inv.id ? 'Deleting…' : 'Yes'}
-                        </button>
-                        <button className={styles.cancelBtn} onClick={() => setConfirmId(null)}>Cancel</button>
-                      </>
-                    ) : (
-                      <>
-                        <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
-                        <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
-                        <button className={styles.deleteBtn} onClick={() => setConfirmId(inv.id)} aria-label="Delete invoice">
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    )}
+                    <Link to={`/invoices/${inv.id}/edit`} className={styles.actionLink}>Edit</Link>
+                    <Link to={`/invoices/${inv.id}/preview`} className={styles.actionLink}>Preview</Link>
+                    <button className={styles.iconBtn} onClick={() => handleDuplicate(inv)} aria-label="Duplicate invoice" title="Duplicate">
+                      <Copy size={14} />
+                    </button>
+                    <button className={styles.deleteBtn} onClick={() => setInvoiceToDelete(inv)} aria-label="Delete invoice" title="Delete">
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
               ))}
