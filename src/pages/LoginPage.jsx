@@ -80,8 +80,7 @@ export default function LoginPage() {
       <div className={styles.page}>
         <div className={styles.card}>
           <Link to="/" className={styles.logoWrap}>
-            <div className={styles.logoMark}>In</div>
-            <span className={styles.logoName}>Numbers on Paper</span>
+            <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
           </Link>
 
           <h1 className={styles.title}>Two-factor authentication</h1>
@@ -124,8 +123,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <Link to="/" className={styles.logoWrap}>
-          <div className={styles.logoMark}>In</div>
-          <span className={styles.logoName}>Numbers on Paper</span>
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
         </Link>
 
         <h1 className={styles.title}>Welcome back</h1>

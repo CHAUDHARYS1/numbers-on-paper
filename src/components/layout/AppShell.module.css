@@ -30,26 +30,18 @@
   min-height: 64px;
 }
 
-.logoMark {
-  width: 32px;
+.sidebarLogoImg {
   height: 32px;
-  background: var(--color-brand-600);
-  color: #fff;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-  letter-spacing: -0.5px;
+  width: auto;
+  display: block;
+  flex: 1;
+  min-width: 0;
+  object-fit: contain;
+  object-position: left center;
 }
 
-.logoName {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  letter-spacing: -0.3px;
+[data-theme="dark"] .sidebarLogoImg {
+  filter: brightness(0) invert(1);
 }
 
 .mobileClose {
@@ -245,14 +237,17 @@
 .hamburger:hover { background: var(--color-bg-subtle); }
 .hamburger:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 
-.topBarLogo {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.topBarLogoImg {
+  height: 22px;
+  width: auto;
+  display: block;
   flex: 1;
+  object-fit: contain;
+  object-position: left center;
+}
+
+[data-theme="dark"] .topBarLogoImg {
+  filter: brightness(0) invert(1);
 }
 
 .content {
@@ -261,7 +256,7 @@
   max-width: var(--content-max);
   width: 100%;
   margin: 0 auto;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 
