@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Plus, Trash2, Save, ArrowLeft, UserCheck, Copy, Eye, X } from 'lucide-react'
+import { Plus, Trash, FloppyDisk, ArrowLeft, UserCheck, Copy, Eye, X } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -352,7 +352,7 @@ export default function InvoiceEditorPage() {
             <Eye size={14} />
             Preview
           </button>
-          <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
+          <Button variant="primary" size="md" icon={<FloppyDisk size={15} />} loading={saving} onClick={handleSave}>
             {isNew ? 'Save invoice' : 'Save changes'}
           </Button>
         </div>
@@ -498,7 +498,7 @@ export default function InvoiceEditorPage() {
                         disabled={lineItems.length === 1}
                         aria-label="Remove item"
                       >
-                        <Trash2 size={13} />
+                        <Trash size={13} />
                       </button>
                     </div>
                   </div>
@@ -520,7 +520,7 @@ export default function InvoiceEditorPage() {
                         <Copy size={14} />
                       </button>
                       <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
-                        <Trash2 size={14} />
+                        <Trash size={14} />
                       </button>
                     </div>
                     <textarea

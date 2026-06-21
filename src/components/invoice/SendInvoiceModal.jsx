@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Send, X } from 'lucide-react'
+import { PaperPlaneTilt, X } from '@phosphor-icons/react'
 import styles from './SendInvoiceModal.module.css'
 
 export default function SendInvoiceModal({ invoice, profile, onClose }) {
@@ -93,7 +93,7 @@ export default function SendInvoiceModal({ invoice, profile, onClose }) {
                 Cancel
               </button>
               <button type="submit" className={styles.sendBtn} disabled={sending}>
-                <Send size={15} />
+                <PaperPlaneTilt size={15} />
                 {sending ? 'Sending…' : 'Send invoice'}
               </button>
             </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { AlertTriangle } from 'lucide-react'
+import { Warning } from '@phosphor-icons/react'
 import styles from './ConfirmModal.module.css'
 
 export default function ConfirmModal({
@@ -40,7 +40,7 @@ export default function ConfirmModal({
     >
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.iconWrap}>
-          <AlertTriangle size={22} />
+          <Warning size={22} />
         </div>
         <h2 className={styles.title} id="confirm-title">{title}</h2>
         {message && <p className={styles.message}>{message}</p>}

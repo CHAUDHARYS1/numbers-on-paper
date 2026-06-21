@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Clock, FileText } from 'lucide-react'
+import { Plus, Trash, Clock, FileText } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -424,7 +424,7 @@ export default function TimeTrackerPage() {
                           onClick={() => handleDelete(entry.id)}
                           aria-label={`Delete ${entry.description}`}
                         >
-                          <Trash2 size={14} />
+                          <Trash size={14} />
                         </button>
                       )}
                     </td>

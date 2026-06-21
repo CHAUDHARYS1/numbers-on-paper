@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, Edit2, Printer, Send, Mail } from 'lucide-react'
+import { ArrowLeft, DownloadSimple, PencilSimple, Printer, PaperPlaneTilt, EnvelopeSimple } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -71,18 +71,18 @@ export default function InvoicePreviewPage() {
         </button>
         <div className={styles.actions}>
           <Link to={`/invoices/${id}/edit`}>
-            <Button variant="secondary" size="md" icon={<Edit2 size={15} />}>Edit</Button>
+            <Button variant="secondary" size="md" icon={<PencilSimple size={15} />}>Edit</Button>
           </Link>
           <Link to={`/invoices/${id}/email-preview`}>
-            <Button variant="secondary" size="md" icon={<Mail size={15} />}>Preview email</Button>
+            <Button variant="secondary" size="md" icon={<EnvelopeSimple size={15} />}>Preview email</Button>
           </Link>
           <Button variant="secondary" size="md" icon={<Printer size={15} />} onClick={handlePrint}>
             Print
           </Button>
-          <Button variant="secondary" size="md" icon={<Download size={15} />} loading={downloading} onClick={handleDownload}>
+          <Button variant="secondary" size="md" icon={<DownloadSimple size={15} />} loading={downloading} onClick={handleDownload}>
             Download PDF
           </Button>
-          <Button variant="primary" size="md" icon={<Send size={15} />} onClick={() => setShowSend(true)}>
+          <Button variant="primary" size="md" icon={<PaperPlaneTilt size={15} />} onClick={() => setShowSend(true)}>
             Send to client
           </Button>
         </div>

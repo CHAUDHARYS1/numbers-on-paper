@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import html2pdf from 'html2pdf.js'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Eye, EyeOff, Printer, RotateCcw, ChevronRight,
-  Plus, Trash2, ArrowLeft,
-} from 'lucide-react'
+  Eye, EyeSlash, Printer, ArrowCounterClockwise, CaretRight,
+  Plus, Trash, ArrowLeft,
+} from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { getProposal, createProposal, updateProposal } from '@/lib/proposals'
@@ -69,7 +69,7 @@ function Section({ num, title, defaultOpen = true, children }) {
       <summary className={styles.grpSummary}>
         <span className={styles.grpNum}>{num}</span>
         <span className={styles.grpTitle}>{title}</span>
-        <ChevronRight size={14} className={[styles.chev, open ? styles.chevOpen : ''].join(' ')} aria-hidden="true" />
+        <CaretRight size={14} className={[styles.chev, open ? styles.chevOpen : ''].join(' ')} aria-hidden="true" />
       </summary>
       <div className={styles.grpBody}>{children}</div>
     </details>
@@ -260,11 +260,11 @@ export default function ProposalEditorPage() {
         {saving && <span className={styles.savingTag}>Saving…</span>}
         <div className={styles.topbarActions}>
           <button className={styles.tbtnGhost} onClick={reset} title="Reset to default template">
-            <RotateCcw size={13} />
+            <ArrowCounterClockwise size={13} />
             Reset
           </button>
           <button className={styles.tbtn} onClick={() => setSoloMode(v => !v)}>
-            {soloMode ? <EyeOff size={13} /> : <Eye size={13} />}
+            {soloMode ? <EyeSlash size={13} /> : <Eye size={13} />}
             {soloMode ? 'Edit' : 'Preview'}
           </button>
           <button className={`${styles.tbtn} ${styles.tbtnPrimary}`} onClick={handleSavePdf} disabled={printing}>
@@ -419,7 +419,7 @@ export default function ProposalEditorPage() {
                         onClick={() => removeScopeGroup(gi)}
                         aria-label="Remove scope group"
                       >
-                        <Trash2 size={14} />
+                        <Trash size={14} />
                       </button>
                     </div>
                     {grp.items.map((item, ii) => (
@@ -435,7 +435,7 @@ export default function ProposalEditorPage() {
                           onClick={() => removeScopeItem(gi, ii)}
                           aria-label="Remove item"
                         >
-                          <Trash2 size={14} />
+                          <Trash size={14} />
                         </button>
                       </div>
                     ))}
@@ -467,7 +467,7 @@ export default function ProposalEditorPage() {
                         onClick={() => removeItem(i)}
                         aria-label="Remove line item"
                       >
-                        <Trash2 size={14} />
+                        <Trash size={14} />
                       </button>
                     </div>
                     <input
@@ -575,7 +575,7 @@ export default function ProposalEditorPage() {
                       onClick={() => removeStage(i)}
                       aria-label="Remove payment stage"
                     >
-                      <Trash2 size={14} />
+                      <Trash size={14} />
                     </button>
                   </div>
                 ))}
@@ -611,7 +611,7 @@ export default function ProposalEditorPage() {
                       onClick={() => removeTerm(i)}
                       aria-label="Remove term"
                     >
-                      <Trash2 size={14} />
+                      <Trash size={14} />
                     </button>
                   </div>
                 ))}

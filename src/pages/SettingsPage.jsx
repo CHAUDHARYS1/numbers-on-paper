@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/context/ToastContext'
-import PageHeader from '@/components/layout/PageHeader'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
-import { Save, Upload, Lock, ShieldCheck, Trash2 } from 'lucide-react'
+import { FloppyDisk, UploadSimple, LockKey, ShieldCheck, Trash } from '@phosphor-icons/react'
 import styles from './SettingsPage.module.css'
 
 // ── Change Password ────────────────────────────────────────────────
@@ -36,7 +35,7 @@ function PasswordSection({ user, toast }) {
   return (
     <div className={styles.subsection}>
       <div className={styles.subsectionHead}>
-        <Lock size={16} />
+        <LockKey size={16} />
         <div>
           <div className={styles.subsectionTitle}>Change password</div>
           <div className={styles.subsectionHint}>Use at least 8 characters.</div>
@@ -272,7 +271,7 @@ function DeleteAccountModal({ user, onCancel, toast, navigate, signOut }) {
       aria-labelledby="delete-account-title"
     >
       <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalIcon}><Trash2 size={22} /></div>
+        <div className={styles.modalIcon}><Trash size={22} /></div>
         <h2 className={styles.modalTitle} id="delete-account-title">Delete account</h2>
         <p className={styles.modalMsg}>
           This will permanently delete your account, all invoices, and client data.
@@ -372,15 +371,11 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Settings"
-        description="Manage your business profile, security, and notifications"
-        action={
-          <Button variant="primary" size="md" icon={<Save size={15} />} loading={saving} onClick={handleSave}>
-            Save changes
-          </Button>
-        }
-      />
+      <div className={styles.saveBar}>
+        <Button variant="primary" size="md" icon={<FloppyDisk size={15} />} loading={saving} onClick={handleSave}>
+          Save changes
+        </Button>
+      </div>
 
       <div className={styles.sections}>
 
@@ -406,7 +401,7 @@ export default function SettingsPage() {
                     disabled={uploadingLogo}
                   />
                   <label htmlFor="logo-upload" className={styles.logoUploadLabel}>
-                    <Upload size={13} />
+                    <UploadSimple size={13} />
                     {uploadingLogo ? 'Uploading…' : profile.logo_url ? 'Change logo' : 'Upload logo'}
                   </label>
                   {profile.logo_url && (
@@ -551,7 +546,7 @@ export default function SettingsPage() {
               <Button
                 variant="danger"
                 size="sm"
-                icon={<Trash2 size={14} />}
+                icon={<Trash size={14} />}
                 onClick={() => setDeleteOpen(true)}
               >
                 Delete account

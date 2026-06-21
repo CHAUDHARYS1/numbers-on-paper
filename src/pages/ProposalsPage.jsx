@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Scroll, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Scroll, PencilSimple, Trash } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { getProposals, deleteProposal } from '@/lib/proposals'
@@ -42,16 +42,12 @@ export default function ProposalsPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Proposals</h1>
-          <p className={styles.subtitle}>Create and manage client proposals</p>
-        </div>
+      <div className={styles.toolbar}>
         <Button variant="primary" onClick={() => navigate('/proposals/new')}>
           <Plus size={16} />
           New Proposal
         </Button>
-      </header>
+      </div>
 
       {loading ? (
         <div className={styles.loading}><span className="spinner" /></div>
@@ -98,14 +94,14 @@ export default function ProposalsPage() {
                       onClick={e => { e.stopPropagation(); navigate(`/proposals/${p.id}/edit`) }}
                       aria-label="Edit proposal"
                     >
-                      <Pencil size={15} />
+                      <PencilSimple size={15} />
                     </button>
                     <button
                       className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                       onClick={e => { e.stopPropagation(); setDeleteTarget(p) }}
                       aria-label="Delete proposal"
                     >
-                      <Trash2 size={15} />
+                      <Trash size={15} />
                     </button>
                   </td>
                 </tr>
