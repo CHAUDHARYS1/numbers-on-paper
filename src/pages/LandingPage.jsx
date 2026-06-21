@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
-import { FileText, Zap, Shield, Download, ChevronRight, Check, LogIn, ArrowRight } from 'lucide-react'
+import { FileText, Lightning, ShieldCheck, DownloadSimple, CaretRight, Check, SignIn, ArrowRight } from '@phosphor-icons/react'
 import styles from './LandingPage.module.css'
 
 const FEATURES = [
-  { icon: Zap,      title: 'Create in seconds',      desc: 'Fill in your client info and line items — your invoice is ready instantly.' },
-  { icon: Download, title: 'Download as PDF',         desc: 'One click to export a clean, professional PDF ready to send.' },
-  { icon: Shield,   title: 'Stored securely',         desc: 'All your invoices saved in the cloud, accessible from any device.' },
-  { icon: FileText, title: 'Multiple templates',      desc: 'Choose from templates that match your brand. More coming soon.' },
+  { icon: Lightning,     title: 'Create in seconds',   desc: 'Fill in your client info and line items — your invoice is ready instantly.' },
+  { icon: DownloadSimple,title: 'Download as PDF',      desc: 'One click to export a clean, professional PDF ready to send.' },
+  { icon: ShieldCheck,   title: 'Stored securely',      desc: 'All your invoices saved in the cloud, accessible from any device.' },
+  { icon: FileText,      title: 'Multiple templates',   desc: 'Choose from templates that match your brand. More coming soon.' },
 ]
 
 const FREE_FEATURES = [
@@ -29,7 +29,7 @@ export default function LandingPage() {
           </div>
           <div className={styles.navActions}>
             <Link to="/login" className={styles.navLogin} aria-label="Sign in">
-              <LogIn size={15} />
+              <SignIn size={15} />
               <span className={styles.navLoginLabel}>Sign in</span>
             </Link>
             <Link to="/signup" className={styles.navCta}>
@@ -59,7 +59,7 @@ export default function LandingPage() {
           <div className={styles.heroCtas}>
             <Link to="/signup" className={styles.heroCtaPrimary}>
               Create your free account
-              <ChevronRight size={18} />
+              <CaretRight size={18} />
             </Link>
             <Link to="/login" className={styles.heroCtaSecondary}>
               Sign in
@@ -138,7 +138,7 @@ export default function LandingPage() {
               <div className={styles.pricingPrice}>$0<span>/month</span></div>
               <p className={styles.pricingNote}>Free forever. Paid plans with more features coming soon.</p>
               <Link to="/signup" className={styles.pricingCta}>
-                Get started free <ChevronRight size={16} />
+                Get started free <CaretRight size={16} />
               </Link>
             </div>
             <ul className={styles.pricingList}>

@@ -2,33 +2,30 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import { Eye, EyeSlash, FileText, PaperPlaneTilt, ChartLine } from '@phosphor-icons/react'
 import styles from './AuthPage.module.css'
 
 export default function LoginPage() {
   const { signIn, setMfaPending } = useAuth()
   const navigate = useNavigate()
 
-  const [email, setEmail]       = useState('')
+  const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [showPw,   setShowPw]   = useState(false)
+  const [error,    setError]    = useState('')
+  const [loading,  setLoading]  = useState(false)
 
-  // MFA challenge step
-  const [step, setStep]               = useState('credentials') // 'credentials' | 'mfa'
-  const [mfaCode, setMfaCode]         = useState('')
-  const [mfaChallenge, setMfaChallenge] = useState(null) // { factorId, challengeId }
+  const [step,         setStep]         = useState('credentials')
+  const [mfaCode,      setMfaCode]      = useState('')
+  const [mfaChallenge, setMfaChallenge] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     const { error: signInError } = await signIn(email, password)
     if (signInError) { setError(signInError.message); setLoading(false); return }
 
-    // Check if the user's account requires an MFA step-up
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
       const { data: factors } = await supabase.auth.mfa.listFactors()
@@ -36,7 +33,6 @@ export default function LoginPage() {
       if (totp) {
         const { data: challenge, error: challengeErr } = await supabase.auth.mfa.challenge({ factorId: totp.id })
         if (challengeErr) { setError('Failed to start 2FA challenge.'); setLoading(false); return }
-        // Tell PublicRoute not to redirect while we complete MFA
         setMfaPending(true)
         setMfaChallenge({ factorId: totp.id, challengeId: challenge.id })
         setStep('mfa')
@@ -44,7 +40,6 @@ export default function LoginPage() {
         return
       }
     }
-
     setLoading(false)
     navigate('/dashboard')
   }
@@ -53,110 +48,133 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     const { error } = await supabase.auth.mfa.verify({
-      factorId:   mfaChallenge.factorId,
+      factorId:    mfaChallenge.factorId,
       challengeId: mfaChallenge.challengeId,
       code:        mfaCode,
     })
-
     setLoading(false)
     if (error) { setError('Invalid code. Please try again.'); setMfaCode(''); return }
-
     setMfaPending(false)
     navigate('/dashboard')
   }
 
-  const handleBackToLogin = () => {
-    setMfaPending(false)
-    setStep('credentials')
-    setError('')
-    setMfaCode('')
-    setMfaChallenge(null)
-  }
-
   if (step === 'mfa') {
     return (
-      <div className={styles.page}>
-        <div className={styles.card}>
-          <Link to="/" className={styles.logoWrap}>
-            <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
-          </Link>
-
-          <h1 className={styles.title}>Two-factor authentication</h1>
-          <p className={styles.sub}>Enter the 6-digit code from your authenticator app.</p>
-
-          <form onSubmit={handleMfaVerify} className={styles.form} noValidate>
-            <Input
-              label="Authentication code"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              placeholder="000000"
-              value={mfaCode}
-              onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
-              autoComplete="one-time-code"
-              autoFocus
-            />
-            {error && <p className={styles.errorMsg} role="alert">{error}</p>}
-            <Button type="submit" variant="primary" size="lg" loading={loading} style={{ width: '100%' }}>
-              Verify
-            </Button>
-          </form>
-
-          <p className={styles.switchLink}>
+      <div className={styles.split}>
+        <div className={styles.left}>
+          <div className={styles.leftLogo}><img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" /></div>
+          <div className={styles.leftBody}>
+            <h2 className={styles.headline}>Two-factor<br /><em>authentication</em></h2>
+            <ul className={styles.features}>
+              <li className={styles.feature}><FileText size={20} className={styles.featureIcon} />Your account is protected</li>
+              <li className={styles.feature}><PaperPlaneTilt size={20} className={styles.featureIcon} />Verify your identity to continue</li>
+            </ul>
+          </div>
+          <div className={styles.tagline}>"Numbers on Paper — simple invoicing."</div>
+        </div>
+        <div className={styles.right}>
+          <div className={styles.card}>
+            <Link to="/" className={styles.cardLogo}><img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" /></Link>
+            <h1 className={styles.title}>Two-factor authentication</h1>
+            <p className={styles.sub}>Enter the 6-digit code from your authenticator app.</p>
+            <form onSubmit={handleMfaVerify} className={styles.form} noValidate>
+              <div className={styles.fld}>
+                <label className={styles.fldLabel} htmlFor="mfa-code">Authentication code</label>
+                <input
+                  id="mfa-code"
+                  className={styles.fldInput}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={mfaCode}
+                  onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                  autoComplete="one-time-code"
+                  autoFocus
+                />
+              </div>
+              {error && <div className={styles.error}>{error}</div>}
+              <button type="submit" className={styles.btnSubmit} disabled={loading}>
+                {loading ? 'Verifying…' : 'Verify'}
+              </button>
+            </form>
             <button
               type="button"
-              onClick={handleBackToLogin}
-              style={{ background: 'none', border: 'none', padding: 0, color: 'inherit', font: 'inherit', cursor: 'pointer' }}
+              className={styles.backLink}
+              onClick={() => { setMfaPending(false); setStep('credentials'); setError(''); setMfaCode(''); setMfaChallenge(null) }}
             >
               ← Back to sign in
             </button>
-          </p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <Link to="/" className={styles.logoWrap}>
-          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoImg} />
-        </Link>
-
-        <h1 className={styles.title}>Welcome back</h1>
-        <p className={styles.sub}>Sign in to your account</p>
-
-        <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          {error && <p className={styles.errorMsg} role="alert">{error}</p>}
-          <Button type="submit" variant="primary" size="lg" loading={loading} style={{ width: '100%' }}>
-            Sign in
-          </Button>
-        </form>
-
-        <p className={styles.switchLink}>
-          Don't have an account? <Link to="/signup">Create one free</Link>
-        </p>
+    <div className={styles.split}>
+      <div className={styles.left}>
+        <div className={styles.leftLogo}><img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" /></div>
+        <div className={styles.leftBody}>
+          <h2 className={styles.headline}>Invoice smarter,<br />get paid <em>faster</em></h2>
+          <ul className={styles.features}>
+            <li className={styles.feature}><FileText size={20} className={styles.featureIcon} />Professional invoices in seconds</li>
+            <li className={styles.feature}><PaperPlaneTilt size={20} className={styles.featureIcon} />Send directly to clients via email</li>
+            <li className={styles.feature}><ChartLine size={20} className={styles.featureIcon} />Track revenue and outstanding balances</li>
+          </ul>
+        </div>
+        <div className={styles.tagline}>"Finally, an invoice tool that gets out of the way."</div>
+      </div>
+      <div className={styles.right}>
+        <div className={styles.card}>
+          <Link to="/" className={styles.cardLogo}><img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" /></Link>
+          <h1 className={styles.title}>Welcome back</h1>
+          <p className={styles.sub}>Sign in to your workspace to keep invoicing.</p>
+          <form onSubmit={handleSubmit} className={styles.form} noValidate>
+            <div className={styles.fld}>
+              <label className={styles.fldLabel} htmlFor="email">Email</label>
+              <input
+                id="email"
+                className={styles.fldInput}
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
+            <div className={styles.fld}>
+              <div className={styles.fldRow}>
+                <label className={styles.fldLabel} htmlFor="password">Password</label>
+              </div>
+              <div className={styles.pwWrap}>
+                <input
+                  id="password"
+                  className={styles.fldInput}
+                  type={showPw ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  style={{ paddingRight: 40 }}
+                />
+                <button type="button" className={styles.pwEye} onClick={() => setShowPw(p => !p)} aria-label={showPw ? 'Hide password' : 'Show password'}>
+                  {showPw ? <EyeSlash size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+            </div>
+            {error && <div className={styles.error}>{error}</div>}
+            <button type="submit" className={styles.btnSubmit} disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+          <p className={styles.switchLink}>No account yet? <Link to="/signup">Create one free</Link></p>
+        </div>
       </div>
     </div>
   )

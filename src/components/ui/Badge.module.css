@@ -1,14 +1,18 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-circle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
   line-height: 1.6;
+  white-space: nowrap;
 }
 
-.paid    { background: var(--color-success-bg); color: var(--color-success-text); }
-.unpaid  { background: var(--color-danger-bg);  color: var(--color-danger-text);  }
-.draft   { background: var(--color-neutral-100); color: var(--color-neutral-600); }
-.overdue { background: var(--color-warning-bg); color: var(--color-warning-text); }
+.paid    { background: var(--green-tint);  color: var(--green);  }
+.unpaid  { background: var(--amber-tint);  color: var(--amber);  }
+.overdue { background: var(--red-tint);    color: var(--red);    }
+.draft   { background: var(--paper-2);     color: var(--ink-4);  }

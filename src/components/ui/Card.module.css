@@ -1,10 +1,9 @@
 .card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
   min-width: 0;
-  overflow: hidden;
 }
 
 .header {
@@ -12,26 +11,27 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-6);
-  border-bottom: 1px solid var(--color-border-default);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line);
 }
 
 .title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -.01em;
+  color: var(--ink);
   margin: 0;
 }
 
 .description {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin: var(--space-1) 0 0;
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  margin: 2px 0 0;
 }
 
 .action { flex-shrink: 0; }
 
-.body { padding: var(--space-6); }
+.body { padding: var(--space-5); }
 
 @media (max-width: 640px) {
   .header { padding: var(--space-4); }
