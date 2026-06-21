@@ -12,6 +12,8 @@ import InvoicePreviewPage from '@/pages/InvoicePreviewPage'
 import EmailPreviewPage from '@/pages/EmailPreviewPage'
 import SettingsPage from '@/pages/SettingsPage'
 import TimeTrackerPage from '@/pages/TimeTrackerPage'
+import ProposalsPage from '@/pages/ProposalsPage'
+import ProposalEditorPage from '@/pages/ProposalEditorPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 // Layout
@@ -44,6 +46,9 @@ export default function App() {
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell><InvoicePreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals"          element={<PrivateRoute><AppShell><ProposalsPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals/new"      element={<PrivateRoute><AppShell bare><ProposalEditorPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals/:id/edit" element={<PrivateRoute><AppShell bare><ProposalEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/time"     element={<PrivateRoute><AppShell><TimeTrackerPage /></AppShell></PrivateRoute>} />
       <Route path="/settings" element={<PrivateRoute><AppShell><SettingsPage /></AppShell></PrivateRoute>} />
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, FileText, Clock, Plus, Settings,
+  LayoutDashboard, FileText, Clock, Scroll, Plus, Settings,
   LogOut, Menu, X, Moon, Sun
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -11,11 +11,12 @@ import styles from './AppShell.module.css'
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/invoices',  icon: FileText,        label: 'Invoices' },
+  { to: '/proposals', icon: Scroll,          label: 'Proposals' },
   { to: '/time',      icon: Clock,           label: 'Time' },
   { to: '/settings',  icon: Settings,        label: 'Settings' },
 ]
 
-export default function AppShell({ children }) {
+export default function AppShell({ children, bare }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
@@ -124,9 +125,10 @@ export default function AppShell({ children }) {
           </button>
         </div>
 
-        <div className={styles.content}>
-          {children}
-        </div>
+        {bare
+          ? <div className={styles.contentBare}>{children}</div>
+          : <div className={styles.content}>{children}</div>
+        }
       </main>
     </div>
   )

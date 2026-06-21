@@ -160,3 +160,49 @@ create trigger set_invoices_updated_at
 create trigger set_clients_updated_at
   before update on public.clients
   for each row execute function public.set_updated_at();
+
+-- ─── Proposals ────────────────────────────────────────────────────
+-- Auto-increment proposal number per user (same pattern as invoices)
+create or replace function public.next_proposal_number(p_user_id uuid)
+returns integer as $$
+declare
+  next_num integer;
+begin
+  select coalesce(max(proposal_no), 1000) + 1
+  into next_num
+  from public.proposals
+  where user_id = p_user_id;
+  return next_num;
+end;
+$$ language plpgsql security definer;
+
+create table public.proposals (
+  id          uuid default gen_random_uuid() primary key,
+  user_id     uuid references auth.users(id) on delete cascade not null,
+  proposal_no integer not null,
+  data        jsonb not null default '{}'::jsonb,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+
+alter table public.proposals enable row level security;
+
+create policy "Users manage own proposals"
+  on public.proposals for all using (auth.uid() = user_id);
+
+-- Set proposal_no before insert
+create or replace function public.set_proposal_no()
+returns trigger as $$
+begin
+  new.proposal_no := public.next_proposal_number(new.user_id);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger set_proposal_no_on_insert
+  before insert on public.proposals
+  for each row execute function public.set_proposal_no();
+
+create trigger set_proposals_updated_at
+  before update on public.proposals
+  for each row execute function public.set_updated_at();
