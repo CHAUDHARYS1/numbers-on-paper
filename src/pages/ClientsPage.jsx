@@ -14,12 +14,19 @@ function Avatar({ name, size = 'lg' }) {
   const initials = (name || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
   const colors = ['#2563EB','#15803d','#7c3aed','#c2410c','#be185d','#0f766e']
   const color = colors[(name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length]
-  const dim = size === 'lg' ? 44 : 32
+  const dim = size === 'lg' ? 44 : size === 'md' ? 40 : 32
   return (
     <div className={styles.avatar} style={{ width: dim, height: dim, background: color, fontSize: dim * 0.38 }}>
       {initials}
     </div>
   )
+}
+
+function MiniAvatar({ name }) {
+  const initials = (name || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
+  const colors = ['#2563EB','#15803d','#7c3aed','#c2410c','#be185d','#0f766e']
+  const color = colors[(name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length]
+  return <div className="m-row-ava" style={{ background: color }}>{initials}</div>
 }
 
 function AddClientModal({ onClose, onSave }) {
@@ -65,6 +72,59 @@ function AddClientModal({ onClose, onSave }) {
         </form>
       </div>
     </div>
+  )
+}
+
+/* Mobile add-client bottom sheet */
+function MobileAddSheet({ onClose, onSave }) {
+  const [draft, setDraft] = useState({ name: '', contact: '', email: '', city: '' })
+  const set = k => e => setDraft(d => ({ ...d, [k]: e.target.value }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!draft.name.trim()) return
+    onSave(draft)
+  }
+
+  return (
+    <>
+      <div className="m-scrim" onClick={onClose} />
+      <div className="m-sheet" role="dialog" aria-modal="true">
+        <div className="m-sheet-grip" />
+        <div className="m-sheet-h">
+          <h3>Add client</h3>
+          <button className="m-iconbtn m-iconbtn--ghost" onClick={onClose} aria-label="Close">
+            <X size={20} />
+          </button>
+        </div>
+        <form className="m-sheet-body" onSubmit={handleSubmit}>
+          <div className="m-stack">
+            <div className="m-field">
+              <label className="m-label">Client name *</label>
+              <input className="m-input" placeholder="Company or person" value={draft.name} onChange={set('name')} autoFocus required />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="m-field">
+                <label className="m-label">Contact</label>
+                <input className="m-input" placeholder="Jane Smith" value={draft.contact} onChange={set('contact')} />
+              </div>
+              <div className="m-field">
+                <label className="m-label">City</label>
+                <input className="m-input" placeholder="City, ST" value={draft.city} onChange={set('city')} />
+              </div>
+            </div>
+            <div className="m-field">
+              <label className="m-label">Email</label>
+              <input className="m-input" type="email" placeholder="jane@company.com" value={draft.email} onChange={set('email')} />
+            </div>
+          </div>
+        </form>
+        <div className="m-sheet-foot">
+          <button className="m-btn m-btn--ghost" onClick={onClose}>Cancel</button>
+          <button className="m-btn m-btn--primary" onClick={e => { e.preventDefault(); if (!draft.name.trim()) return; onSave(draft) }}>Save client</button>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -122,93 +182,180 @@ export default function ClientsPage() {
 
   return (
     <div>
-      {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
+      {/* ── Mobile layout ────────────────────────────────────────── */}
+      <div className="m-only">
+        <div className="m-head">
+          <div className="m-head-top">
+            <div>
+              <div className="m-eyebrow">Clients</div>
+              <h1 className="m-title">Clients</h1>
+            </div>
+            <button className="m-iconbtn m-iconbtn--accent" onClick={() => setAddOpen(true)} aria-label="Add client">
+              <Plus size={22} weight="bold" />
+            </button>
+          </div>
 
-      {/* Summary bar */}
-      <div className={styles.summary}>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal}>{enriched.length}</span>
-          <span className={styles.summaryLbl}>Clients</span>
-        </div>
-        <div className={styles.summaryDiv} />
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
-          <span className={styles.summaryLbl}>Total billed</span>
-        </div>
-        <div className={styles.summaryDiv} />
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
-          <span className={styles.summaryLbl}>Outstanding</span>
-        </div>
-      </div>
+          {/* 3-stat row */}
+          <div className="m-stats" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginTop: 16 }}>
+            <div className="m-stat" style={{ padding: '13px 12px' }}>
+              <div className="m-stat-val" style={{ fontSize: 20 }}>{enriched.length}</div>
+              <div className="m-stat-lbl" style={{ marginTop: 3 }}>Clients</div>
+            </div>
+            <div className="m-stat" style={{ padding: '13px 12px' }}>
+              <div className="m-stat-val" style={{ fontSize: 20 }}>{fmt0(totalBilled)}</div>
+              <div className="m-stat-lbl" style={{ marginTop: 3 }}>Billed</div>
+            </div>
+            <div className="m-stat" style={{ padding: '13px 12px' }}>
+              <div className="m-stat-val" style={{ fontSize: 20, color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</div>
+              <div className="m-stat-lbl" style={{ marginTop: 3 }}>Due</div>
+            </div>
+          </div>
 
-      {/* Filter row */}
-      <div className={styles.toolbar}>
-        <div className={styles.searchWrap}>
-          <MagnifyingGlass size={16} className={styles.searchIcon} />
-          <input
-            className={styles.searchInput}
-            placeholder="Search clients…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            aria-label="Search clients"
-          />
+          {/* Search */}
+          <div className="m-search" style={{ marginTop: 14 }}>
+            <MagnifyingGlass size={18} />
+            <input
+              placeholder="Search clients…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label="Search clients"
+            />
+          </div>
         </div>
-        <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
-          <Plus size={15} /> Add client
-        </button>
-      </div>
 
-      {loading ? (
-        <div className={styles.grid}>
-          {[1,2,3,4,5,6].map(n => <div key={n} className={[styles.card, styles.skeleton].join(' ')} />)}
-        </div>
-      ) : view.length === 0 ? (
-        <div className={styles.emptyCard}>
-          <p className={styles.emptyTitle}>No clients found</p>
-          <p className={styles.emptySub}>{search ? 'Try a different search.' : 'Add your first client to get started.'}</p>
-          {search
-            ? <button className={styles.btnGhost} onClick={() => setSearch('')}>Clear search</button>
-            : <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}><Plus size={15} /> Add client</button>
-          }
-        </div>
-      ) : (
-        <div className={styles.grid}>
-          {view.map(c => (
-            <div className={styles.card} key={c.id}>
-              <div className={styles.cardHead}>
-                <Avatar name={c.name} />
-                <div className={styles.cardHeadInfo}>
-                  <div className={styles.clientName}>{c.name}</div>
-                  <div className={styles.clientCity}>{c.city || '—'}</div>
-                </div>
-              </div>
-              <div className={styles.contact}>
-                {c.contact && <div className={styles.contactRow}><User size={13} className={styles.contactIcon} />{c.contact}</div>}
-                {c.email   && <div className={styles.contactRow}><EnvelopeSimple size={13} className={styles.contactIcon} />{c.email}</div>}
-              </div>
-              <div className={styles.stats}>
-                <div className={styles.stat}>
-                  <span className={[styles.statV, !c.count ? styles.statZero : ''].join(' ')}>{c.count}</span>
-                  <span className={styles.statL}>Invoices</span>
-                </div>
-                <div className={styles.stat}>
-                  <span className={[styles.statV, !c.billed ? styles.statZero : ''].join(' ')}>{fmt0(c.billed)}</span>
-                  <span className={styles.statL}>Billed</span>
-                </div>
-                <div className={styles.stat}>
-                  <span className={[styles.statV, c.outstanding ? styles.statDue : styles.statZero].join(' ')}>{fmt0(c.outstanding)}</span>
-                  <span className={styles.statL}>Due</span>
-                </div>
-              </div>
-              <div className={styles.cardActions}>
-                <Link to={`/invoices/new?client=${c.id}`} className={styles.cardBtn}><Plus size={13} /> Invoice</Link>
-                <Link to={`/invoices?client=${c.id}`} className={styles.cardBtn}>View invoices</Link>
+        <div className="m-body">
+          {loading ? (
+            <div className="m-list m-card">
+              {[1,2,3].map(n => <div key={n} className={styles.mSkeletonRow} />)}
+            </div>
+          ) : view.length === 0 ? (
+            <div className="m-card m-card--pad">
+              <div className="m-empty">
+                <User size={36} style={{ color: 'var(--ink-4)' }} />
+                <div className="m-empty-t">No clients found</div>
+                <div className="m-empty-s">{search ? 'Try a different search.' : 'Add your first client.'}</div>
+                {!search && (
+                  <button className="m-btn m-btn--primary" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setAddOpen(true)}>
+                    <Plus size={18} weight="bold" /> Add client
+                  </button>
+                )}
               </div>
             </div>
-          ))}
+          ) : (
+            <div className="m-list m-card">
+              {view.map(c => (
+                <div key={c.id} className="m-row" style={{ cursor: 'default' }}>
+                  <MiniAvatar name={c.name} />
+                  <div className="m-row-main">
+                    <div className="m-row-title">{c.name}</div>
+                    <div className="m-row-meta">{c.city || '—'} · {c.count} invoice{c.count === 1 ? '' : 's'}</div>
+                  </div>
+                  <div className="m-row-end">
+                    <span className="m-row-amt">{fmt0(c.billed)}</span>
+                    {c.outstanding
+                      ? <span className="m-row-num" style={{ color: 'var(--amber)' }}>{fmt0(c.outstanding)} due</span>
+                      : <span className="m-row-num" style={{ color: 'var(--ink-4)' }}>paid up</span>
+                    }
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+
+        {addOpen && <MobileAddSheet onClose={() => setAddOpen(false)} onSave={handleSave} />}
+      </div>
+
+      {/* ── Desktop layout ──────────────────────────────────────── */}
+      <div className="d-only">
+        {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
+
+        {/* Summary bar */}
+        <div className={styles.summary}>
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal}>{enriched.length}</span>
+            <span className={styles.summaryLbl}>Clients</span>
+          </div>
+          <div className={styles.summaryDiv} />
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
+            <span className={styles.summaryLbl}>Total billed</span>
+          </div>
+          <div className={styles.summaryDiv} />
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
+            <span className={styles.summaryLbl}>Outstanding</span>
+          </div>
+        </div>
+
+        {/* Filter row */}
+        <div className={styles.toolbar}>
+          <div className={styles.searchWrap}>
+            <MagnifyingGlass size={16} className={styles.searchIcon} />
+            <input
+              className={styles.searchInput}
+              placeholder="Search clients…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label="Search clients"
+            />
+          </div>
+          <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
+            <Plus size={15} /> Add client
+          </button>
+        </div>
+
+        {loading ? (
+          <div className={styles.grid}>
+            {[1,2,3,4,5,6].map(n => <div key={n} className={[styles.card, styles.skeleton].join(' ')} />)}
+          </div>
+        ) : view.length === 0 ? (
+          <div className={styles.emptyCard}>
+            <p className={styles.emptyTitle}>No clients found</p>
+            <p className={styles.emptySub}>{search ? 'Try a different search.' : 'Add your first client to get started.'}</p>
+            {search
+              ? <button className={styles.btnGhost} onClick={() => setSearch('')}>Clear search</button>
+              : <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}><Plus size={15} /> Add client</button>
+            }
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {view.map(c => (
+              <div className={styles.card} key={c.id}>
+                <div className={styles.cardHead}>
+                  <Avatar name={c.name} />
+                  <div className={styles.cardHeadInfo}>
+                    <div className={styles.clientName}>{c.name}</div>
+                    <div className={styles.clientCity}>{c.city || '—'}</div>
+                  </div>
+                </div>
+                <div className={styles.contact}>
+                  {c.contact && <div className={styles.contactRow}><User size={13} className={styles.contactIcon} />{c.contact}</div>}
+                  {c.email   && <div className={styles.contactRow}><EnvelopeSimple size={13} className={styles.contactIcon} />{c.email}</div>}
+                </div>
+                <div className={styles.stats}>
+                  <div className={styles.stat}>
+                    <span className={[styles.statV, !c.count ? styles.statZero : ''].join(' ')}>{c.count}</span>
+                    <span className={styles.statL}>Invoices</span>
+                  </div>
+                  <div className={styles.stat}>
+                    <span className={[styles.statV, !c.billed ? styles.statZero : ''].join(' ')}>{fmt0(c.billed)}</span>
+                    <span className={styles.statL}>Billed</span>
+                  </div>
+                  <div className={styles.stat}>
+                    <span className={[styles.statV, c.outstanding ? styles.statDue : styles.statZero].join(' ')}>{fmt0(c.outstanding)}</span>
+                    <span className={styles.statL}>Due</span>
+                  </div>
+                </div>
+                <div className={styles.cardActions}>
+                  <Link to={`/invoices/new?client=${c.id}`} className={styles.cardBtn}><Plus size={13} /> Invoice</Link>
+                  <Link to={`/invoices?client=${c.id}`} className={styles.cardBtn}>View invoices</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

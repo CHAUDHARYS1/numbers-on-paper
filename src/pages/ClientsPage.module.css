@@ -277,6 +277,16 @@
 .fldInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 
+/* ── Mobile skeleton ───────────────────────────────────────── */
+.mSkeletonRow {
+  height: 68px;
+  background: linear-gradient(90deg, var(--paper-2) 25%, var(--surface) 50%, var(--paper-2) 75%);
+  background-size: 200% 100%;
+  border-bottom: 1px solid var(--line-soft);
+  animation: mShimmer 1.5s ease-in-out infinite;
+}
+@keyframes mShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1080px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }

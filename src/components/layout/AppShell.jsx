@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import {
-  SquaresFour, FileText, UsersThree, Scroll, GearSix,
-  SignOut, List, X, Moon, Sun
+  SquaresFour, FileText, UsersThree, GearSix,
+  Plus, SignOut, Moon, Sun
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -12,8 +11,16 @@ const NAV_ITEMS = [
   { to: '/dashboard', Icon: SquaresFour, label: 'Dashboard' },
   { to: '/invoices',  Icon: FileText,    label: 'Invoices'  },
   { to: '/clients',   Icon: UsersThree,  label: 'Clients'   },
-  { to: '/proposals', Icon: Scroll,      label: 'Proposals' },
   { to: '/settings',  Icon: GearSix,     label: 'Settings'  },
+]
+
+/* Mobile tab items: 5 slots — New is the center FAB */
+const MOB_TABS = [
+  { to: '/dashboard', Icon: SquaresFour, label: 'Home',     fab: false },
+  { to: '/invoices',  Icon: FileText,    label: 'Invoices', fab: false },
+  { to: null,         Icon: Plus,        label: 'New',      fab: true  },
+  { to: '/clients',   Icon: UsersThree,  label: 'Clients',  fab: false },
+  { to: '/settings',  Icon: GearSix,     label: 'Settings', fab: false },
 ]
 
 function Avatar({ name, size = 'md' }) {
@@ -29,7 +36,6 @@ function Avatar({ name, size = 'md' }) {
 }
 
 export default function AppShell({ children, bare, title, description, actions, maxWidth }) {
-  const [mobileOpen, setMobileOpen] = useState(false)
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
@@ -42,7 +48,7 @@ export default function AppShell({ children, bare, title, description, actions, 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   const email = user?.email || ''
 
-  const navLinks = (onClickItem) => (
+  const navLinks = (
     <nav className={styles.nav} aria-label="Main navigation">
       {NAV_ITEMS.map(({ to, Icon, label }) => (
         <NavLink
@@ -50,7 +56,6 @@ export default function AppShell({ children, bare, title, description, actions, 
           to={to}
           className={({ isActive }) => [styles.navItem, isActive ? styles.navItemOn : ''].join(' ')}
           aria-current={({ isActive }) => isActive ? 'page' : undefined}
-          onClick={onClickItem}
         >
           <Icon size={18} weight="regular" aria-hidden="true" />
           <span>{label}</span>
@@ -94,36 +99,11 @@ export default function AppShell({ children, bare, title, description, actions, 
         <a href="/dashboard" className={styles.sideLogo} aria-label="Numbers on Paper home">
           <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" />
         </a>
-        {navLinks()}
-        {userFooter}
-      </aside>
-
-      {/* Mobile scrim */}
-      {mobileOpen && (
-        <div className={styles.scrim} onClick={() => setMobileOpen(false)} aria-hidden="true" />
-      )}
-
-      {/* Mobile drawer */}
-      <aside className={[styles.drawer, mobileOpen ? styles.drawerOpen : ''].join(' ')}>
-        <div className={styles.drawerTop}>
-          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" style={{ height: 22 }} />
-          <button className={styles.burgerBtn} onClick={() => setMobileOpen(false)} aria-label="Close menu">
-            <X size={20} />
-          </button>
-        </div>
-        {navLinks(() => setMobileOpen(false))}
+        {navLinks}
         {userFooter}
       </aside>
 
       <main className={styles.main}>
-        {/* Mobile topbar */}
-        <header className={styles.mTopbar}>
-          <button className={styles.burgerBtn} onClick={() => setMobileOpen(true)} aria-label="Open menu">
-            <List size={20} />
-          </button>
-          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" style={{ height: 22 }} />
-        </header>
-
         {bare ? (
           <div className={styles.contentBare}>{children}</div>
         ) : (
@@ -142,6 +122,41 @@ export default function AppShell({ children, bare, title, description, actions, 
             </div>
           </>
         )}
+
+        {/* Mobile bottom tab bar */}
+        <nav className={styles.tabbar} aria-label="Main navigation">
+          {MOB_TABS.map(({ to, Icon, label, fab }) => {
+            if (fab) {
+              return (
+                <Link
+                  key="new"
+                  to="/invoices/new"
+                  className={styles.tabFab}
+                  aria-label="New invoice"
+                >
+                  <span className={styles.tabFabInner}>
+                    <Icon size={28} weight="bold" />
+                  </span>
+                </Link>
+              )
+            }
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) => [styles.tab, isActive ? styles.tabOn : ''].join(' ')}
+                aria-current={({ isActive }) => isActive ? 'page' : undefined}
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon size={24} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" />
+                    <span>{label}</span>
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
+        </nav>
       </main>
     </div>
   )
