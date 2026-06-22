@@ -372,25 +372,13 @@ export default function ClientsPage() {
       <div className="d-only">
         {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
 
-        {/* Summary + controls row */}
-        <div className={styles.summary}>
-          <div className={styles.summaryStats}>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryVal}>{enriched.length}</span>
-              <span className={styles.summaryLbl}>Clients</span>
-            </div>
-            <div className={styles.summaryDiv} />
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
-              <span className={styles.summaryLbl}>Total billed</span>
-            </div>
-            <div className={styles.summaryDiv} />
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
-              <span className={styles.summaryLbl}>Outstanding</span>
-            </div>
+        {/* Sticky header */}
+        <div className={styles.deskHeader}>
+          <div className={styles.deskHeaderLeft}>
+            <h1 className={styles.deskTitle}>Clients</h1>
+            <p className={styles.deskDesc}>Everyone you bill, with their history at a glance.</p>
           </div>
-          <div className={styles.summaryControls}>
+          <div className={styles.deskHeaderRight}>
             <div className={styles.searchWrap}>
               <MagnifyingGlass size={15} className={styles.searchIcon} />
               <input
@@ -404,6 +392,24 @@ export default function ClientsPage() {
             <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
               <Plus size={15} /> Add client
             </button>
+          </div>
+        </div>
+
+        {/* Summary row */}
+        <div className={styles.summary}>
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal}>{enriched.length}</span>
+            <span className={styles.summaryLbl}>Clients</span>
+          </div>
+          <div className={styles.summaryDiv} />
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
+            <span className={styles.summaryLbl}>Total billed</span>
+          </div>
+          <div className={styles.summaryDiv} />
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
+            <span className={styles.summaryLbl}>Outstanding</span>
           </div>
         </div>
 
