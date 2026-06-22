@@ -51,11 +51,15 @@ export default function DashboardPage() {
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
 
-  const totalPaid   = invoices.filter(i => effStatus(i) === 'paid').reduce((s, i) => s + (i.total || 0), 0)
-  const totalUnpaid = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).reduce((s, i) => s + (i.total || 0), 0)
-  const draftCount  = invoices.filter(i => effStatus(i) === 'draft').length
-  const totalAll    = invoices.reduce((s, i) => s + (i.total || 0), 0)
+  const totalPaid    = invoices.filter(i => effStatus(i) === 'paid').reduce((s, i) => s + (i.total || 0), 0)
+  const totalUnpaid  = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).reduce((s, i) => s + (i.total || 0), 0)
+  const draftCount   = invoices.filter(i => effStatus(i) === 'draft').length
+  const totalAll     = invoices.reduce((s, i) => s + (i.total || 0), 0)
   const overdueCount = invoices.filter(i => effStatus(i) === 'overdue').length
+  const sentCount    = invoices.filter(i => effStatus(i) !== 'draft').length
+  const openCount    = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).length
+  const thisYear     = new Date().getFullYear().toString()
+  const paidThisYear = invoices.filter(i => effStatus(i) === 'paid' && (i.issue_date || '').startsWith(thisYear)).reduce((s, i) => s + (i.total || 0), 0)
 
   const outstanding = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).slice(0, 4)
 
@@ -63,10 +67,10 @@ export default function DashboardPage() {
   const firstName   = displayName.split(' ')[0]
 
   const STATS = [
-    { label: 'Total invoiced',  value: fmt(totalAll),    Icon: TrendUp,        color: 'brand'   },
-    { label: 'Collected',       value: fmt(totalPaid),   Icon: CurrencyDollar, color: 'green'   },
-    { label: 'Outstanding',     value: fmt(totalUnpaid), Icon: Hourglass,      color: 'amber'   },
-    { label: 'Drafts',          value: draftCount,       Icon: FileDashed,     color: 'neutral' },
+    { label: 'Total invoiced',  value: fmt(totalAll),    Icon: TrendUp,        color: 'brand',   sub: `${sentCount} sent`                                   },
+    { label: 'Collected',       value: fmt(totalPaid),   Icon: CurrencyDollar, color: 'green',   sub: `${fmt(paidThisYear)} this year`                      },
+    { label: 'Outstanding',     value: fmt(totalUnpaid), Icon: Hourglass,      color: 'amber',   sub: `${openCount} open`                                   },
+    { label: 'Drafts',          value: draftCount,       Icon: FileDashed,     color: 'neutral', sub: overdueCount > 0 ? `${overdueCount} overdue` : 'none overdue' },
   ]
 
   return (
@@ -198,9 +202,12 @@ export default function DashboardPage() {
       <div className="d-only">
         {/* Stats */}
         <div className={styles.statsGrid}>
-          {STATS.map(({ label, value, Icon, color }) => (
+          {STATS.map(({ label, value, Icon, color, sub }) => (
             <div key={label} className={[styles.statCard, styles[`stat_${color}`]].join(' ')}>
-              <div className={styles.statIcon}><Icon size={18} weight="duotone" /></div>
+              <div className={styles.statIconRow}>
+                <div className={styles.statIcon}><Icon size={18} weight="duotone" /></div>
+                {sub && <span className={styles.statSub}>{sub}</span>}
+              </div>
               <div className={styles.statVal}>{value}</div>
               <div className={styles.statLabel}>{label}</div>
             </div>
