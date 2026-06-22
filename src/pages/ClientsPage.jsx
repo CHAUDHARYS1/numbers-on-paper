@@ -81,6 +81,10 @@ function ClientDetailSheet({ client, onClose }) {
   const color = colors[(client.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length]
   const initials = (client.name || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
 
+  // Handle both column naming conventions in the clients table
+  const contactName  = client.contact_name  || client.contact  || ''
+  const contactEmail = client.contact_email || client.email    || ''
+
   return (
     <>
       <div className="m-scrim" onClick={onClose} />
@@ -119,25 +123,25 @@ function ClientDetailSheet({ client, onClose }) {
 
         {/* Contact rows */}
         <div className="m-cdet-rows">
-          {client.contact && (
+          {contactName && (
             <div className="m-cdet-row">
               <div className="m-cdet-row-ic"><User size={17} /></div>
               <div>
-                <div className="m-cdet-row-v">{client.contact}</div>
+                <div className="m-cdet-row-v">{contactName}</div>
                 <div className="m-cdet-row-l">Primary contact</div>
               </div>
             </div>
           )}
-          {client.email && (
-            <a href={`mailto:${client.email}`} className="m-cdet-row m-cdet-row--link">
+          {contactEmail && (
+            <a href={`mailto:${contactEmail}`} className="m-cdet-row m-cdet-row--link">
               <div className="m-cdet-row-ic"><EnvelopeSimple size={17} /></div>
               <div style={{ minWidth: 0 }}>
-                <div className="m-cdet-row-v" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.email}</div>
+                <div className="m-cdet-row-v" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contactEmail}</div>
                 <div className="m-cdet-row-l">Email</div>
               </div>
             </a>
           )}
-          {client.city && !client.contact && !client.email && (
+          {client.city && (
             <div className="m-cdet-row">
               <div className="m-cdet-row-ic"><MapPin size={17} /></div>
               <div>
@@ -409,8 +413,8 @@ export default function ClientsPage() {
                   </div>
                 </div>
                 <div className={styles.contact}>
-                  {c.contact && <div className={styles.contactRow}><User size={13} className={styles.contactIcon} />{c.contact}</div>}
-                  {c.email   && <div className={styles.contactRow}><EnvelopeSimple size={13} className={styles.contactIcon} />{c.email}</div>}
+                  {(c.contact_name || c.contact) && <div className={styles.contactRow}><User size={13} className={styles.contactIcon} />{c.contact_name || c.contact}</div>}
+                  {(c.contact_email || c.email)  && <div className={styles.contactRow}><EnvelopeSimple size={13} className={styles.contactIcon} />{c.contact_email || c.email}</div>}
                 </div>
                 <div className={styles.stats}>
                   <div className={styles.stat}>
