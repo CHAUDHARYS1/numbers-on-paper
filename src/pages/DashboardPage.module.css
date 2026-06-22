@@ -133,6 +133,35 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Caught-up empty state ─────────────────────────────────── */
+.caughtUp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+  flex: 1;
+}
+.catSvg {
+  width: 90px;
+  height: 90px;
+  color: var(--accent);
+  margin-bottom: var(--space-4);
+  opacity: .8;
+}
+.caughtUpTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  margin: 0 0 var(--space-1);
+}
+.caughtUpSub {
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  margin: 0;
+}
+
 /* ── Table ─────────────────────────────────────────────────── */
 .tableWrap { overflow-x: auto; }
 

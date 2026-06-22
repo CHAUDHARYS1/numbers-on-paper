@@ -226,12 +226,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Outstanding */}
-          {outstanding.length > 0 && (
-            <div className={styles.card}>
-              <div className={styles.cardHead}>
-                <h2 className={styles.cardTitle}>Outstanding</h2>
+          <div className={styles.card}>
+            <div className={styles.cardHead}>
+              <h2 className={styles.cardTitle}>Outstanding</h2>
+              {outstanding.length > 0 && (
                 <Link to="/invoices?status=unpaid" className={styles.cardLink}>View all</Link>
-              </div>
+              )}
+            </div>
+            {outstanding.length > 0 ? (
               <div className={styles.outstandingList}>
                 {outstanding.map(inv => (
                   <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className={styles.outRow}>
@@ -246,8 +248,44 @@ export default function DashboardPage() {
                   </Link>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className={styles.caughtUp}>
+                <svg className={styles.catSvg} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  {/* Tail */}
+                  <path d="M72 98 Q90 108 86 90 Q82 76 72 82" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Body */}
+                  <ellipse cx="58" cy="88" rx="26" ry="20" fill="currentColor" opacity=".12"/>
+                  <ellipse cx="58" cy="88" rx="26" ry="20" stroke="currentColor" strokeWidth="3"/>
+                  {/* Head */}
+                  <circle cx="58" cy="58" r="26" fill="currentColor" opacity=".12"/>
+                  <circle cx="58" cy="58" r="26" stroke="currentColor" strokeWidth="3"/>
+                  {/* Left ear */}
+                  <path d="M38 38 L32 22 L48 32Z" fill="currentColor" opacity=".12" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+                  {/* Right ear */}
+                  <path d="M78 38 L84 22 L68 32Z" fill="currentColor" opacity=".12" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+                  {/* Inner ears */}
+                  <path d="M39 36 L35 26 L46 33Z" fill="currentColor" opacity=".25"/>
+                  <path d="M77 36 L81 26 L70 33Z" fill="currentColor" opacity=".25"/>
+                  {/* Eyes — happy squint */}
+                  <path d="M47 55 Q50 51 53 55" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M63 55 Q66 51 69 55" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  {/* Nose */}
+                  <path d="M56 62 L58 60 L60 62 L58 64Z" fill="currentColor" opacity=".6"/>
+                  {/* Mouth */}
+                  <path d="M58 64 Q54 68 52 66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M58 64 Q62 68 64 66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  {/* Whiskers left */}
+                  <line x1="34" y1="61" x2="50" y2="63" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  <line x1="34" y1="65" x2="50" y2="65" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  {/* Whiskers right */}
+                  <line x1="82" y1="61" x2="66" y2="63" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  <line x1="82" y1="65" x2="66" y2="65" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                </svg>
+                <p className={styles.caughtUpTitle}>You're all caught up!</p>
+                <p className={styles.caughtUpSub}>No outstanding invoices.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Recent invoices */}
