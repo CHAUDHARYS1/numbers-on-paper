@@ -1,11 +1,21 @@
 import { Routes, Route, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { Plus } from '@phosphor-icons/react'
+import { Plus, MagnifyingGlass } from '@phosphor-icons/react'
 
 const newInvoiceBtn = (
   <Link to="/invoices/new" className="app-btn-primary">
     <Plus size={15} /> New invoice
   </Link>
+)
+
+const dashboardActions = (
+  <>
+    <div className="topbar-search">
+      <MagnifyingGlass size={15} className="topbar-search__icon" />
+      <input type="search" placeholder="Search…" aria-label="Search" className="topbar-search__input" />
+    </div>
+    {newInvoiceBtn}
+  </>
 )
 
 // Pages
@@ -49,7 +59,7 @@ export default function App() {
       <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
       {/* Private — wrapped in AppShell */}
-      <Route path="/dashboard" element={<PrivateRoute><AppShell title="Dashboard" description="Overview of your invoicing activity" actions={newInvoiceBtn}><DashboardPage /></AppShell></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><AppShell title="Dashboard" description="Overview of your invoicing activity" actions={dashboardActions}><DashboardPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices" element={<PrivateRoute><AppShell title="Invoices" description="Create, manage, and track every invoice in one place."><InvoicesPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/new" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
