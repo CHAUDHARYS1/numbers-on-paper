@@ -171,23 +171,11 @@
 .propCardDel:hover { color: var(--red); background: var(--red-tint); }
 .propCardDel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Mobile card list lives inside m-only so always flex when rendered */
+.cardList { display: flex; }
+
 /* ── Mobile breakpoint ─────────────────────────────────────── */
 @media (max-width: 880px) {
-  .page {
-    padding: var(--space-5) var(--space-4);
-    gap: var(--space-4);
-  }
-
-  .toolbar {
-    justify-content: stretch;
-  }
-  .toolbar > * { width: 100%; justify-content: center; }
-
-  .tableWrap { display: none; }
-  .cardList   { display: flex; }
-
   .propCard { border-radius: 16px; }
   .propCard:focus-visible { border-radius: 16px; }
-
-  .empty { padding: 40px var(--space-5); }
 }
