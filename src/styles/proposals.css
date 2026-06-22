@@ -218,7 +218,7 @@
   transition: color .14s;
 }
 .pe-back:hover { color: var(--ink); }
-.pe-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.pe-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
 .pe-topbar-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 
 /* ═══════════════════════════════════════════════════════════
@@ -287,7 +287,7 @@
 }
 .pp-brand { display: flex; align-items: center; gap: var(--space-3); }
 .pp-logo {
-  width: 40px; height: 40px; border-radius: var(--radius);
+  width: 40px; height: 40px; border-radius: var(--radius-lg);
   background: var(--accent); display: grid; place-items: center; flex-shrink: 0;
 }
 .pp-logo img { display: block; width: 24px; height: 24px; }
@@ -458,7 +458,7 @@
 .m-paper-top { background: #0B1B34; padding: 20px; }
 .m-paper-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .m-paper-logo {
-  width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+  width: 36px; height: 36px; background: var(--accent); border-radius: var(--radius-lg);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .m-paper-biz { font-size: 15px; font-weight: 700; color: #fff; }
