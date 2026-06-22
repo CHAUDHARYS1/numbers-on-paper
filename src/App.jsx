@@ -52,7 +52,7 @@ export default function App() {
       <Route path="/invoices" element={<PrivateRoute><AppShell title="Invoices" description="Create, manage, and track every invoice in one place."><InvoicesPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/new" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
-      <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell><InvoicePreviewPage /></AppShell></PrivateRoute>} />
+      <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell hideTabbar><InvoicePreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute><AppShell title="Clients" description="Everyone you bill, with their history at a glance."><ClientsPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals" element={<PrivateRoute><AppShell title="Proposals" description="Build and send project proposals."><ProposalsPage /></AppShell></PrivateRoute>} />

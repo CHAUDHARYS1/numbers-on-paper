@@ -465,19 +465,117 @@
   .previewModalBody { padding: var(--space-4); }
 }
 
+/* ── New line item mobile cards ────────────────────────────────── */
+.liCard {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: 14px;
+  background: var(--color-bg-subtle);
+  margin-bottom: var(--space-3);
+}
+.liCardHead {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.liCardNum {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--color-text-muted);
+}
+.liCardTitle {
+  width: 100%; height: 44px; padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 16px; font-family: var(--font-body);
+  color: var(--color-text-primary); background: var(--color-bg-surface);
+}
+.liCardTitle:focus { outline: none; border-color: var(--color-border-brand); box-shadow: 0 0 0 3px var(--color-brand-50); }
+.liCardRow2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.liCardField { display: flex; flex-direction: column; gap: 6px; }
+.liCardLabel { font-size: 12.5px; font-weight: 700; color: var(--color-text-muted); }
+.liCardInput {
+  height: 44px; padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 16px; font-family: var(--font-body);
+  color: var(--color-text-primary); background: var(--color-bg-surface);
+  width: 100%;
+}
+.liCardInput:focus { outline: none; border-color: var(--color-border-brand); box-shadow: 0 0 0 3px var(--color-brand-50); }
+.liCardAmountRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+.liCardAmountLabel { font-size: 13px; color: var(--color-text-muted); }
+.liCardAmount {
+  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+  color: var(--color-text-primary);
+}
+.liCardAdd {
+  width: 100%; height: 50px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--color-brand-50); color: var(--color-brand-600);
+  border: 1.5px dashed var(--color-border-brand);
+  font-family: var(--font-body); font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+.liCardAdd:hover { filter: brightness(.96); }
+.liCardAdd:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
+
+/* ── iOS toggle switch ─────────────────────────────────────────── */
+.iosSwitch {
+  position: relative; display: inline-block;
+  width: 51px; height: 31px; flex-shrink: 0; cursor: pointer;
+}
+.iosSwitch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.iosSlider {
+  position: absolute; inset: 0; cursor: pointer;
+  background: var(--color-border-default);
+  border-radius: 999px; transition: background .2s;
+}
+.iosSlider::before {
+  content: '';
+  position: absolute;
+  width: 27px; height: 27px;
+  left: 2px; top: 2px;
+  background: #fff; border-radius: 50%;
+  transition: transform .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.iosSwitch input:checked + .iosSlider { background: var(--color-brand-600); }
+.iosSwitch input:checked + .iosSlider::before { transform: translateX(20px); }
+.iosSwitch:focus-within .iosSlider { box-shadow: 0 0 0 3px var(--color-brand-50); }
+
+/* ── Mobile toggle rows ────────────────────────────────────────── */
+.mobileToggles { display: none; }
+.desktopToggles { display: block; }
+
+.mToggleRow {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 13px 0;
+  border-bottom: 1px solid var(--color-border-default);
+}
+.mToggleRow:last-of-type { border-bottom: none; }
+.mToggleMain { min-width: 0; }
+.mToggleT { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+.mToggleD { font-size: 12.5px; color: var(--color-text-muted); margin-top: 2px; }
+.mTaxInput { padding: var(--space-3) 0; }
+
 /* ── Mobile chrome ─────────────────────────────────────────────── */
-.mobileHead     { display: none; }
+.mobileHead      { display: none; }
 .mobileActionbar { display: none; }
 
 @media (max-width: 880px) {
   .topBar { display: none; }
-
   .mobileHead { display: block; }
 
   /* Extra padding so content clears the fixed action bar above the tab bar */
-  .formCol {
-    padding-bottom: 80px;
-  }
+  .formCol { padding-bottom: 80px; }
+
+  /* Show iOS toggles, hide desktop checkboxes */
+  .mobileToggles  { display: block; }
+  .desktopToggles { display: none; }
 
   .mobileActionbar {
     display: flex;
@@ -489,6 +587,7 @@
     padding: 12px 18px;
     background: color-mix(in srgb, var(--card) 92%, transparent);
     backdrop-filter: saturate(1.5) blur(14px);
+    -webkit-backdrop-filter: saturate(1.5) blur(14px);
     border-top: 1px solid var(--line);
   }
   .mobileActionbar .mActBtn {

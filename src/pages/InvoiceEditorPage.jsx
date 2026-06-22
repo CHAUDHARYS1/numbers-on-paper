@@ -338,13 +338,17 @@ export default function InvoiceEditorPage() {
         <div className="m-head">
           <div className="m-head-top">
             <button className="m-back" onClick={() => navigate('/invoices')}>
-              <ArrowLeft size={19} /> Invoices
+              <ArrowLeft size={19} /> Back
             </button>
-            <Badge variant={status} />
           </div>
           <h1 className="m-title" style={{ marginTop: 6 }}>
-            {invoiceNumber || 'New invoice'}
+            {isNew ? 'New invoice' : 'Edit invoice'}
           </h1>
+          {!isNew && invoiceNumber && (
+            <p className="m-sub">
+              {invoiceNumber}{billTo.name ? ` · ${billTo.name}` : ''}
+            </p>
+          )}
         </div>
       </div>
 
@@ -524,48 +528,53 @@ export default function InvoiceEditorPage() {
               {/* Mobile cards */}
               <div className={styles.lineItemsMobile}>
                 {lineItems.map((item, idx) => (
-                  <div key={item.id} className={styles.lineItemCard}>
-                    <div className={styles.lineItemCardHeader}>
-                      <input
-                        className={styles.lineItemCardTitle}
-                        placeholder="Item name"
-                        value={item.item}
-                        onChange={e => updateItem(idx, 'item', e.target.value)}
-                      />
-                      <button className={styles.dupBtn} onClick={() => duplicateItem(idx)} aria-label="Duplicate item" title="Duplicate">
-                        <Copy size={14} />
-                      </button>
-                      <button className={styles.removeBtn} onClick={() => removeItem(idx)} disabled={lineItems.length === 1} aria-label="Remove item">
-                        <Trash size={14} />
+                  <div key={item.id} className={styles.liCard}>
+                    <div className={styles.liCardHead}>
+                      <span className={styles.liCardNum}>Item {idx + 1}</span>
+                      <button
+                        className={styles.removeBtn}
+                        onClick={() => removeItem(idx)}
+                        disabled={lineItems.length === 1}
+                        aria-label="Remove item"
+                      >
+                        <Trash size={16} />
                       </button>
                     </div>
-                    <textarea
-                      className={styles.lineItemCardDesc}
-                      placeholder="Description (optional)"
-                      value={item.description}
-                      onChange={e => updateItem(idx, 'description', e.target.value)}
-                      rows={2}
+                    <input
+                      className={styles.liCardTitle}
+                      placeholder="Item name"
+                      value={item.item}
+                      onChange={e => updateItem(idx, 'item', e.target.value)}
                     />
-                    <div className={styles.lineItemCardMeta}>
-                      <div className={styles.lineItemCardField}>
-                        <label className={styles.lineItemCardLabel}>Date</label>
-                        <input className={styles.lineItemCardInput} type="date" value={item.date} onChange={e => updateItem(idx, 'date', e.target.value)} />
+                    <div className={styles.liCardRow2}>
+                      <div className={styles.liCardField}>
+                        <label className={styles.liCardLabel}>Qty</label>
+                        <input
+                          className={styles.liCardInput}
+                          type="number" min="0" step="0.5" placeholder="0"
+                          value={item.hours}
+                          onChange={e => updateItem(idx, 'hours', e.target.value)}
+                        />
                       </div>
-                      <div className={styles.lineItemCardField}>
-                        <label className={styles.lineItemCardLabel}>Hours</label>
-                        <input className={styles.lineItemCardInput} type="number" min="0" step="0.5" placeholder="0" value={item.hours} onChange={e => updateItem(idx, 'hours', e.target.value)} />
+                      <div className={styles.liCardField}>
+                        <label className={styles.liCardLabel}>Rate</label>
+                        <input
+                          className={styles.liCardInput}
+                          type="number" min="0" placeholder="50"
+                          value={item.rate}
+                          onChange={e => updateItem(idx, 'rate', e.target.value)}
+                        />
                       </div>
-                      <div className={styles.lineItemCardField}>
-                        <label className={styles.lineItemCardLabel}>Rate ($)</label>
-                        <input className={styles.lineItemCardInput} type="number" min="0" placeholder="50" value={item.rate} onChange={e => updateItem(idx, 'rate', e.target.value)} />
-                      </div>
-                      <div className={styles.lineItemCardField}>
-                        <label className={styles.lineItemCardLabel}>Amount</label>
-                        <span className={styles.lineItemCardAmount}>{fmt(item.amount)}</span>
-                      </div>
+                    </div>
+                    <div className={styles.liCardAmountRow}>
+                      <span className={styles.liCardAmountLabel}>Amount</span>
+                      <span className={styles.liCardAmount}>{fmt(item.amount)}</span>
                     </div>
                   </div>
                 ))}
+                <button className={styles.liCardAdd} onClick={addItem} type="button">
+                  <Plus size={18} /> Add item
+                </button>
               </div>
             </CardBody>
           </Card>
@@ -574,47 +583,80 @@ export default function InvoiceEditorPage() {
           <Card className={styles.section}>
             <CardHeader title="Totals & options" />
             <CardBody>
-              <div className={styles.togglesRow}>
-                <label className={styles.toggle}>
-                  <input type="checkbox" checked={showDiscount} onChange={e => setShowDiscount(e.target.checked)} />
-                  <span>Discount</span>
-                </label>
-                <label className={styles.toggle}>
-                  <input type="checkbox" checked={showTax} onChange={e => setShowTax(e.target.checked)} />
-                  <span>Tax</span>
-                </label>
-                <label className={styles.toggle}>
-                  <input type="checkbox" checked={showNotes} onChange={e => setShowNotes(e.target.checked)} />
-                  <span>Notes / terms</span>
-                </label>
+
+              {/* Desktop checkboxes */}
+              <div className={styles.desktopToggles}>
+                <div className={styles.togglesRow}>
+                  <label className={styles.toggle}>
+                    <input type="checkbox" checked={showDiscount} onChange={e => setShowDiscount(e.target.checked)} />
+                    <span>Discount</span>
+                  </label>
+                  <label className={styles.toggle}>
+                    <input type="checkbox" checked={showTax} onChange={e => setShowTax(e.target.checked)} />
+                    <span>Tax</span>
+                  </label>
+                  <label className={styles.toggle}>
+                    <input type="checkbox" checked={showNotes} onChange={e => setShowNotes(e.target.checked)} />
+                    <span>Notes / terms</span>
+                  </label>
+                </div>
+                {showDiscount && (
+                  <div className={styles.row2} style={{ marginTop: 'var(--space-4)' }}>
+                    <div className={styles.field}>
+                      <label className={styles.label}>Discount type</label>
+                      <select className={styles.selectField} value={discountType} onChange={e => setDiscountType(e.target.value)}>
+                        <option value="fixed">Fixed ($)</option>
+                        <option value="percent">Percent (%)</option>
+                      </select>
+                    </div>
+                    <Input label="Discount value" type="number" min="0" value={discountValue} onChange={e => setDiscountValue(e.target.value)} />
+                  </div>
+                )}
+                {showTax && (
+                  <div className={styles.taxWrap}>
+                    <Input label="Tax rate (%)" type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e => setTaxRate(e.target.value)} />
+                    {suggestedRate !== undefined && suggestedRate !== parseFloat(taxRate) && (
+                      <button className={styles.stateTaxHint} onClick={() => setTaxRate(suggestedRate)}>
+                        Use {stateKey} state rate: {suggestedRate}%
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {showDiscount && (
-                <div className={styles.row2} style={{ marginTop: 'var(--space-4)' }}>
-                  <div className={styles.field}>
-                    <label className={styles.label}>Discount type</label>
-                    <select className={styles.selectField} value={discountType} onChange={e => setDiscountType(e.target.value)}>
-                      <option value="fixed">Fixed ($)</option>
-                      <option value="percent">Percent (%)</option>
-                    </select>
+              {/* Mobile iOS toggles */}
+              <div className={styles.mobileToggles}>
+                <div className={styles.mToggleRow}>
+                  <div className={styles.mToggleMain}>
+                    <div className={styles.mToggleT}>Add tax</div>
+                    <div className={styles.mToggleD}>Apply a tax rate to the subtotal</div>
                   </div>
-                  <Input label="Discount value" type="number" min="0" value={discountValue} onChange={e => setDiscountValue(e.target.value)} />
+                  <label className={styles.iosSwitch}>
+                    <input type="checkbox" checked={showTax} onChange={e => setShowTax(e.target.checked)} />
+                    <span className={styles.iosSlider} />
+                  </label>
                 </div>
-              )}
-
-              {showTax && (
-                <div className={styles.taxWrap}>
-                  <Input label="Tax rate (%)" type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e => setTaxRate(e.target.value)} />
-                  {suggestedRate !== undefined && suggestedRate !== parseFloat(taxRate) && (
-                    <button
-                      className={styles.stateTaxHint}
-                      onClick={() => setTaxRate(suggestedRate)}
-                    >
-                      Use {stateKey} state rate: {suggestedRate}%
-                    </button>
-                  )}
+                {showTax && (
+                  <div className={styles.mTaxInput}>
+                    <Input label="Tax rate (%)" type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e => setTaxRate(e.target.value)} />
+                    {suggestedRate !== undefined && suggestedRate !== parseFloat(taxRate) && (
+                      <button className={styles.stateTaxHint} onClick={() => setTaxRate(suggestedRate)}>
+                        Use {stateKey} state rate: {suggestedRate}%
+                      </button>
+                    )}
+                  </div>
+                )}
+                <div className={styles.mToggleRow}>
+                  <div className={styles.mToggleMain}>
+                    <div className={styles.mToggleT}>Notes & terms</div>
+                    <div className={styles.mToggleD}>Show a note on the invoice</div>
+                  </div>
+                  <label className={styles.iosSwitch}>
+                    <input type="checkbox" checked={showNotes} onChange={e => setShowNotes(e.target.checked)} />
+                    <span className={styles.iosSlider} />
+                  </label>
                 </div>
-              )}
+              </div>
 
               <div className={styles.totalsSummary}>
                 <div className={styles.totalRow}><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
