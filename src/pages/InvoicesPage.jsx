@@ -212,7 +212,7 @@ export default function InvoicesPage() {
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
-                  <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className="m-row">
+                  <Link key={inv.id} to={`/invoices/${inv.id}/preview`} className="m-row">
                     <MiniAvatar name={clientName} />
                     <div className="m-row-main">
                       <div className="m-row-title">{clientName}</div>

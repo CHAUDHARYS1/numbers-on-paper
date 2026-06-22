@@ -26,11 +26,10 @@ const STATE_TAX_RATES = {
 
 // ── Notes quick-fill templates ────────────────────────────────────
 const NOTE_SNIPPETS = [
-  { label: 'Net 30',         text: 'Payment is due within 30 days of the invoice date. Thank you for your business!' },
-  { label: 'Net 15',         text: 'Payment is due within 15 days. A 1.5% monthly fee applies to balances past due.' },
-  { label: 'Due on receipt', text: 'Payment is due upon receipt of this invoice.' },
-  { label: '50% deposit',    text: 'A 50% deposit is required before work begins. The remaining balance is due upon project completion.' },
-  { label: 'IP transfer',    text: 'All intellectual property and deliverables transfer to the client upon receipt of full payment. Additional revisions beyond the agreed scope are billed at the standard hourly rate.' },
+  { label: 'Net 14',       text: 'Payment is due within 14 days of the invoice date. Thank you for your business!' },
+  { label: 'Net 30',       text: 'Payment is due within 30 days of the invoice date. Thank you for your business!' },
+  { label: 'On receipt',   text: 'Payment is due upon receipt of this invoice.' },
+  { label: '50% deposit',  text: 'A 50% deposit is required before work begins. The remaining balance is due upon project completion.' },
 ]
 
 // ── Auto-growing textarea ─────────────────────────────────────────
@@ -408,34 +407,56 @@ export default function InvoiceEditorPage() {
           <Card className={styles.section}>
             <CardHeader title="Bill to" />
             <CardBody>
-              <div className={styles.stack}>
-                <ClientSelect clients={clients} value={clientId} onChange={handleClientSelect} />
-                <Input label="Client name"   placeholder="Full name"              value={billTo.name}         onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
-                <Input label="Organization"  placeholder="Company or organization" value={billTo.organization}  onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
-                <Input label="Address"       placeholder="Street address"          value={billTo.address}       onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
-                <div className={styles.row3}>
-                  <Input label="City"  value={billTo.city}  onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
-                  <Input label="State" value={billTo.state} onChange={e => setBillTo(p => ({...p, state: e.target.value}))} />
-                  <Input label="ZIP"   value={billTo.zip}   onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
+
+              {/* Mobile: simplified fields */}
+              <div className={styles.billToMobile}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Saved client</label>
+                  <ClientSelect clients={clients} value={clientId} onChange={handleClientSelect} />
+                  <span className={styles.clientHint}>Pick to autofill, or type a new one below.</span>
                 </div>
+                <Input label="Client name" placeholder="Full name" value={billTo.name} onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
                 <div className={styles.row2}>
-                  <Input label="Contact name"  placeholder="Jane Smith"        value={billTo.contact_name  || ''} onChange={e => setBillTo(p => ({...p, contact_name: e.target.value}))} />
-                  <Input label="Contact title" placeholder="Project Manager"   value={billTo.contact_title || ''} onChange={e => setBillTo(p => ({...p, contact_title: e.target.value}))} />
+                  <Input label="Contact" placeholder="Contact name" value={billTo.contact_name || ''} onChange={e => setBillTo(p => ({...p, contact_name: e.target.value}))} />
+                  <Input label="City" value={billTo.city} onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
                 </div>
-                <Input label="Contact email" type="email" placeholder="jane@company.com" value={billTo.contact_email || ''} onChange={e => setBillTo(p => ({...p, contact_email: e.target.value}))} />
-                {billTo.name?.trim() && (
-                  <Button variant="secondary" size="sm" icon={<UserCheck size={14} />} loading={savingClient} onClick={handleSaveClient}>
-                    {clientId ? 'Update client' : 'Save as client'}
-                  </Button>
-                )}
+                <Input label="Email" type="email" placeholder="jane@company.com" value={billTo.contact_email || ''} onChange={e => setBillTo(p => ({...p, contact_email: e.target.value}))} />
               </div>
+
+              {/* Desktop: all fields */}
+              <div className={styles.billToDesktop}>
+                <div className={styles.stack}>
+                  <ClientSelect clients={clients} value={clientId} onChange={handleClientSelect} />
+                  <Input label="Client name"   placeholder="Full name"              value={billTo.name}         onChange={e => setBillTo(p => ({...p, name: e.target.value}))} />
+                  <Input label="Organization"  placeholder="Company or organization" value={billTo.organization}  onChange={e => setBillTo(p => ({...p, organization: e.target.value}))} />
+                  <Input label="Address"       placeholder="Street address"          value={billTo.address}       onChange={e => setBillTo(p => ({...p, address: e.target.value}))} />
+                  <div className={styles.row3}>
+                    <Input label="City"  value={billTo.city}  onChange={e => setBillTo(p => ({...p, city: e.target.value}))} />
+                    <Input label="State" value={billTo.state} onChange={e => setBillTo(p => ({...p, state: e.target.value}))} />
+                    <Input label="ZIP"   value={billTo.zip}   onChange={e => setBillTo(p => ({...p, zip: e.target.value}))} />
+                  </div>
+                  <div className={styles.row2}>
+                    <Input label="Contact name"  placeholder="Jane Smith"      value={billTo.contact_name  || ''} onChange={e => setBillTo(p => ({...p, contact_name: e.target.value}))} />
+                    <Input label="Contact title" placeholder="Project Manager" value={billTo.contact_title || ''} onChange={e => setBillTo(p => ({...p, contact_title: e.target.value}))} />
+                  </div>
+                  <Input label="Contact email" type="email" placeholder="jane@company.com" value={billTo.contact_email || ''} onChange={e => setBillTo(p => ({...p, contact_email: e.target.value}))} />
+                  {billTo.name?.trim() && (
+                    <Button variant="secondary" size="sm" icon={<UserCheck size={14} />} loading={savingClient} onClick={handleSaveClient}>
+                      {clientId ? 'Update client' : 'Save as client'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
             </CardBody>
           </Card>
 
           {/* Line Items */}
           <Card className={styles.section}>
             <CardHeader title="Line items" action={
-              <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addItem}>Add item</Button>
+              <span className={styles.lineItemsAddDesktop}>
+                <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addItem}>Add item</Button>
+              </span>
             } />
             <CardBody style={{ padding: 0 }}>
 
@@ -712,7 +733,7 @@ export default function InvoiceEditorPage() {
           onClick={handleSave}
           disabled={saving}
         >
-          <FloppyDisk size={18} /> {saving ? 'Saving…' : isNew ? 'Save invoice' : 'Save changes'}
+          <FloppyDisk size={18} /> {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
 
