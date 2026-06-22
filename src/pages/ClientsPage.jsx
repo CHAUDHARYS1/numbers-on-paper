@@ -151,6 +151,24 @@ function ClientDetailSheet({ client, onClose }) {
             </div>
           )}
         </div>
+
+        {/* Actions */}
+        <div style={{ padding: '0 18px 28px', display: 'flex', gap: 10 }}>
+          <Link
+            to={`/clients/${client.id}/invoices`}
+            className="m-btn m-btn--ghost"
+            style={{ flex: 1 }}
+          >
+            View invoices
+          </Link>
+          <Link
+            to={`/invoices/new?client=${client.id}`}
+            className="m-btn m-btn--primary"
+            style={{ flex: 1 }}
+          >
+            <Plus size={16} weight="bold" /> New invoice
+          </Link>
+        </div>
       </div>
     </>
   )
@@ -433,7 +451,7 @@ export default function ClientsPage() {
                 </div>
                 <div className={styles.cardActions}>
                   <Link to={`/invoices/new?client=${c.id}`} className={styles.cardBtn}><Plus size={13} /> Invoice</Link>
-                  <Link to={`/invoices?client=${c.id}`} className={styles.cardBtn}>View invoices</Link>
+                  <Link to={`/clients/${c.id}/invoices`} className={styles.cardBtn}>View invoices</Link>
                 </div>
               </div>
             ))}
