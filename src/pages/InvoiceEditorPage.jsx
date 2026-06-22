@@ -125,6 +125,9 @@ export default function InvoiceEditorPage() {
   const toast     = useToast()
   const isNew     = !id
   const duplicate = location.state?.duplicate ?? null
+  const presetClientId = isNew && !duplicate
+    ? new URLSearchParams(location.search).get('client')
+    : null
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
@@ -258,6 +261,24 @@ export default function InvoiceEditorPage() {
       return updated
     }))
   }
+
+  useEffect(() => {
+    if (!presetClientId || !clients.length) return
+    const c = clients.find(cl => cl.id === presetClientId)
+    if (!c) return
+    setClientId(c.id)
+    setBillTo({
+      name:          c.name,
+      organization:  c.organization || '',
+      address:       c.address_line1 || '',
+      city:          c.city || '',
+      state:         c.state || '',
+      zip:           c.zip || '',
+      contact_name:  c.contact_name || '',
+      contact_title: c.contact_title || '',
+      contact_email: c.contact_email || '',
+    })
+  }, [presetClientId, clients])
 
   // ── Client helpers ────────────────────────────────────────────
 
