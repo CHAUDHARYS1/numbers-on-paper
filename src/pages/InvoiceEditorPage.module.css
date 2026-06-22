@@ -455,14 +455,15 @@
   overflow-y: auto;
 }
 
+/* mobile/desktop preview content split */
+.previewMobile  { display: none; }
+.previewDesktop { display: block; }
+
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .row2 { grid-template-columns: 1fr; }
   .row3 { grid-template-columns: 1fr; }
   .taxWrap { max-width: 100%; }
-  .previewBackdrop { padding: var(--space-4) 0; align-items: flex-end; }
-  .previewModal { border-radius: var(--radius-xl) var(--radius-xl) 0 0; margin-bottom: 0; }
-  .previewModalBody { padding: var(--space-4); }
 }
 
 /* ── Bill to mobile/desktop split ──────────────────────────────── */
@@ -480,12 +481,12 @@
 
 /* ── New line item mobile cards ────────────────────────────────── */
 .liCard {
-  display: flex; flex-direction: column; gap: var(--space-3);
-  padding: var(--space-4);
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px;
   border: 1px solid var(--line-soft);
   border-radius: 12px;
   background: var(--paper-2);
-  margin-bottom: var(--space-3);
+  margin-bottom: 10px;
 }
 .liCardHead {
   display: flex; align-items: center; justify-content: space-between;
@@ -602,11 +603,52 @@
   /* formCol: side padding so cards don't go edge-to-edge */
   .formCol { padding-left: 16px; padding-right: 16px; }
 
+  /* Preview modal → native bottom sheet on mobile */
+  .previewBackdrop {
+    padding: 0;
+    align-items: flex-end;
+    background: rgba(0,0,0,.45);
+  }
+  .previewModal {
+    border-radius: 24px 24px 0 0;
+    margin-bottom: 0;
+    max-height: 90dvh;
+    animation: previewSheetUp .32s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  @keyframes previewSheetUp {
+    from { transform: translateY(100%); }
+    to   { transform: none; }
+  }
+  .previewModalHeader {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 18px 14px;
+  }
+  .previewModalTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: -.01em;
+  }
+  .previewModalClose {
+    width: 36px; height: 36px;
+    color: var(--ink-3);
+  }
+  .previewModalClose:hover { background: var(--paper-2); }
+  .previewModalBody {
+    padding: 18px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+  .previewMobile  { display: block; }
+  .previewDesktop { display: none; }
+
   /* selectField: taller + rounder on mobile */
   .selectField { height: 50px; border-radius: 12px; font-size: 16px; }
 
   /* lineItemsMobile: padding inside the card */
-  .lineItemsMobile { padding: 16px; }
+  .lineItemsMobile { padding: 12px; }
 
   /* Totals summary: full-width on mobile */
   .totalsSummary { width: 100%; min-width: 0; margin-left: 0; align-items: stretch; }

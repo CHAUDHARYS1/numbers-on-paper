@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import InvoicePreview from '@/components/invoice/InvoicePreview'
+import MobileInvoiceDoc from '@/components/invoice/MobileInvoiceDoc'
 import ClientSelect from '@/components/invoice/ClientSelect'
 import styles from './InvoiceEditorPage.module.css'
 
@@ -757,7 +758,12 @@ export default function InvoiceEditorPage() {
               </button>
             </div>
             <div className={styles.previewModalBody}>
-              <InvoicePreview data={invoiceData} />
+              <div className={styles.previewMobile}>
+                <MobileInvoiceDoc invoice={invoiceData} />
+              </div>
+              <div className={styles.previewDesktop}>
+                <InvoicePreview data={invoiceData} />
+              </div>
             </div>
           </div>
         </div>,
