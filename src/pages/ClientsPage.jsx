@@ -75,6 +75,83 @@ function AddClientModal({ onClose, onSave }) {
   )
 }
 
+/* Mobile client detail bottom sheet */
+function ClientDetailSheet({ client, onClose }) {
+  const colors = ['#2563EB','#15803d','#7c3aed','#c2410c','#be185d','#0f766e']
+  const color = colors[(client.name || '').split('').reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length]
+  const initials = (client.name || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
+
+  return (
+    <>
+      <div className="m-scrim" onClick={onClose} />
+      <div className="m-sheet" role="dialog" aria-modal="true" aria-label={client.name}>
+        <div className="m-sheet-grip" />
+
+        {/* Header */}
+        <div className="m-cdet-head">
+          <div className="m-cdet-ava" style={{ background: color }}>{initials}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="m-cdet-name">{client.name}</div>
+            {client.city && <div className="m-cdet-city">{client.city}</div>}
+          </div>
+          <button className="m-iconbtn m-iconbtn--ghost" onClick={onClose} aria-label="Close">
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="m-cdet-stats">
+          <div className="m-stat" style={{ padding: '12px 10px', textAlign: 'center' }}>
+            <div className="m-stat-val" style={{ fontSize: 18 }}>{client.count}</div>
+            <div className="m-stat-lbl">Invoices</div>
+          </div>
+          <div className="m-stat" style={{ padding: '12px 10px', textAlign: 'center' }}>
+            <div className="m-stat-val" style={{ fontSize: 18 }}>{fmt0(client.billed)}</div>
+            <div className="m-stat-lbl">Billed</div>
+          </div>
+          <div className="m-stat" style={{ padding: '12px 10px', textAlign: 'center' }}>
+            <div className="m-stat-val" style={{ fontSize: 18, color: client.outstanding ? 'var(--amber)' : 'var(--ink)' }}>
+              {fmt0(client.outstanding)}
+            </div>
+            <div className="m-stat-lbl">Due</div>
+          </div>
+        </div>
+
+        {/* Contact rows */}
+        <div className="m-cdet-rows">
+          {client.contact && (
+            <div className="m-cdet-row">
+              <div className="m-cdet-row-ic"><User size={17} /></div>
+              <div>
+                <div className="m-cdet-row-v">{client.contact}</div>
+                <div className="m-cdet-row-l">Primary contact</div>
+              </div>
+            </div>
+          )}
+          {client.email && (
+            <a href={`mailto:${client.email}`} className="m-cdet-row m-cdet-row--link">
+              <div className="m-cdet-row-ic"><EnvelopeSimple size={17} /></div>
+              <div style={{ minWidth: 0 }}>
+                <div className="m-cdet-row-v" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{client.email}</div>
+                <div className="m-cdet-row-l">Email</div>
+              </div>
+            </a>
+          )}
+          {client.city && !client.contact && !client.email && (
+            <div className="m-cdet-row">
+              <div className="m-cdet-row-ic"><MapPin size={17} /></div>
+              <div>
+                <div className="m-cdet-row-v">{client.city}</div>
+                <div className="m-cdet-row-l">Location</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
 /* Mobile add-client bottom sheet */
 function MobileAddSheet({ onClose, onSave }) {
   const [draft, setDraft] = useState({ name: '', contact: '', email: '', city: '' })
@@ -133,9 +210,10 @@ export default function ClientsPage() {
   const toast    = useToast()
   const [invoices,  setInvoices]  = useState([])
   const [clients,   setClients]   = useState([])
-  const [search,    setSearch]    = useState('')
-  const [addOpen,   setAddOpen]   = useState(false)
-  const [loading,   setLoading]   = useState(true)
+  const [search,          setSearch]          = useState('')
+  const [addOpen,         setAddOpen]         = useState(false)
+  const [selectedClient,  setSelectedClient]  = useState(null)
+  const [loading,         setLoading]         = useState(true)
 
   useEffect(() => {
     if (!user) return
@@ -244,7 +322,7 @@ export default function ClientsPage() {
           ) : (
             <div className="m-list m-card">
               {view.map(c => (
-                <div key={c.id} className="m-row" style={{ cursor: 'default' }}>
+                <div key={c.id} className="m-row" onClick={() => setSelectedClient(c)} style={{ cursor: 'pointer' }}>
                   <MiniAvatar name={c.name} />
                   <div className="m-row-main">
                     <div className="m-row-title">{c.name}</div>
@@ -264,6 +342,7 @@ export default function ClientsPage() {
         </div>
 
         {addOpen && <MobileAddSheet onClose={() => setAddOpen(false)} onSave={handleSave} />}
+        {selectedClient && <ClientDetailSheet client={selectedClient} onClose={() => setSelectedClient(null)} />}
       </div>
 
       {/* ── Desktop layout ──────────────────────────────────────── */}
