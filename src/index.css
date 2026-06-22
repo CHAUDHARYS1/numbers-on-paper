@@ -1,4 +1,5 @@
 @import './styles/mobile.css';
+@import './styles/proposals.css';
 
 /* ─── Design tokens ──────────────────────────────────────────────── */
 :root {
@@ -247,9 +248,11 @@ input, textarea, select { font-family: var(--font-body); }
 
 /* ─── Print ──────────────────────────────────────────────────────── */
 @media print {
-  body * { visibility: hidden; }
-  #invoice-print, #invoice-print * { visibility: visible; }
-  #invoice-print {
+  /* Invoice print (scoped so it doesn't conflict with proposal print) */
+  body:not(.proposal-print) * { visibility: hidden; }
+  body:not(.proposal-print) #invoice-print,
+  body:not(.proposal-print) #invoice-print * { visibility: visible; }
+  body:not(.proposal-print) #invoice-print {
     position: absolute; top: 0; left: 0; width: 100%;
     box-shadow: none !important; border: none !important;
     border-radius: 0 !important; padding: 12mm !important; font-size: 11pt !important;

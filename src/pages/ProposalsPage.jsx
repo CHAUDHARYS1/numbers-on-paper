@@ -84,9 +84,9 @@ export default function ProposalsPage() {
                   className={styles.row}
                   onClick={() => navigate(`/proposals/${p.id}/edit`)}
                 >
-                  <td className={styles.mono}>PRO-{String(p.proposal_no).padStart(4, '0')}</td>
+                  <td className={styles.mono}>PROP-{String(p.proposal_no).padStart(4, '0')}</td>
                   <td className={styles.bold}>{p.data?.title || 'Untitled'}</td>
-                  <td>{p.data?.clientCompany || p.data?.clientName || '—'}</td>
+                  <td>{p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || '—'}</td>
                   <td>{new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   <td className={styles.actionsCell}>
                     <button

@@ -1,216 +1,212 @@
-import styles from './ProposalPreview.module.css'
+/* Proposal paper document — pure presentational.
+   Uses global .pp-* / .ps-* classes from proposals.css. */
 
-const fmt = (n) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0)
+const fmt = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0)
+const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
 
-export default function ProposalPreview({ data, computed }) {
-  const { subtotal, afterDiscount, tax, total, stageTotal } = computed
+const STATUS_MAP = {
+  draft:    'draft',
+  sent:     'sent',
+  accepted: 'accepted',
+  declined: 'declined',
+}
+
+function StatusBadge({ status }) {
+  const key = STATUS_MAP[status] || 'draft'
+  const labels = { draft: 'Draft', sent: 'Sent', accepted: 'Accepted', declined: 'Declined' }
+  return <span className={`prop-badge prop-badge--${key}`}>{labels[key]}</span>
+}
+
+export default function ProposalDoc({ data }) {
+  const d = data || {}
+  const sec = d.sections || {}
+  const bf = d.preparedBy || {}
+  const bt = d.preparedFor || {}
+  const items = d.items || []
+
+  // Build ordered list of enabled + non-empty sections (keeps numbering sequential)
+  const blocks = []
+
+  if (sec.intro && (d.introText || '').trim()) {
+    blocks.push({ key: 'intro', title: 'Introduction', body: (
+      <p className="ps-text">{d.introText}</p>
+    )})
+  }
+
+  if (sec.scope && ((d.scopeText || '').trim() || (d.objectives || []).some(o => o.trim()))) {
+    blocks.push({ key: 'scope', title: 'Scope of work', body: (
+      <div className="stack" style={{ gap: 'var(--space-5)' }}>
+        {(d.scopeText || '').trim() && <p className="ps-text">{d.scopeText}</p>}
+        {(d.objectives || []).filter(o => o.trim()).length > 0 && (
+          <ul className="ps-list ps-list--num">
+            {d.objectives.filter(o => o.trim()).map((o, i) => (
+              <li key={i}>
+                <span className="ps-list-n">{String(i + 1).padStart(2, '0')}</span>
+                <span>{o}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )})
+  }
+
+  if (sec.deliverables && (d.deliverables || []).some(x => x.trim())) {
+    blocks.push({ key: 'deliverables', title: 'Deliverables', body: (
+      <ul className="ps-list ps-list--check">
+        {d.deliverables.filter(x => x.trim()).map((x, i) => (
+          <li key={i}>
+            <svg aria-hidden="true" viewBox="0 0 256 256" width="18" height="18" fill="none"
+              stroke="currentColor" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="128" cy="128" r="96" />
+              <polyline points="88,136 112,160 168,96" />
+            </svg>
+            <span>{x}</span>
+          </li>
+        ))}
+      </ul>
+    )})
+  }
+
+  if (sec.investment) {
+    blocks.push({ key: 'investment', title: 'Investment', body: (
+      <>
+        <table className="pp-table">
+          <thead>
+            <tr>
+              <th style={{ width: '52%' }}>Description</th>
+              <th className="pp-num-cell">Qty</th>
+              <th className="pp-num-cell">Rate</th>
+              <th className="pp-num-cell">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.length === 0 ? (
+              <tr><td colSpan={4} style={{ color: '#94A3B8', padding: '20px 0' }}>No line items yet.</td></tr>
+            ) : items.map((it, i) => (
+              <tr key={i}>
+                <td>
+                  <div className="pp-item">{it.description || '—'}</div>
+                  {it.note ? <div className="pp-desc">{it.note}</div> : null}
+                </td>
+                <td className="pp-num-cell">{it.qty}</td>
+                <td className="pp-num-cell">{fmt(it.rate)}</td>
+                <td className="pp-num-cell" style={{ fontWeight: 700, color: '#0B1B34' }}>{fmt(it.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="ps-invest-foot">
+          <div className="pp-totals">
+            <div className="pp-total-row"><span>Subtotal</span><span>{fmt(d.subtotal)}</span></div>
+            {d.showTax
+              ? <div className="pp-total-row"><span>Tax ({Math.round((d.taxRate || 0) * 100)}%)</span><span>{fmt(d.taxAmt)}</span></div>
+              : null}
+            <div className="pp-total-row pp-grand"><span>Total</span><span>{fmt(d.total)}</span></div>
+          </div>
+        </div>
+      </>
+    )})
+  }
+
+  if (sec.timeline && (d.timeline || []).some(m => (m.phase || '').trim())) {
+    blocks.push({ key: 'timeline', title: 'Timeline', body: (
+      <div className="ps-timeline">
+        {d.timeline.filter(m => (m.phase || '').trim()).map((m, i) => (
+          <div className="ps-mile" key={i}>
+            <span className="ps-mile-dot" />
+            <div className="ps-mile-phase">{m.phase}</div>
+            <div className="ps-mile-dur">{m.duration || '—'}</div>
+          </div>
+        ))}
+      </div>
+    )})
+  }
+
+  if (sec.terms && (d.termsText || '').trim()) {
+    blocks.push({ key: 'terms', title: 'Terms & conditions', body: (
+      <p className="ps-text ps-text--sm" style={{ whiteSpace: 'pre-wrap' }}>{d.termsText}</p>
+    )})
+  }
+
+  if (sec.acceptance) {
+    blocks.push({ key: 'acceptance', title: 'Acceptance', body: (
+      <>
+        <p className="ps-text ps-text--sm">
+          By signing below, you agree to the scope, investment, and terms outlined in this proposal.
+        </p>
+        <div className="ps-sign">
+          <div className="ps-sign-col">
+            <div className="ps-sign-line" />
+            <div className="ps-sign-lbl">Signature · {bt.name || 'Client'}</div>
+          </div>
+          <div className="ps-sign-col">
+            <div className="ps-sign-line" />
+            <div className="ps-sign-lbl">Date</div>
+          </div>
+        </div>
+      </>
+    )})
+  }
 
   return (
-    <div className={styles.paper} id="proposal-paper">
-      {/* ── Cover top ─────────────────────────── */}
-      <div className={styles.coverTop}>
-        <img src="/sc-design/logo.svg" alt="SC Design" className={styles.coverLogo} />
-        <span className={styles.coverLocation}>★ Chicago, IL</span>
-      </div>
-
-      {/* ── Cover heading ─────────────────────── */}
-      <div className={styles.coverHeading}>
-        {data.kicker && <p className={styles.kicker}>{data.kicker}</p>}
-        <h1 className={styles.docTitle}>{data.title || 'Project Proposal'}</h1>
-      </div>
-
-      {/* ── Meta grid ─────────────────────────── */}
-      <div className={styles.metaSection}>
-        <div className={styles.metaParties}>
-          <div className={styles.metaParty}>
-            <p className={styles.metaLabel}>Prepared for</p>
-            {data.clientName    && <p className={styles.metaValue}>{data.clientName}</p>}
-            {data.clientCompany && <p className={styles.metaValue}>{data.clientCompany}</p>}
-            {data.clientEmail   && <p className={styles.metaMuted}>{data.clientEmail}</p>}
+    <div className="paper" id="proposal-paper">
+      {/* Header: brand + doc block */}
+      <div className="pp-top">
+        <div className="pp-brand">
+          <div className="pp-logo">
+            <img src="/mark/mark-white.svg" alt="" />
           </div>
-          <div className={styles.metaParty}>
-            <p className={styles.metaLabel}>Prepared by</p>
-            {data.fromName    && <p className={styles.metaValue}>{data.fromName}</p>}
-            {data.fromContact && <p className={styles.metaValue}>{data.fromContact}</p>}
-            {data.fromEmail   && <p className={styles.metaMuted}>{data.fromEmail}</p>}
-            {data.fromPhone   && <p className={styles.metaMuted}>{data.fromPhone}</p>}
+          <div>
+            <div className="pp-biz">{bf.name || 'SC Design & Consultation'}</div>
+            <div className="pp-tag">Web Design &amp; Consultation</div>
           </div>
         </div>
-        <div className={styles.metaFacts}>
-          <div className={styles.metaFact}>
-            <p className={styles.metaFactLabel}>Proposal No.</p>
-            <p className={styles.metaFactValue}>
-              {data.proposalNo ? `PRO-${String(data.proposalNo).padStart(4, '0')}` : '—'}
-            </p>
-          </div>
-          <div className={styles.metaFact}>
-            <p className={styles.metaFactLabel}>Date</p>
-            <p className={styles.metaFactValue}>
-              {data.date ? new Date(data.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'}
-            </p>
-          </div>
-          <div className={styles.metaFact}>
-            <p className={styles.metaFactLabel}>Valid for</p>
-            <p className={styles.metaFactValue}>{data.validDays ? `${data.validDays} days` : '—'}</p>
-          </div>
-          <div className={styles.metaFact}>
-            <p className={styles.metaFactLabel}>Timeline</p>
-            <p className={styles.metaFactValue}>{data.timeline || '—'}</p>
-          </div>
+        <div className="pp-doc">
+          <div className="pp-doc-word">Proposal</div>
+          <div className="pp-num">{d.number || 'PROP-0000'}</div>
+          <StatusBadge status={d.status || 'draft'} />
         </div>
       </div>
 
-      {/* ── 01 Project Overview ──────────────── */}
-      {data.overview && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionNum}>01</span>
-            <h2 className={styles.sectionTitle}>Project Overview</h2>
-          </div>
-          <p className={styles.overviewText}>{data.overview}</p>
-        </section>
-      )}
+      {(d.title || '').trim() && <h1 className="ps-title">{d.title}</h1>}
 
-      {/* ── 02 Scope of Work ─────────────────── */}
-      {data.scope?.length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionNum}>02</span>
-            <h2 className={styles.sectionTitle}>Scope of Work</h2>
-          </div>
-          <div className={styles.scopeGroups}>
-            {data.scope.map((grp, gi) => (
-              <div key={gi} className={styles.scopeGroup}>
-                <p className={styles.scopeGroupTitle}>
-                  <span className={styles.scopeBullet} aria-hidden="true" />
-                  {grp.title}
-                </p>
-                <ul className={styles.scopeItems}>
-                  {grp.items?.map((item, ii) => (
-                    <li key={ii} className={styles.scopeItem}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <div className="pp-divider" />
 
-      {/* ── 03 Investment ────────────────────── */}
-      {data.items?.length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionNum}>03</span>
-            <h2 className={styles.sectionTitle}>Investment</h2>
+      <div className="pp-meta">
+        <div>
+          <div className="pp-meta-label">Prepared for</div>
+          <div className="pp-meta-val">
+            <strong>{bt.name || '—'}</strong><br />
+            {bt.contact ? <>{bt.contact}<br /></> : null}
+            {bt.city}
           </div>
-          <table className={styles.priceTable}>
-            <thead>
-              <tr>
-                <th className={styles.colDesc}>Description</th>
-                <th className={styles.colNum}>Qty</th>
-                <th className={styles.colNum}>Rate</th>
-                <th className={styles.colAmt}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((item, i) => (
-                <tr key={i}>
-                  <td className={styles.descCell}>
-                    <span className={styles.descMain}>{item.desc}</span>
-                    {item.sub && <span className={styles.descSub}>{item.sub}</span>}
-                  </td>
-                  <td className={styles.numCell}>{item.qty ?? 1}</td>
-                  <td className={styles.numCell}>{fmt(item.rate)}</td>
-                  <td className={styles.amtCell}>{fmt((item.qty || 0) * (item.rate || 0))}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className={styles.totalsBox}>
-            <div className={styles.totalRow}>
-              <span>Subtotal</span>
-              <span>{fmt(subtotal)}</span>
-            </div>
-            {data.discount > 0 && (
-              <div className={styles.totalRow}>
-                <span>Discount</span>
-                <span className={styles.discountAmt}>−{fmt(data.discount)}</span>
-              </div>
-            )}
-            {data.taxOn && (
-              <div className={styles.totalRow}>
-                <span>Tax ({data.taxRate ?? 0}%)</span>
-                <span>{fmt(tax)}</span>
-              </div>
-            )}
-            <div className={styles.grandTotalChip}>
-              <span className={styles.grandTotalLabel}>
-                <span className={styles.usdTag}>USD</span> Total
-              </span>
-              <span className={styles.grandTotalAmt}>{fmt(total)}</span>
-            </div>
+        </div>
+        <div>
+          <div className="pp-meta-label">Prepared by</div>
+          <div className="pp-meta-val">
+            <strong>{bf.name}</strong><br />
+            {bf.line1 && <>{bf.line1}<br /></>}
+            {bf.line2}
           </div>
-        </section>
-      )}
-
-      {/* ── 04 Payment Schedule ──────────────── */}
-      {data.payment?.length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionNum}>04</span>
-            <h2 className={styles.sectionTitle}>Payment Schedule</h2>
-          </div>
-          {stageTotal !== 100 && (
-            <p className={styles.payWarning}>
-              Stage percentages total {stageTotal}% — must equal 100%.
-            </p>
-          )}
-          <div className={styles.payRows}>
-            {data.payment.map((stage, i) => (
-              <div key={i} className={styles.payRow}>
-                <span className={styles.payIndex}>{String(i + 1).padStart(2, '0')}</span>
-                <span className={styles.payLabel}>{stage.label}</span>
-                <span className={styles.payPct}>{stage.pct ?? 0}%</span>
-                <span className={styles.payAmt}>{fmt(total * (stage.pct || 0) / 100)}</span>
-              </div>
-            ))}
-          </div>
-          {data.payNote && <p className={styles.payNote}>{data.payNote}</p>}
-        </section>
-      )}
-
-      {/* ── 05 Terms & Conditions ────────────── */}
-      {data.terms?.filter(Boolean).length > 0 && (
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <span className={styles.sectionNum}>05</span>
-            <h2 className={styles.sectionTitle}>Terms &amp; Conditions</h2>
-          </div>
-          <ol className={styles.termsList}>
-            {data.terms.filter(Boolean).map((term, i) => (
-              <li key={i} className={styles.termItem}>{term}</li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {/* ── Proposal note ─────────────────────── */}
-      <div className={styles.proposalNote}>
-        This is a proposal, not an invoice. No payment is due until a formal invoice is issued.
+        </div>
+        <div>
+          <div className="pp-meta-label">Date</div>
+          <div className="pp-meta-val"><strong>{fmtDate(d.issue_date)}</strong></div>
+          <div className="pp-meta-label" style={{ marginTop: 'var(--space-4)' }}>Valid until</div>
+          <div className="pp-meta-val"><strong>{fmtDate(d.valid_until)}</strong></div>
+        </div>
       </div>
 
-      {/* ── Footer ────────────────────────────── */}
-      <footer className={styles.footer}>
-        <img src="/sc-design/skyline-navy.svg" alt="" className={styles.skyline} aria-hidden="true" />
-        <div className={styles.footerContent}>
-          <span className={styles.footerStudio}>{data.fromName || 'SC Design & Consultation'}</span>
-          <span className={styles.footerMeta}>
-            {data.proposalNo ? `PRO-${String(data.proposalNo).padStart(4, '0')}` : ''}{data.fromEmail ? ` · ${data.fromEmail}` : ''}
-          </span>
-        </div>
-      </footer>
+      {blocks.map((b, i) => (
+        <section className="ps-sec" key={b.key}>
+          <div className="ps-sec-head">
+            <span className="ps-sec-n">{String(i + 1).padStart(2, '0')}</span>
+            <h2 className="ps-sec-title">{b.title}</h2>
+          </div>
+          <div className="ps-sec-body">{b.body}</div>
+        </section>
+      ))}
     </div>
   )
 }

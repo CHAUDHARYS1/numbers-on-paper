@@ -1,7 +1,7 @@
-import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   SquaresFour, FileText, UsersThree, GearSix,
-  Plus, SignOut, Moon, Sun
+  Scroll, SignOut, Moon, Sun
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -10,17 +10,18 @@ import styles from './AppShell.module.css'
 const NAV_ITEMS = [
   { to: '/dashboard', Icon: SquaresFour, label: 'Dashboard' },
   { to: '/invoices',  Icon: FileText,    label: 'Invoices'  },
+  { to: '/proposals', Icon: Scroll,      label: 'Proposals' },
   { to: '/clients',   Icon: UsersThree,  label: 'Clients'   },
   { to: '/settings',  Icon: GearSix,     label: 'Settings'  },
 ]
 
-/* Mobile tab items: 5 slots — New is the center FAB */
+/* Mobile tab items: 5 regular tabs */
 const MOB_TABS = [
-  { to: '/dashboard', Icon: SquaresFour, label: 'Home',     fab: false },
-  { to: '/invoices',  Icon: FileText,    label: 'Invoices', fab: false },
-  { to: null,         Icon: Plus,        label: 'New',      fab: true  },
-  { to: '/clients',   Icon: UsersThree,  label: 'Clients',  fab: false },
-  { to: '/settings',  Icon: GearSix,     label: 'Settings', fab: false },
+  { to: '/dashboard', Icon: SquaresFour, label: 'Home'      },
+  { to: '/invoices',  Icon: FileText,    label: 'Invoices'  },
+  { to: '/proposals', Icon: Scroll,      label: 'Proposals' },
+  { to: '/clients',   Icon: UsersThree,  label: 'Clients'   },
+  { to: '/settings',  Icon: GearSix,     label: 'Settings'  },
 ]
 
 function Avatar({ name, size = 'md' }) {
@@ -125,37 +126,21 @@ export default function AppShell({ children, bare, title, description, actions, 
 
         {/* Mobile bottom tab bar */}
         <nav className={styles.tabbar} aria-label="Main navigation">
-          {MOB_TABS.map(({ to, Icon, label, fab }) => {
-            if (fab) {
-              return (
-                <Link
-                  key="new"
-                  to="/invoices/new"
-                  className={styles.tabFab}
-                  aria-label="New invoice"
-                >
-                  <span className={styles.tabFabInner}>
-                    <Icon size={28} weight="bold" />
-                  </span>
-                </Link>
-              )
-            }
-            return (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) => [styles.tab, isActive ? styles.tabOn : ''].join(' ')}
-                aria-current={({ isActive }) => isActive ? 'page' : undefined}
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon size={24} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" />
-                    <span>{label}</span>
-                  </>
-                )}
-              </NavLink>
-            )
-          })}
+          {MOB_TABS.map(({ to, Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) => [styles.tab, isActive ? styles.tabOn : ''].join(' ')}
+              aria-current={({ isActive }) => isActive ? 'page' : undefined}
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon size={22} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" />
+                  <span>{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
       </main>
     </div>

@@ -332,13 +332,29 @@ export default function InvoiceEditorPage() {
 
   return (
     <div className={styles.page}>
+
+      {/* ── Mobile header ── */}
+      <div className={styles.mobileHead}>
+        <div className="m-head">
+          <div className="m-head-top">
+            <button className="m-back" onClick={() => navigate('/invoices')}>
+              <ArrowLeft size={19} /> Invoices
+            </button>
+            <Badge variant={status} />
+          </div>
+          <h1 className="m-title" style={{ marginTop: 6 }}>
+            {invoiceNumber || 'New invoice'}
+          </h1>
+        </div>
+      </div>
+
       {duplicate && (
         <div className={styles.duplicateBanner}>
           Duplicated from <strong>{duplicate.invoice_number}</strong> — review and save when ready.
         </div>
       )}
 
-      {/* ── Top bar ── */}
+      {/* ── Top bar (desktop) ── */}
       <div className={styles.topBar}>
         <button className={styles.back} onClick={() => navigate('/invoices')}>
           <ArrowLeft size={16} /> Invoices
@@ -640,6 +656,23 @@ export default function InvoiceEditorPage() {
             </Card>
           )}
         </div>
+
+      {/* ── Mobile bottom action bar ── */}
+      <div className={styles.mobileActionbar}>
+        <button
+          className={`${styles.mActBtn} ${styles.mActGhost}`}
+          onClick={() => setPreviewOpen(true)}
+        >
+          <Eye size={18} /> Preview
+        </button>
+        <button
+          className={`${styles.mActBtn} ${styles.mActPrimary}`}
+          onClick={handleSave}
+          disabled={saving}
+        >
+          <FloppyDisk size={18} /> {saving ? 'Saving…' : isNew ? 'Save invoice' : 'Save changes'}
+        </button>
+      </div>
 
       {previewOpen && createPortal(
         <div

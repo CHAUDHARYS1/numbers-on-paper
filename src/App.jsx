@@ -56,8 +56,8 @@ export default function App() {
       <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute><AppShell title="Clients" description="Everyone you bill, with their history at a glance."><ClientsPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals" element={<PrivateRoute><AppShell title="Proposals" description="Build and send project proposals."><ProposalsPage /></AppShell></PrivateRoute>} />
-      <Route path="/proposals/new"      element={<PrivateRoute><AppShell bare><ProposalEditorPage /></AppShell></PrivateRoute>} />
-      <Route path="/proposals/:id/edit" element={<PrivateRoute><AppShell bare><ProposalEditorPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals/new"      element={<PrivateRoute><AppShell><ProposalEditorPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals/:id/edit" element={<PrivateRoute><AppShell><ProposalEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/time"     element={<PrivateRoute><AppShell title="Time" description="Log hours and convert them to invoice line items."><TimeTrackerPage /></AppShell></PrivateRoute>} />
       <Route path="/settings" element={<PrivateRoute><AppShell title="Settings" description="Manage your business profile, security, and notifications."><SettingsPage /></AppShell></PrivateRoute>} />
 

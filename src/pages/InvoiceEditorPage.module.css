@@ -464,3 +464,42 @@
   .previewModal { border-radius: var(--radius-xl) var(--radius-xl) 0 0; margin-bottom: 0; }
   .previewModalBody { padding: var(--space-4); }
 }
+
+/* ── Mobile chrome ─────────────────────────────────────────────── */
+.mobileHead     { display: none; }
+.mobileActionbar { display: none; }
+
+@media (max-width: 880px) {
+  .topBar { display: none; }
+
+  .mobileHead { display: block; }
+
+  /* Extra padding so content clears the fixed action bar above the tab bar */
+  .formCol {
+    padding-bottom: 80px;
+  }
+
+  .mobileActionbar {
+    display: flex;
+    gap: 10px;
+    position: fixed;
+    left: 0; right: 0;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 35;
+    padding: 12px 18px;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    backdrop-filter: saturate(1.5) blur(14px);
+    border-top: 1px solid var(--line);
+  }
+  .mobileActionbar .mActBtn {
+    flex: 1; height: 50px; border-radius: 12px;
+    font-family: var(--font-body); font-size: 15px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s, opacity .15s; border: 1px solid transparent;
+  }
+  .mobileActionbar .mActBtn:disabled { opacity: .55; cursor: not-allowed; }
+  .mActGhost   { background: var(--card); color: var(--ink); border-color: var(--line) !important; }
+  .mActGhost:hover   { background: var(--paper-2); }
+  .mActPrimary { background: var(--accent); color: #fff; }
+  .mActPrimary:hover { background: var(--accent-2); }
+}

@@ -110,12 +110,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Revenue chart */}
-          <div className="m-card m-card--pad" style={{ marginTop: 12 }}>
-            <div className="m-card-h" style={{ padding: 0, marginBottom: 14 }}>
+          {/* Revenue chart — scrollable so axis labels stay legible */}
+          <div className="m-card" style={{ marginTop: 12, overflow: 'hidden' }}>
+            <div style={{ padding: '18px 18px 10px' }}>
               <h2 className="m-card-title">Revenue</h2>
             </div>
-            <RevenueChart invoices={invoices} height={100} />
+            <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
+              <div style={{ minWidth: 520, padding: '0 18px 18px' }}>
+                <RevenueChart invoices={invoices} />
+              </div>
+            </div>
           </div>
 
           {/* Outstanding list */}
