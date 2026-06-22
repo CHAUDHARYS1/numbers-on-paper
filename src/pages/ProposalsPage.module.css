@@ -186,5 +186,8 @@
   .tableWrap { display: none; }
   .cardList   { display: flex; }
 
+  .propCard { border-radius: 16px; }
+  .propCard:focus-visible { border-radius: 16px; }
+
   .empty { padding: 40px var(--space-5); }
 }
