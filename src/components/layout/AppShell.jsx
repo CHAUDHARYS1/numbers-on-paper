@@ -116,18 +116,16 @@ export default function AppShell({ children, bare, title, description, actions, 
                     {title && <h1 className={styles.pageTitle}>{title}</h1>}
                     {description && <p className={styles.pageDesc}>{description}</p>}
                   </div>
-                  <div className={styles.topbarActions}>
-                    <div className={styles.topbarSearch}>
-                      <MagnifyingGlass size={15} className={styles.topbarSearchIcon} />
-                      <input
-                        className={styles.topbarSearchInput}
-                        type="search"
-                        placeholder="Search…"
-                        aria-label="Search"
-                      />
-                    </div>
-                    {actions}
+                  <div className={styles.topbarSearch}>
+                    <MagnifyingGlass size={15} className={styles.topbarSearchIcon} />
+                    <input
+                      className={styles.topbarSearchInput}
+                      type="search"
+                      placeholder="Search…"
+                      aria-label="Search"
+                    />
                   </div>
+                  {actions && <div className={styles.topbarActions}>{actions}</div>}
                 </div>
               </header>
             )}
