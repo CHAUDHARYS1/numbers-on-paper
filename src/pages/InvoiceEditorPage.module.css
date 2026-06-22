@@ -237,7 +237,7 @@
 .removeBtn:focus-visible { outline: 2px solid var(--color-border-brand); outline-offset: 2px; }
 
 /* ── Line items — mobile cards ─────────────────────────────────── */
-.lineItemsMobile { display: none; }
+.lineItemsMobile { display: none; padding: 0; }
 
 .lineItemCard {
   padding: var(--space-4);
@@ -482,9 +482,9 @@
 .liCard {
   display: flex; flex-direction: column; gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid var(--color-border-default);
-  border-radius: 14px;
-  background: var(--color-bg-subtle);
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: var(--paper-2);
   margin-bottom: var(--space-3);
 }
 .liCardHead {
@@ -595,6 +595,18 @@
 
   /* Cards get rounder corners on mobile */
   .section { border-radius: 14px !important; }
+
+  /* Row2 stays 2-col on mobile (don't collapse the date/status pairs) */
+  .row2 { grid-template-columns: 1fr 1fr; }
+
+  /* formCol: side padding so cards don't go edge-to-edge */
+  .formCol { padding-left: 16px; padding-right: 16px; }
+
+  /* selectField: taller + rounder on mobile */
+  .selectField { height: 50px; border-radius: 12px; font-size: 16px; }
+
+  /* lineItemsMobile: padding inside the card */
+  .lineItemsMobile { padding: 16px; }
 
   /* Totals summary: full-width on mobile */
   .totalsSummary { width: 100%; min-width: 0; margin-left: 0; align-items: stretch; }

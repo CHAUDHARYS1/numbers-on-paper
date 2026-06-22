@@ -30,3 +30,12 @@
   outline-offset: 2px;
   border-color: var(--color-border-brand);
 }
+
+@media (max-width: 880px) {
+  .select {
+    height: 50px;
+    border-radius: 12px;
+    font-size: 16px;
+    background-color: var(--color-bg-surface);
+  }
+}
