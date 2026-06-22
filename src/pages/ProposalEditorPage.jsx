@@ -482,111 +482,7 @@ export default function ProposalEditorPage() {
         {/* ── FORM ───────────────────────────────────────────── */}
         <div className="pe-form">
 
-          {/* 1 · Proposal details */}
-          <section className="card">
-            <div className="card-head"><h2 className="card-title">Proposal details</h2></div>
-            <div className="card-body">
-              <div className="stack">
-                <Field label="Proposal title">
-                  <input
-                    className="fld-input"
-                    value={title}
-                    placeholder="e.g. Website redesign & brand refresh"
-                    onChange={e => setTitle(e.target.value)}
-                  />
-                </Field>
-                <div className="row2">
-                  <Field label="Proposal number">
-                    <input
-                      className="fld-input fld-mono"
-                      value={proposalNo ? `PROP-${String(proposalNo).padStart(4, '0')}` : 'Unsaved'}
-                      readOnly
-                    />
-                  </Field>
-                  <Field label="Status">
-                    <select className="fld-select" value={status} onChange={e => setStatus(e.target.value)}>
-                      <option value="draft">Draft</option>
-                      <option value="sent">Sent</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="declined">Declined</option>
-                    </select>
-                  </Field>
-                </div>
-                <div className="row2">
-                  <Field label="Date">
-                    <input className="fld-input fld-mono" type="date" value={issue} onChange={e => setIssue(e.target.value)} />
-                  </Field>
-                  <Field label="Valid until">
-                    <input className="fld-input fld-mono" type="date" value={valid} onChange={e => setValid(e.target.value)} />
-                  </Field>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 2 · Prepared for */}
-          <section className="card">
-            <div className="card-head"><h2 className="card-title">Prepared for</h2></div>
-            <div className="card-body">
-              <div className="stack">
-                {clients.length > 0 && (
-                  <Field label="Autofill from saved clients">
-                    <select
-                      className="fld-select"
-                      value={clientId}
-                      onChange={e => handleClientSelect(e.target.value)}
-                    >
-                      <option value="">— Select a client —</option>
-                      {clients.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.organization ? `${c.name} — ${c.organization}` : c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                )}
-                <div className="row2">
-                  <Field label="Client name">
-                    <input
-                      className="fld-input"
-                      placeholder="Company or person"
-                      value={client.name}
-                      onChange={e => setClientField('name', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Contact">
-                    <input
-                      className="fld-input"
-                      placeholder="Jane Smith"
-                      value={client.contact}
-                      onChange={e => setClientField('contact', e.target.value)}
-                    />
-                  </Field>
-                </div>
-                <div className="row2">
-                  <Field label="Email">
-                    <input
-                      className="fld-input"
-                      type="email"
-                      placeholder="jane@company.com"
-                      value={client.email}
-                      onChange={e => setClientField('email', e.target.value)}
-                    />
-                  </Field>
-                  <Field label="City">
-                    <input
-                      className="fld-input"
-                      placeholder="City, ST"
-                      value={client.city}
-                      onChange={e => setClientField('city', e.target.value)}
-                    />
-                  </Field>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 3 · Prepared by (your branding) */}
+          {/* 1 · Prepared by (your branding) */}
           <section className="card">
             <div className="card-head"><h2 className="card-title">Prepared by</h2></div>
             <div className="card-body">
@@ -655,6 +551,110 @@ export default function ProposalEditorPage() {
                       placeholder="City, State ZIP"
                       value={prepBy.line2}
                       onChange={e => setPrepBy(p => ({ ...p, line2: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 2 · Proposal details */}
+          <section className="card">
+            <div className="card-head"><h2 className="card-title">Proposal details</h2></div>
+            <div className="card-body">
+              <div className="stack">
+                <Field label="Proposal title">
+                  <input
+                    className="fld-input"
+                    value={title}
+                    placeholder="e.g. Website redesign & brand refresh"
+                    onChange={e => setTitle(e.target.value)}
+                  />
+                </Field>
+                <div className="row2">
+                  <Field label="Proposal number">
+                    <input
+                      className="fld-input fld-mono"
+                      value={proposalNo ? `PROP-${String(proposalNo).padStart(4, '0')}` : 'Unsaved'}
+                      readOnly
+                    />
+                  </Field>
+                  <Field label="Status">
+                    <select className="fld-select" value={status} onChange={e => setStatus(e.target.value)}>
+                      <option value="draft">Draft</option>
+                      <option value="sent">Sent</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="declined">Declined</option>
+                    </select>
+                  </Field>
+                </div>
+                <div className="row2">
+                  <Field label="Date">
+                    <input className="fld-input fld-mono" type="date" value={issue} onChange={e => setIssue(e.target.value)} />
+                  </Field>
+                  <Field label="Valid until">
+                    <input className="fld-input fld-mono" type="date" value={valid} onChange={e => setValid(e.target.value)} />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 3 · Prepared for */}
+          <section className="card">
+            <div className="card-head"><h2 className="card-title">Prepared for</h2></div>
+            <div className="card-body">
+              <div className="stack">
+                {clients.length > 0 && (
+                  <Field label="Autofill from saved clients">
+                    <select
+                      className="fld-select"
+                      value={clientId}
+                      onChange={e => handleClientSelect(e.target.value)}
+                    >
+                      <option value="">— Select a client —</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.organization ? `${c.name} — ${c.organization}` : c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                )}
+                <div className="row2">
+                  <Field label="Client name">
+                    <input
+                      className="fld-input"
+                      placeholder="Company or person"
+                      value={client.name}
+                      onChange={e => setClientField('name', e.target.value)}
+                    />
+                  </Field>
+                  <Field label="Contact">
+                    <input
+                      className="fld-input"
+                      placeholder="Jane Smith"
+                      value={client.contact}
+                      onChange={e => setClientField('contact', e.target.value)}
+                    />
+                  </Field>
+                </div>
+                <div className="row2">
+                  <Field label="Email">
+                    <input
+                      className="fld-input"
+                      type="email"
+                      placeholder="jane@company.com"
+                      value={client.email}
+                      onChange={e => setClientField('email', e.target.value)}
+                    />
+                  </Field>
+                  <Field label="City">
+                    <input
+                      className="fld-input"
+                      placeholder="City, ST"
+                      value={client.city}
+                      onChange={e => setClientField('city', e.target.value)}
                     />
                   </Field>
                 </div>
