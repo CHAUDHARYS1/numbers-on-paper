@@ -15,6 +15,12 @@ const TABS = ['all', 'draft', 'unpaid', 'overdue', 'paid']
 const TAB_LABELS = { all: 'All', draft: 'Drafts', unpaid: 'Due', overdue: 'Overdue', paid: 'Paid' }
 const STATUS_ORDER = { draft: 0, unpaid: 1, overdue: 2, paid: 3 }
 
+const _today = new Date(); _today.setHours(0, 0, 0, 0)
+function effStatus(inv) {
+  if (inv.status === 'unpaid' && inv.due_date && new Date(inv.due_date + 'T00:00:00') < _today) return 'overdue'
+  return inv.status
+}
+
 function fmt(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0)
 }
@@ -91,12 +97,13 @@ export default function InvoicesPage() {
   }
 
   const counts = TABS.reduce((acc, t) => {
-    acc[t] = t === 'all' ? invoices.length : invoices.filter(i => i.status === t).length
+    acc[t] = t === 'all' ? invoices.length : invoices.filter(i => effStatus(i) === t).length
     return acc
   }, {})
 
   const filtered = invoices.filter(inv => {
-    const matchTab = tab === 'all' || inv.status === tab
+    const es = effStatus(inv)
+    const matchTab = tab === 'all' || es === tab
     const q = search.toLowerCase()
     const matchSearch = !q ||
       (inv.invoice_number || '').toLowerCase().includes(q) ||
@@ -111,7 +118,7 @@ export default function InvoicesPage() {
       case 'client':         av = a.bill_to?.name || '';  bv = b.bill_to?.name || '';  break
       case 'issue_date':     av = a.issue_date || '';     bv = b.issue_date || '';     break
       case 'due_date':       av = a.due_date || '';       bv = b.due_date || '';       break
-      case 'status':         av = STATUS_ORDER[a.status] ?? 0; bv = STATUS_ORDER[b.status] ?? 0; break
+      case 'status':         av = STATUS_ORDER[effStatus(a)] ?? 0; bv = STATUS_ORDER[effStatus(b)] ?? 0; break
       case 'total':          av = Number(a.total) || 0;   bv = Number(b.total) || 0;  break
       default:               av = a.created_at || '';     bv = b.created_at || '';     break
     }
@@ -208,7 +215,7 @@ export default function InvoicesPage() {
             <div className="m-list m-card">
               {sorted.map(inv => {
                 const clientName = inv.bill_to?.name || '—'
-                const dateLabel = inv.due_date && ['unpaid','overdue'].includes(inv.status)
+                const dateLabel = inv.due_date && ['unpaid','overdue'].includes(effStatus(inv))
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
@@ -220,7 +227,7 @@ export default function InvoicesPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 )
@@ -305,11 +312,11 @@ export default function InvoicesPage() {
                       <td className={styles.tClient}>{inv.bill_to?.name || '—'}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.issue_date)}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.due_date)}</td>
-                      <td><Badge variant={inv.status} /></td>
+                      <td><Badge variant={effStatus(inv)} /></td>
                       <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                       <td>
                         <div className={styles.rowActs}>
-                          {['unpaid','overdue'].includes(inv.status) && (
+                          {['unpaid','overdue'].includes(effStatus(inv)) && (
                             <button
                               className={styles.actPaid}
                               onClick={() => handleMarkPaid(inv)}

@@ -132,10 +132,12 @@ export default function InvoiceEditorPage() {
   const [saving,   setSaving]   = useState(false)
   const [savingClient, setSavingClient] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [isDirty,  setIsDirty]  = useState(false)
 
   const [invoiceNumber, setInvoiceNumber] = useState('')
   const [issueDate,     setIssueDate]     = useState(new Date().toISOString().slice(0, 10))
   const [dueDate,       setDueDate]       = useState('')
+  const dueDateTouchedRef = useRef(false)
   const [status,        setStatus]        = useState('draft')
   const [billTo,        setBillTo]        = useState({ name: '', organization: '', address: '', city: '', state: '', zip: '' })
   const [lineItems,     setLineItems]     = useState([DEFAULT_ITEM()])
@@ -185,7 +187,7 @@ export default function InvoiceEditorPage() {
           if (!data) return
           setInvoiceNumber(data.invoice_number)
           setIssueDate(data.issue_date || '')
-          setDueDate(data.due_date || '')
+          if (data.due_date) { dueDateTouchedRef.current = true; setDueDate(data.due_date) }
           setStatus(data.status)
           setBillTo(data.bill_to || {})
           setClientId(data.client_id || '')
@@ -208,9 +210,31 @@ export default function InvoiceEditorPage() {
     return () => document.removeEventListener('keydown', handle)
   }, [previewOpen])
 
+  // Auto-set due date to +30 days when issue date changes (if not manually set)
+  useEffect(() => {
+    if (!issueDate || dueDateTouchedRef.current) return
+    const d = new Date(issueDate + 'T00:00:00')
+    d.setDate(d.getDate() + 30)
+    setDueDate(d.toISOString().slice(0, 10))
+  }, [issueDate])
+
+  // Ctrl+S / Cmd+S to save
+  const handleSaveRef = useRef(null)
+  useEffect(() => {
+    const handle = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        handleSaveRef.current?.()
+      }
+    }
+    window.addEventListener('keydown', handle)
+    return () => window.removeEventListener('keydown', handle)
+  }, [])
+
   // ── Line item helpers ─────────────────────────────────────────
 
   const updateItem = (idx, field, value) => {
+    setIsDirty(true)
     setLineItems(prev => {
       const next = [...prev]
       next[idx] = { ...next[idx], [field]: value }
@@ -219,8 +243,8 @@ export default function InvoiceEditorPage() {
     })
   }
 
-  const addItem       = () => setLineItems(p => [...p, DEFAULT_ITEM()])
-  const removeItem    = (idx) => setLineItems(p => p.filter((_, i) => i !== idx))
+  const addItem       = () => { setLineItems(p => [...p, DEFAULT_ITEM()]); setIsDirty(true) }
+  const removeItem    = (idx) => { setLineItems(p => p.filter((_, i) => i !== idx)); setIsDirty(true) }
   const duplicateItem = (idx) => setLineItems(prev => {
     const copy = { ...prev[idx], id: crypto.randomUUID() }
     const next = [...prev]
@@ -323,10 +347,12 @@ export default function InvoiceEditorPage() {
     if (error) {
       toast.error('Failed to save invoice. Please try again.')
     } else {
+      setIsDirty(false)
       toast.success(isNew ? 'Invoice created!' : 'Invoice updated!')
       navigate('/invoices')
     }
   }
+  handleSaveRef.current = handleSave
 
   const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0)
 
@@ -345,6 +371,7 @@ export default function InvoiceEditorPage() {
           <h1 className="m-title" style={{ marginTop: 6 }}>
             {invoiceNumber || 'New invoice'}
           </h1>
+          {isDirty && <p className={`m-sub ${styles.unsavedHint}`}>Unsaved changes</p>}
         </div>
       </div>
 
@@ -368,6 +395,7 @@ export default function InvoiceEditorPage() {
             <Eye size={14} />
             Preview
           </button>
+          {isDirty && <span className={styles.unsavedBadge}>Unsaved</span>}
           <Button variant="primary" size="md" icon={<FloppyDisk size={15} />} loading={saving} onClick={handleSave}>
             {isNew ? 'Save invoice' : 'Save changes'}
           </Button>
@@ -394,8 +422,8 @@ export default function InvoiceEditorPage() {
                 </div>
               </div>
               <div className={styles.row2}>
-                <Input label="Issue date" type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} />
-                <Input label="Due date"   type="date" value={dueDate}   onChange={e => setDueDate(e.target.value)} />
+                <Input label="Issue date" type="date" value={issueDate} onChange={e => { setIssueDate(e.target.value); setIsDirty(true) }} />
+                <Input label="Due date"   type="date" value={dueDate}   onChange={e => { dueDateTouchedRef.current = true; setDueDate(e.target.value); setIsDirty(true) }} />
               </div>
             </CardBody>
           </Card>

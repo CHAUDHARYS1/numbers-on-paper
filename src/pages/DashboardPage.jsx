@@ -21,6 +21,12 @@ function greeting() {
   return 'Good evening'
 }
 
+const _today = new Date(); _today.setHours(0, 0, 0, 0)
+function effStatus(inv) {
+  if (inv.status === 'unpaid' && inv.due_date && new Date(inv.due_date + 'T00:00:00') < _today) return 'overdue'
+  return inv.status
+}
+
 function MiniAvatar({ name }) {
   const initials = (name || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()
   const colors = ['#2563EB','#15803d','#7c3aed','#c2410c','#be185d','#0f766e']
@@ -45,13 +51,13 @@ export default function DashboardPage() {
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
 
-  const totalPaid   = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total || 0), 0)
-  const totalUnpaid = invoices.filter(i => ['unpaid','overdue'].includes(i.status)).reduce((s, i) => s + (i.total || 0), 0)
-  const draftCount  = invoices.filter(i => i.status === 'draft').length
+  const totalPaid   = invoices.filter(i => effStatus(i) === 'paid').reduce((s, i) => s + (i.total || 0), 0)
+  const totalUnpaid = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).reduce((s, i) => s + (i.total || 0), 0)
+  const draftCount  = invoices.filter(i => effStatus(i) === 'draft').length
   const totalAll    = invoices.reduce((s, i) => s + (i.total || 0), 0)
-  const overdueCount = invoices.filter(i => i.status === 'overdue').length
+  const overdueCount = invoices.filter(i => effStatus(i) === 'overdue').length
 
-  const outstanding = invoices.filter(i => ['unpaid','overdue'].includes(i.status)).slice(0, 4)
+  const outstanding = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).slice(0, 4)
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'
   const firstName   = displayName.split(' ')[0]
@@ -140,7 +146,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
@@ -165,7 +171,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
@@ -228,7 +234,7 @@ export default function DashboardPage() {
                     </div>
                     <div className={styles.outRight}>
                       <div className={styles.outAmt}>{fmt(inv.total)}</div>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
@@ -279,7 +285,7 @@ export default function DashboardPage() {
                       </td>
                       <td className={styles.tClient}>{inv.bill_to?.name || '—'}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.issue_date)}</td>
-                      <td><Badge variant={inv.status} /></td>
+                      <td><Badge variant={effStatus(inv)} /></td>
                       <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                     </tr>
                   ))}
