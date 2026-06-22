@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } fr
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, ArrowsOut, FilePdf, FloppyDisk, Check,
-  Plus, Trash, Eye, X, DotsSixVertical,
+  Plus, Trash, Eye, X, DotsSixVertical, UploadSimple,
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -12,12 +12,8 @@ import Button from '@/components/ui/Button'
 import Switch from '@/components/ui/Switch'
 import ProposalDoc, { MobileProposalDoc } from '@/components/proposal/ProposalPreview'
 
-// Business info shown in the paper header
-const BUSINESS = {
-  name: 'SC Design & Consultation',
-  line1: '120 Roberts Street, Suite 4',
-  line2: 'Fargo, ND 58102',
-  email: 'hello@scdesign.co',
+const DEFAULT_BUSINESS = {
+  name: '', tagline: '', line1: '', line2: '', logoUrl: '',
 }
 
 const TERMS_SNIPPETS = [
@@ -233,6 +229,10 @@ export default function ProposalEditorPage() {
   // Terms
   const [termsText, setTermsText] = useState(TERMS_SNIPPETS[1].text)
 
+  // Prepared by (business branding)
+  const [prepBy, setPrepBy] = useState(DEFAULT_BUSINESS)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+
   // UI
   const [previewOpen, setPreviewOpen] = useState(false)
   const [savedFlash, setSavedFlash]   = useState(false)
@@ -249,6 +249,21 @@ export default function ProposalEditorPage() {
     supabase.from('clients').select('*').eq('user_id', user.id).order('name')
       .then(({ data }) => setClients(data || []))
   }, [user])
+
+  // ── Load business profile defaults (new proposals only) ──────
+  useEffect(() => {
+    if (!user || id) return   // existing proposals load from saved data
+    supabase.from('profiles').select('business_name,tagline,logo_url,full_name').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (!data) return
+        setPrepBy(p => ({
+          ...p,
+          name:    data.business_name || data.full_name || '',
+          tagline: data.tagline       || '',
+          logoUrl: data.logo_url      || '',
+        }))
+      })
+  }, [user, id])
 
   // ── Client select autofill ────────────────────────────────────
   const handleClientSelect = (id) => {
@@ -289,6 +304,15 @@ export default function ProposalEditorPage() {
       if (d.taxRate !== undefined)     setTaxRate(d.taxRate)
       if (d.timeline)                  setTimeline(d.timeline)
       if (d.termsText !== undefined)   setTermsText(d.termsText)
+      if (d.preparedBy)                setPrepBy({ ...DEFAULT_BUSINESS, ...d.preparedBy })
+      else {
+        // Existing proposal without branding — pull from profile
+        supabase.from('profiles').select('business_name,tagline,logo_url,full_name').eq('id', user.id).single()
+          .then(({ data: prof }) => {
+            if (!prof) return
+            setPrepBy({ name: prof.business_name || prof.full_name || '', tagline: prof.tagline || '', logoUrl: prof.logo_url || '', line1: '', line2: '' })
+          })
+      }
       setLoaded(true)
     })
   }, [id, navigate])
@@ -314,16 +338,35 @@ export default function ProposalEditorPage() {
   const taxAmt   = useMemo(() => showTax ? +(subtotal * (taxRate / 100)).toFixed(2) : 0, [showTax, subtotal, taxRate])
   const total    = useMemo(() => +(subtotal + taxAmt).toFixed(2), [subtotal, taxAmt])
 
+  // ── Logo upload ───────────────────────────────────────────────
+  const handleLogoUpload = async (file) => {
+    if (!file || !user) return
+    setUploadingLogo(true)
+    const ext = file.name.split('.').pop().toLowerCase()
+    const path = `${user.id}/logo.${ext}`
+    const { error } = await supabase.storage.from('logos').upload(path, file, { upsert: true })
+    if (error) {
+      toast.error('Failed to upload logo')
+      setUploadingLogo(false)
+      return
+    }
+    const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(path)
+    const logoUrl = `${publicUrl}?t=${Date.now()}`
+    setPrepBy(p => ({ ...p, logoUrl }))
+    await supabase.from('profiles').update({ logo_url: logoUrl }).eq('id', user.id)
+    setUploadingLogo(false)
+  }
+
   const docData = useMemo(() => ({
     number:      proposalNo ? `PROP-${String(proposalNo).padStart(4, '0')}` : 'PROP-0000',
     title, status, issue_date: issue, valid_until: valid,
-    preparedBy:  BUSINESS,
+    preparedBy:  prepBy,
     preparedFor: client,
     sections,
     introText, scopeText, objectives, deliverables,
     items: lineItems, subtotal, taxRate: taxRate / 100, taxAmt, total, showTax,
     timeline, termsText,
-  }), [proposalNo, title, status, issue, valid, client, sections, introText, scopeText,
+  }), [proposalNo, title, status, issue, valid, prepBy, client, sections, introText, scopeText,
        objectives, deliverables, lineItems, subtotal, taxRate, taxAmt, total, showTax,
        timeline, termsText])
 
@@ -543,7 +586,83 @@ export default function ProposalEditorPage() {
             </div>
           </section>
 
-          {/* 3 · Sections toggle panel */}
+          {/* 3 · Prepared by (your branding) */}
+          <section className="card">
+            <div className="card-head"><h2 className="card-title">Prepared by</h2></div>
+            <div className="card-body">
+              <div className="stack">
+                {/* Logo */}
+                <div className="pb-logo-row">
+                  <div className="pb-logo-preview">
+                    {prepBy.logoUrl
+                      ? <img src={prepBy.logoUrl} alt="Business logo" className="pb-logo-img" />
+                      : <span className="pb-logo-placeholder">No logo</span>
+                    }
+                  </div>
+                  <div className="stack" style={{ gap: 'var(--space-2)', flex: 1 }}>
+                    <label className="pb-upload-btn" htmlFor="pb-logo-input">
+                      <UploadSimple size={14} />
+                      {uploadingLogo ? 'Uploading…' : prepBy.logoUrl ? 'Change logo' : 'Upload logo'}
+                    </label>
+                    <input
+                      id="pb-logo-input"
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                    />
+                    {prepBy.logoUrl && (
+                      <button
+                        className="pb-remove-logo"
+                        type="button"
+                        onClick={() => setPrepBy(p => ({ ...p, logoUrl: '' }))}
+                      >
+                        Remove logo
+                      </button>
+                    )}
+                    <span className="fld-hint" style={{ margin: 0 }}>PNG, SVG, or JPG · shown in proposal header</span>
+                  </div>
+                </div>
+
+                <Field label="Business name">
+                  <input
+                    className="fld-input"
+                    placeholder="e.g. SC Design & Consultation"
+                    value={prepBy.name}
+                    onChange={e => setPrepBy(p => ({ ...p, name: e.target.value }))}
+                  />
+                </Field>
+                <Field label="Tagline">
+                  <input
+                    className="fld-input"
+                    placeholder="e.g. Web Design & Consultation"
+                    value={prepBy.tagline}
+                    onChange={e => setPrepBy(p => ({ ...p, tagline: e.target.value }))}
+                  />
+                </Field>
+                <div className="row2">
+                  <Field label="Address line 1">
+                    <input
+                      className="fld-input"
+                      placeholder="Street address"
+                      value={prepBy.line1}
+                      onChange={e => setPrepBy(p => ({ ...p, line1: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label="Address line 2">
+                    <input
+                      className="fld-input"
+                      placeholder="City, State ZIP"
+                      value={prepBy.line2}
+                      onChange={e => setPrepBy(p => ({ ...p, line2: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4 · Sections toggle panel */}
           <section className="card">
             <div className="card-head">
               <h2 className="card-title">Sections</h2>

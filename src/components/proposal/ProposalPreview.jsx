@@ -155,11 +155,14 @@ export default function ProposalDoc({ data }) {
       <div className="pp-top">
         <div className="pp-brand">
           <div className="pp-logo">
-            <img src="/mark/mark-white.svg" alt="" />
+            {bf.logoUrl
+              ? <img src={bf.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              : <img src="/mark/mark-white.svg" alt="" />
+            }
           </div>
           <div>
             <div className="pp-biz">{bf.name || 'SC Design & Consultation'}</div>
-            <div className="pp-tag">Web Design &amp; Consultation</div>
+            <div className="pp-tag">{bf.tagline || 'Web Design & Consultation'}</div>
           </div>
         </div>
         <div className="pp-doc">
@@ -311,11 +314,14 @@ export function MobileProposalDoc({ data }) {
       <div className="m-paper-top">
         <div className="m-paper-brand">
           <div className="m-paper-logo">
-            <img src="/mark/mark-white.svg" alt="" style={{ width: 22, height: 22 }} />
+            {bf.logoUrl
+              ? <img src={bf.logoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              : <img src="/mark/mark-white.svg" alt="" style={{ width: 22, height: 22 }} />
+            }
           </div>
           <div>
             <div className="m-paper-biz">{bf.name || 'SC Design & Consultation'}</div>
-            <div className="m-paper-tag">Web Design &amp; Consultation</div>
+            <div className="m-paper-tag">{bf.tagline || 'Web Design & Consultation'}</div>
           </div>
         </div>
         <div className="m-paper-docrow">
