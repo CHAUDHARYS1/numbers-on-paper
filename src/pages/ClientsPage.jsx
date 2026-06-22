@@ -372,39 +372,39 @@ export default function ClientsPage() {
       <div className="d-only">
         {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
 
-        {/* Summary bar */}
+        {/* Summary + controls row */}
         <div className={styles.summary}>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryVal}>{enriched.length}</span>
-            <span className={styles.summaryLbl}>Clients</span>
+          <div className={styles.summaryStats}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal}>{enriched.length}</span>
+              <span className={styles.summaryLbl}>Clients</span>
+            </div>
+            <div className={styles.summaryDiv} />
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
+              <span className={styles.summaryLbl}>Total billed</span>
+            </div>
+            <div className={styles.summaryDiv} />
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
+              <span className={styles.summaryLbl}>Outstanding</span>
+            </div>
           </div>
-          <div className={styles.summaryDiv} />
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryVal}>{fmt0(totalBilled)}</span>
-            <span className={styles.summaryLbl}>Total billed</span>
+          <div className={styles.summaryControls}>
+            <div className={styles.searchWrap}>
+              <MagnifyingGlass size={15} className={styles.searchIcon} />
+              <input
+                className={styles.searchInput}
+                placeholder="Search clients…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                aria-label="Search clients"
+              />
+            </div>
+            <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
+              <Plus size={15} /> Add client
+            </button>
           </div>
-          <div className={styles.summaryDiv} />
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
-            <span className={styles.summaryLbl}>Outstanding</span>
-          </div>
-        </div>
-
-        {/* Filter row */}
-        <div className={styles.toolbar}>
-          <div className={styles.searchWrap}>
-            <MagnifyingGlass size={16} className={styles.searchIcon} />
-            <input
-              className={styles.searchInput}
-              placeholder="Search clients…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              aria-label="Search clients"
-            />
-          </div>
-          <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
-            <Plus size={15} /> Add client
-          </button>
         </div>
 
         {loading ? (
