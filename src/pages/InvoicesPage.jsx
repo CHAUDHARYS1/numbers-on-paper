@@ -239,6 +239,18 @@ export default function InvoicesPage() {
 
       {/* ── Desktop layout ──────────────────────────────────────── */}
       <div className="d-only">
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Invoices</h1>
+            <p className="page-header__desc">Create, manage, and track every invoice in one place.</p>
+          </div>
+          <div className="page-header__right">
+            <Link to="/invoices/new" className="app-btn-primary">
+              <Plus size={15} /> New invoice
+            </Link>
+          </div>
+        </div>
+
         {/* Filter bar */}
         <div className={styles.filterbar}>
           <div className={styles.searchWrap}>

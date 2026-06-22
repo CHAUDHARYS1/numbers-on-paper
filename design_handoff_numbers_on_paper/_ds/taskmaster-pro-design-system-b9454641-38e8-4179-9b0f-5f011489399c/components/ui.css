@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════════════════
+   Component classes — the reusable UI primitives, lifted from
+   the live Taskmaster Pro app (src/index.css). Consumers get
+   these by linking styles.css; the React components in this
+   design system emit exactly these class names.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.tm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s var(--ease-spring), border-color 0.15s ease;
+}
+.tm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tm-btn:not(:disabled):active { transform: scale(0.97); }
+
+/* sizes */
+.tm-btn--md { min-height: 44px; padding: 0 var(--space-4); font-size: var(--text-md); }
+.tm-btn--sm { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+/* variants */
+.tm-btn--primary { background-color: var(--accent); color: #fff; }
+.tm-btn--primary:not(:disabled):hover { background-color: var(--accent-2); }
+
+.tm-btn--ghost { background-color: transparent; color: var(--ink-3); font-weight: var(--weight-medium); }
+.tm-btn--ghost:not(:disabled):hover { background-color: var(--paper-2); color: var(--ink); }
+
+.tm-btn--danger {
+  background-color: transparent; color: var(--red);
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+}
+.tm-btn--danger:not(:disabled):hover { background-color: var(--red-tint); }
+
+.tm-btn--block { width: 100%; }
+
+/* ── Avatar ──────────────────────────────────────────────── */
+.tm-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: var(--weight-bold);
+  flex-shrink: 0;
+  border-radius: var(--radius-circle);
+  object-fit: cover;
+}
+.tm-avatar--square { border-radius: var(--radius-sm); }
+.tm-avatar--sm { width: 20px; height: 20px; font-size: 10px; }
+.tm-avatar--md { width: 24px; height: 24px; font-size: 11px; }
+.tm-avatar--lg { width: 36px; height: 36px; font-size: 14px; }
+
+/* ── Badge / status pill ─────────────────────────────────── */
+.tm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.tm-pill--green { background: var(--green-tint); color: var(--green); }
+.tm-pill--red   { background: var(--red-tint);   color: var(--red);   }
+.tm-pill--amber { background: var(--amber-tint); color: var(--amber); }
+.tm-pill--accent{ background: var(--accent-tint); color: var(--accent); }
+.tm-pill--gray  { background: var(--paper-2);    color: var(--ink-3); }
+
+/* ── Label chip (workspace-scoped colored tag) ───────────── */
+.tm-label-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  color: var(--label-color, var(--ink-2));
+  background: var(--label-bg, var(--paper-2));
+  white-space: nowrap;
+}
+
+/* ── Priority chip ───────────────────────────────────────── */
+.tm-priority-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius);
+  color: var(--p-color, var(--ink-3));
+  background: color-mix(in srgb, var(--p-color, var(--ink-3)) 12%, transparent);
+  white-space: nowrap;
+  width: fit-content;
+}
+.tm-priority-chip .tm-priority-icon { font-family: var(--font-mono); font-weight: 700; }
+
+/* ── Field (label + input) ───────────────────────────────── */
+.tm-field { display: flex; flex-direction: column; gap: var(--space-2); }
+.tm-field-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tm-field-input {
+  font-size: var(--text-md);
+  color: var(--ink);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s;
+  font-family: var(--font-body);
+}
+.tm-field-input::placeholder { color: var(--ink-4); }
+.tm-field-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
+  background-color: var(--card);
+}
+.tm-field--error .tm-field-input { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-tint); }
+.tm-field-hint { font-size: var(--text-sm); color: var(--ink-3); }
+.tm-field-hint--error { color: var(--red); }
+
+/* ── Checkbox ────────────────────────────────────────────── */
+.tm-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--paper-3);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s;
+}
+.tm-checkbox::after {
+  content: '';
+  width: 9px; height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translateY(-1px);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.tm-checkbox:checked { background: var(--accent); border-color: var(--accent); }
+.tm-checkbox:checked::after { opacity: 1; }
+
+/* ── Segmented control ───────────────────────────────────── */
+.tm-segmented {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+.tm-segmented button {
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  padding: 5px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.tm-segmented button:hover { color: var(--ink); }
+.tm-segmented button.tm-seg--on {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ── Progress bar ────────────────────────────────────────── */
+.tm-progress-track {
+  height: 6px;
+  background: var(--paper-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.tm-progress-fill {
+  height: 100%;
+  background: var(--progress-color, var(--accent));
+  border-radius: var(--radius-sm);
+  transition: width 0.5s var(--ease-enter);
+}
+
+/* ── Task card ───────────────────────────────────────────── */
+.tm-task-card {
+  position: relative;
+  background-color: var(--card);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 11px var(--space-4) 10px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+.tm-task-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05); }
+.tm-task-card--done { border-left-color: var(--green); }
+.tm-task-card--done .tm-task-title { color: var(--ink-4); text-decoration: line-through; text-decoration-color: var(--ink-4); }
+.tm-task-card--overdue  { border-left-color: var(--red); }
+.tm-task-card--due-soon { border-left-color: var(--amber); }
+.tm-task-title { font-size: var(--text-md); font-weight: var(--weight-semibold); color: var(--ink); line-height: var(--leading-snug); word-break: break-word; }
+.tm-task-desc { font-size: var(--text-body); color: var(--ink-4); line-height: 1.4; }
+.tm-task-labels { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.tm-task-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: 3px; }
+.tm-task-footer-left, .tm-task-footer-right { display: flex; align-items: center; gap: 6px; }
+.tm-task-assignee {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: var(--weight-medium); color: var(--ink-3);
+  background: var(--paper-2); border-radius: 999px; padding: 2px 8px 2px 5px;
+}
+.tm-task-assignee-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tm-task-meta-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: var(--weight-medium); color: var(--ink-4); }
+.tm-task-due { font-size: 10px; font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; color: var(--ink-4); white-space: nowrap; }
+.tm-task-card--overdue .tm-task-due { color: var(--red); }
+.tm-task-card--due-soon .tm-task-due { color: var(--amber); }
+
+/* ── Column ──────────────────────────────────────────────── */
+.tm-column {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card);
+  border-top: 3px solid var(--col-color, var(--line));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  min-width: 240px;
+}
+.tm-column-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.tm-column-label { font-size: var(--text-body); font-weight: var(--weight-semibold); color: var(--ink-2); }
+.tm-column-count {
+  font-size: var(--text-xs); font-family: var(--font-mono); font-weight: var(--weight-bold);
+  color: var(--ink-4); background-color: var(--paper-2); padding: 2px 6px; border-radius: var(--radius);
+}
+.tm-column-list { flex: 1; overflow-y: auto; padding: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2); min-height: 80px; }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.tm-modal-overlay {
+  position: fixed; inset: 0;
+  background-color: rgba(0,0,0,0.32);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.tm-modal {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
+  width: 100%; max-width: 480px;
+  overflow: hidden;
+}
+.tm-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.tm-modal-title { font-size: var(--text-xl); font-weight: var(--weight-semibold); color: var(--ink); letter-spacing: -0.01em; }
+.tm-modal-close { background: none; border: none; font-size: 22px; color: var(--ink-4); line-height: 1; padding: 2px 6px; border-radius: var(--radius-sm); }
+.tm-modal-close:hover { color: var(--ink); background: var(--paper-2); }
+.tm-modal-body { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4); }
+.tm-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); padding: var(--space-3) var(--space-5); background-color: var(--surface); border-top: 1px solid var(--line); }

@@ -1,0 +1,23 @@
+/* ── Effects: shadow & motion tokens ───────────────────────
+   A three-tier shadow system by elevation, plus two signature
+   easing curves: a bouncy spring for press/tap feedback and a
+   smooth enter curve for panels and sheets.
+   ───────────────────────────────────────────────────────── */
+:root {
+  /* ── Shadows ── elevation low → high. Cards carry a hairline
+        ring baked into the shadow; never nest shadowed elements. */
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04); /* cards */
+  --shadow-pop:   0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06); /* toasts, popovers */
+  --shadow-float: 0 12px 40px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06); /* modals, sheets */
+  --shadow:       var(--shadow-pop);
+
+  /* ── Motion ── */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);  /* @kind other */ /* press, tap, swatch pop */
+  --ease-enter:  cubic-bezier(.32, 1, .45, 1);     /* @kind other */ /* sheet + pane entrance */
+}
+
+html[data-theme="dark"] {
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.35);
+  --shadow-pop:   0 8px 24px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-float: 0 12px 40px rgba(0,0,0,0.8), 0 2px 6px rgba(0,0,0,0.5);
+}

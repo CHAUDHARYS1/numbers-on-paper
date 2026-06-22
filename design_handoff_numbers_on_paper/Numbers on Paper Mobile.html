@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Numbers on Paper — Mobile</title>
+<link rel="icon" href="numbers-on-paper-assets/favicon/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/fonts.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/colors.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/typography.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/spacing.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/effects.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/base.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/components/ui.css" />
+<link rel="stylesheet" href="mobile/m-app.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  (function () { const real = ReactDOM.createRoot.bind(ReactDOM);
+    ReactDOM.createRoot = function () { return { render() {}, unmount() {} }; };
+    window.__restoreCreateRoot = function () { ReactDOM.createRoot = real; }; })();
+</script>
+<script src="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/_ds_bundle.js"></script>
+<script>window.__restoreCreateRoot();</script>
+<script src="app/data.js"></script>
+
+<script type="text/babel" src="mobile/m-shared.jsx"></script>
+<script type="text/babel" src="mobile/m-home.jsx"></script>
+<script type="text/babel" src="mobile/m-invoices.jsx"></script>
+<script type="text/babel" src="mobile/m-editor.jsx"></script>
+<script type="text/babel" src="mobile/m-clients.jsx"></script>
+<script type="text/babel" src="mobile/m-settings.jsx"></script>
+
+<script type="text/babel">
+const NOP = window.NOP;
+const { useState, useEffect, useRef } = React;
+const LS = { signed: 'nop_m_signed', theme: 'nop_m_theme', tab: 'nop_m_tab' };
+
+const TAB_DEFS = [
+  { key: 'home',     icon: 'ph-house',        label: 'Home' },
+  { key: 'invoices', icon: 'ph-file-text',    label: 'Invoices' },
+  { key: 'new',      icon: 'ph-plus',         label: 'New', fab: true },
+  { key: 'clients',  icon: 'ph-users-three',  label: 'Clients' },
+  { key: 'settings', icon: 'ph-gear-six',     label: 'Settings' },
+];
+
+function deriveInv(inv) {
+  const c = NOP.clients[inv.client] || {};
+  inv.clientName = c.name || inv.clientName || 'New client';
+  inv.overdue = inv.status === 'unpaid' && !!inv.due_date && inv.due_date < NOP.TODAY;
+  return inv;
+}
+
+function App() {
+  const [signedIn, setSignedIn] = useState(() => localStorage.getItem(LS.signed) === '1');
+  const [theme, setThemeState]  = useState(() => localStorage.getItem(LS.theme) || 'light');
+  const [tab, setTab]           = useState(() => localStorage.getItem(LS.tab) || 'home');
+  const [stack, setStack]       = useState([]);
+  const [invoices, setInvoices] = useState(() => NOP.invoices.map(i => ({ ...i })));
+  const [filter, setFilter]     = useState('all');
+  const [anim, setAnim]         = useState('tab');
+  const [navKey, setNavKey]     = useState(0);
+  const [toastMsg, setToastMsg] = useState(null);
+  const toastTimer = useRef(null);
+
+  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem(LS.theme, theme); }, [theme]);
+  useEffect(() => { localStorage.setItem(LS.tab, tab); }, [tab]);
+  useEffect(() => { localStorage.setItem(LS.signed, signedIn ? '1' : '0'); }, [signedIn]);
+
+  const bump = (a) => { setAnim(a); setNavKey(k => k + 1); };
+
+  const toast = (m) => {
+    setToastMsg(m);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToastMsg(null), 2200);
+  };
+
+  const app = {
+    invoices, theme, invoicesFilter: filter,
+    setTheme: (t) => setThemeState(t),
+    signIn: () => { setSignedIn(true); setTab('home'); setStack([]); bump('tab'); },
+    signOut: () => { setSignedIn(false); setStack([]); bump('tab'); },
+    goTab: (name, f) => { setTab(name); setStack([]); setFilter(f || 'all'); bump('tab'); },
+    pop: () => { setStack(st => st.slice(0, -1)); bump('push'); },
+    openInvoice: (id) => { setStack(st => [...st, { name: 'invoice', id }]); bump('push'); },
+    newInvoice: () => { setStack(st => [...st, { name: 'editor' }]); bump('push'); },
+    editInvoice: (id) => { setStack(st => [...st, { name: 'editor', id }]); bump('push'); },
+    markPaid: (id) => { setInvoices(rs => rs.map(r => r.id === id ? deriveInv({ ...r, status: 'paid', overdue: false }) : r)); toast('Marked as paid'); },
+    removeInvoice: (id) => { setInvoices(rs => rs.filter(r => r.id !== id)); toast('Invoice deleted'); },
+    duplicateInvoice: (id) => {
+      const src = invoices.find(r => r.id === id); if (!src) return;
+      const copy = deriveInv({ ...src, id: 'dup_' + Math.random().toString(36).slice(2, 7), invoice_number: 'INV-' + (44 + Math.floor(Math.random() * 50)), status: 'draft', issue_date: null, due_date: null, overdue: false });
+      setInvoices(rs => [copy, ...rs]); toast('Duplicated as draft');
+    },
+    saveInvoice: (rec, isNew) => {
+      const inv = deriveInv({ ...rec });
+      setInvoices(rs => isNew ? [inv, ...rs] : rs.map(r => r.id === inv.id ? inv : r));
+      setStack(st => st.slice(0, -1)); bump('push');
+      toast(isNew ? 'Invoice created' : 'Changes saved');
+    },
+    toast,
+  };
+
+  // ── Login (no chrome) ──
+  if (!signedIn) {
+    return (
+      <div className="m-root">
+        <window.StatusBar />
+        <div className="m-viewport">
+          <div className="m-screen" key={'login-' + navKey} data-anim={anim}>
+            <window.LoginScreen app={app} />
+          </div>
+        </div>
+        {toastMsg ? <Toast msg={toastMsg} /> : null}
+      </div>
+    );
+  }
+
+  const current = stack.length ? stack[stack.length - 1] : { name: tab };
+  const showTabBar = stack.length === 0;
+
+  let screen;
+  switch (current.name) {
+    case 'home':     screen = <window.HomeScreen app={app} />; break;
+    case 'invoices': screen = <window.InvoicesScreen app={app} />; break;
+    case 'clients':  screen = <window.ClientsScreen app={app} />; break;
+    case 'settings': screen = <window.SettingsScreen app={app} />; break;
+    case 'invoice':  screen = <window.InvoiceDetailScreen app={app} id={current.id} />; break;
+    case 'editor':   screen = <window.EditorScreen app={app} id={current.id} />; break;
+    default:         screen = <window.HomeScreen app={app} />;
+  }
+
+  return (
+    <div className="m-root">
+      <window.StatusBar />
+      <div className="m-viewport">
+        <div className="m-screen" key={current.name + '-' + (current.id || '') + '-' + navKey} data-anim={anim}>
+          {screen}
+        </div>
+      </div>
+
+      {showTabBar ? (
+        <nav className="m-tabbar">
+          {TAB_DEFS.map(t => {
+            if (t.fab) {
+              return (
+                <button key={t.key} className="m-tab m-tab--new" onClick={() => app.newInvoice()} aria-label="New invoice">
+                  <span className="m-tab-fab"><i className={'ph ' + t.icon}></i></span>
+                </button>
+              );
+            }
+            const on = tab === t.key;
+            return (
+              <button key={t.key} className={'m-tab' + (on ? ' m-tab--on' : '')} onClick={() => app.goTab(t.key)}>
+                <i className={(on ? 'ph-fill ' : 'ph ') + t.icon}></i>
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      ) : null}
+
+      {toastMsg ? <Toast msg={toastMsg} /> : null}
+    </div>
+  );
+}
+
+function Toast({ msg }) {
+  return <div className="m-toast"><i className="ph ph-check-circle"></i> {msg}</div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

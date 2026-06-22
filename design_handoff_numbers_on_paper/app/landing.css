@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════
+   Numbers on Paper — landing page styles.
+   Imports the Taskmaster Pro marketing kit, then (1) swaps the
+   display face from Instrument Serif to this project's brand
+   type (Space Grotesk / Space Mono) and (2) adds the pricing
+   grid + hero invoice-mock the kit doesn't ship.
+   ═══════════════════════════════════════════════════════════ */
+@import url('marketing.css');
+
+/* ── Brand type overrides ── */
+.lp{ font-family:'Space Grotesk', -apple-system, system-ui, sans-serif; }
+.lp-hero h1, .lp-h2, .lp-cta h2, .lp-stat-n{
+  font-family:'Space Grotesk', sans-serif !important;
+  font-weight:600 !important; letter-spacing:-.03em !important;
+}
+.lp-hero h1{ line-height:1.05; }
+.lp-h2 em, .lp-hero h1 em, .lp-cta h2 em{ font-style:normal; color:var(--accent); }
+.lp-h2 em{ color:var(--text-2); }
+.lp-tb-label, .lp-bcol-count{ font-family:'Space Mono', monospace !important; }
+.lp-eyebrow{ font-family:'Space Mono', monospace; }
+
+/* keep nav links tidy */
+.lp-nav-links{ display:flex; align-items:center; gap:28px; }
+.lp-nav-links a{ font-size:14px; font-weight:600; color:var(--text-2); text-decoration:none; transition:color .15s; }
+.lp-nav-links a:hover{ color:var(--text); }
+@media (max-width:760px){ .lp-nav-links{ display:none; } }
+
+/* ── Hero invoice mock ── */
+.hv-paper{ padding:22px 24px 20px; background:#fff; }
+.hv-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.hv-brand{ display:flex; align-items:center; gap:10px; }
+.hv-logo{ width:30px; height:30px; border-radius:8px; background:var(--accent); display:grid; place-items:center; }
+.hv-logo img{ width:18px; height:18px; }
+.hv-biz{ font-size:13px; font-weight:700; color:#0B1B34; line-height:1.1; }
+.hv-biz small{ display:block; font-weight:500; font-size:10px; color:#94A3B8; margin-top:2px; }
+.hv-doc{ text-align:right; }
+.hv-num{ font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:#0B1B34; }
+.hv-pill{ display:inline-block; font-family:'Space Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:2px 7px; border-radius:5px; margin-top:5px; background:rgba(146,64,14,.12); color:#92400e; }
+.hv-rule{ height:1px; background:#EEF2F8; margin:16px 0; }
+.hv-meta{ display:flex; gap:32px; }
+.hv-meta-l{ font-family:'Space Mono',monospace; font-size:8px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#94A3B8; }
+.hv-meta-v{ font-size:11px; color:#334155; font-weight:600; margin-top:3px; }
+.hv-items{ margin-top:14px; }
+.hv-irow{ display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid #F4F6FB; font-size:11px; color:#475569; }
+.hv-irow .d{ font-weight:600; color:#0B1B34; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:12px; }
+.hv-irow .a{ font-family:'Space Mono',monospace; font-weight:700; color:#0B1B34; }
+.hv-tot{ display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:2px solid #0B1B34; }
+.hv-tot .l{ font-size:13px; font-weight:700; color:#0B1B34; white-space:nowrap; }
+.hv-tot .v{ font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent); white-space:nowrap; }
+
+/* ── Pricing ── */
+.lp-pricing{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; align-items:start; }
+.price-card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:32px 28px; display:flex; flex-direction:column; gap:20px; position:relative; transition:border-color .2s, box-shadow .2s; }
+.price-card:hover{ border-color:var(--border-hi); }
+.price-card--feat{ border-color:var(--accent); box-shadow:0 16px 50px var(--accent-glow); }
+.price-flag{ position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:5px 12px; border-radius:100px; white-space:nowrap; }
+.price-name{ font-size:14px; font-weight:700; color:var(--text); letter-spacing:.01em; }
+.price-desc{ font-size:13px; color:var(--text-2); line-height:1.55; min-height:38px; }
+.price-amt{ display:flex; align-items:baseline; gap:6px; }
+.price-amt .n{ font-family:'Space Grotesk',sans-serif; font-size:44px; font-weight:600; letter-spacing:-.03em; color:var(--text); line-height:1; }
+.price-amt .p{ font-size:13px; color:var(--text-3); font-weight:500; }
+.price-cta{ width:100%; justify-content:center; }
+.price-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:11px; }
+.price-list li{ display:flex; align-items:flex-start; gap:9px; font-size:13px; color:var(--text-2); line-height:1.45; }
+.price-list li i{ font-size:15px; color:var(--accent); flex-shrink:0; margin-top:1px; }
+.price-list li.ai i{ color:#7c3aed; }
+.price-list li .ai-tag{ font-family:'Space Mono',monospace; font-size:8px; font-weight:700; letter-spacing:.06em; color:#7c3aed; background:rgba(124,58,237,.1); padding:1px 5px; border-radius:4px; margin-left:6px; text-transform:uppercase; }
+.price-feat-head{ font-size:12px; font-weight:700; color:var(--text); }
+.price-note{ text-align:center; font-size:13px; color:var(--text-3); margin-top:28px; }
+
+@media (max-width:900px){ .lp-pricing{ grid-template-columns:1fr; } .price-card--feat{ order:-1; } }

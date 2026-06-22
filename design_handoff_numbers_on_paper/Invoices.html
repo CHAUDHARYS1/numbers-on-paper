@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Numbers on Paper — Invoices</title>
+<link rel="icon" href="numbers-on-paper-assets/favicon/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/fonts.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/colors.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/typography.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/spacing.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/effects.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/base.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/components/ui.css" />
+<link rel="stylesheet" href="app/app.css" />
+<link rel="stylesheet" href="app/forms.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  (function () { const real = ReactDOM.createRoot.bind(ReactDOM);
+    ReactDOM.createRoot = function () { return { render() {}, unmount() {} }; };
+    window.__restoreCreateRoot = function () { ReactDOM.createRoot = real; }; })();
+</script>
+<script src="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/_ds_bundle.js"></script>
+<script>window.__restoreCreateRoot();</script>
+<script src="app/data.js"></script>
+<script type="text/babel" src="app/shell.jsx"></script>
+<script type="text/babel">
+const { Avatar, Button } = window.TaskmasterProDesignSystem_b94546;
+const NOP = window.NOP;
+const { fmt, fmtDate, effStatus } = NOP;
+const { useState, useMemo } = React;
+
+const TABS = ['all', 'draft', 'unpaid', 'overdue', 'paid'];
+const COLS = [
+  { key: 'invoice_number', label: 'Invoice #' },
+  { key: 'client',         label: 'Client' },
+  { key: 'issue_date',     label: 'Issued' },
+  { key: 'due_date',       label: 'Due' },
+  { key: 'status',         label: 'Status' },
+  { key: 'total',          label: 'Amount', right: true },
+];
+const STATUS_ORDER = { draft: 0, unpaid: 1, overdue: 2, paid: 3 };
+
+function Invoices() {
+  const [rows, setRows]     = useState(() => NOP.invoices.map(i => ({ ...i })));
+  const [search, setSearch] = useState('');
+  const [tab, setTab]       = useState('all');
+  const [sortBy, setSortBy] = useState('issue_date');
+  const [sortDir, setDir]   = useState('desc');
+
+  const counts = useMemo(() => {
+    const c = { all: rows.length, draft: 0, unpaid: 0, overdue: 0, paid: 0 };
+    rows.forEach(r => { c[effStatus(r)]++; });
+    return c;
+  }, [rows]);
+
+  const toggleSort = (k) => {
+    if (sortBy === k) setDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(k); setDir('asc'); }
+  };
+
+  const markPaid = (id) => setRows(rs => rs.map(r => r.id === id ? { ...r, status: 'paid', overdue: false } : r));
+  const remove   = (id) => setRows(rs => rs.filter(r => r.id !== id));
+
+  const view = useMemo(() => {
+    const q = search.toLowerCase();
+    let v = rows.filter(r => {
+      const es = effStatus(r);
+      const matchTab = tab === 'all' || es === tab;
+      const matchQ = !q || r.invoice_number.toLowerCase().includes(q) || r.clientName.toLowerCase().includes(q);
+      return matchTab && matchQ;
+    });
+    v.sort((a, b) => {
+      let av, bv;
+      switch (sortBy) {
+        case 'client': av = a.clientName; bv = b.clientName; break;
+        case 'status': av = STATUS_ORDER[effStatus(a)]; bv = STATUS_ORDER[effStatus(b)]; break;
+        case 'total':  av = a.total; bv = b.total; break;
+        default:       av = a[sortBy] || ''; bv = b[sortBy] || '';
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return v;
+  }, [rows, search, tab, sortBy, sortDir]);
+
+  const actions = (
+    <Button variant="primary" onClick={() => location.href = 'InvoiceEditor.html'}>
+      <i className="ph ph-plus" style={{ fontSize: 16 }}></i> New invoice
+    </Button>
+  );
+
+  return (
+    <window.AppShell active="invoices" title="Invoices"
+                     description="Create, manage, and track every invoice in one place." actions={actions} maxWidth={1120}>
+      <div className="filterbar">
+        <div className="filter-search">
+          <i className="ph ph-magnifying-glass"></i>
+          <input placeholder="Search by invoice # or client…" value={search} onChange={e => setSearch(e.target.value)} aria-label="Search" />
+        </div>
+        <div className="filter-tabs" role="tablist">
+          {TABS.map(t => (
+            <button key={t} role="tab" aria-selected={tab === t}
+                    className={'filter-tab' + (tab === t ? ' filter-tab--on' : '')}
+                    onClick={() => setTab(t)}>
+              {t.charAt(0).toUpperCase() + t.slice(1)} <span style={{ opacity: .55, fontFamily: 'var(--font-mono)' }}>{counts[t]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <section className="card">
+        <div className="card-body" style={{ padding: 0 }}>
+          {view.length === 0 ? (
+            <div className="empty-state">
+              <p className="es-title">No invoices found</p>
+              <p className="es-sub">Try adjusting your search or filters.</p>
+              <Button variant="ghost" onClick={() => { setSearch(''); setTab('all'); }}>Clear filters</Button>
+            </div>
+          ) : (
+            <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  {COLS.map(c => (
+                    <th key={c.key} className={c.right ? 't-right' : ''}>
+                      <button className={'th-sort' + (sortBy === c.key ? ' th-sort--on' : '')} onClick={() => toggleSort(c.key)}>
+                        {c.label}
+                        <i className={'ph ' + (sortBy === c.key ? (sortDir === 'asc' ? 'ph-arrow-up' : 'ph-arrow-down') : 'ph-arrows-down-up')}></i>
+                      </button>
+                    </th>
+                  ))}
+                  <th className="t-right"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {view.map(inv => {
+                  const es = effStatus(inv);
+                  return (
+                    <tr key={inv.id}>
+                      <td><a className="t-num" href={'Invoice.html?id=' + inv.id}>{inv.invoice_number}</a></td>
+                      <td>
+                        <div className="cli">
+                          <Avatar name={inv.clientName} userId={inv.client} size="sm" />
+                          <span className="t-client">{inv.clientName}</span>
+                        </div>
+                      </td>
+                      <td className="t-date">{fmtDate(inv.issue_date)}</td>
+                      <td className="t-date">{fmtDate(inv.due_date)}</td>
+                      <td><window.StatusBadge status={es} /></td>
+                      <td className="t-amt">{fmt(inv.total)}</td>
+                      <td>
+                        <div className="rowacts">
+                          {(es === 'unpaid' || es === 'overdue') && (
+                            <button className="act-paid" onClick={() => markPaid(inv.id)} title="Mark as paid">
+                              <i className="ph ph-check-circle"></i> Mark paid
+                            </button>
+                          )}
+                          <a className="act-link" href={'InvoiceEditor.html?id=' + inv.id}>Edit</a>
+                          <a className="act-icon" href={'Invoice.html?id=' + inv.id} title="Preview" aria-label="Preview"><i className="ph ph-eye"></i></a>
+                          <button className="act-icon" title="Duplicate" aria-label="Duplicate" onClick={() => location.href = 'InvoiceEditor.html'}><i className="ph ph-copy"></i></button>
+                          <button className="act-icon act-icon--danger" title="Delete" aria-label="Delete" onClick={() => remove(inv.id)}><i className="ph ph-trash"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            </div>
+          )}
+        </div>
+      </section>
+    </window.AppShell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Invoices />);
+</script>
+</body>
+</html>

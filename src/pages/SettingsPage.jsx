@@ -634,10 +634,16 @@ export default function SettingsPage() {
           DESKTOP LAYOUT
          ══════════════════════════════════════════ */}
       <div className="d-only">
-        <div className={styles.saveBar}>
-          <Button variant="primary" size="md" icon={<FloppyDisk size={15} />} loading={saving} onClick={handleSave}>
-            Save changes
-          </Button>
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Settings</h1>
+            <p className="page-header__desc">Manage your business profile, security, and notifications.</p>
+          </div>
+          <div className="page-header__right">
+            <Button variant="primary" size="md" icon={<FloppyDisk size={15} />} loading={saving} onClick={handleSave}>
+              Save changes
+            </Button>
+          </div>
         </div>
 
         <div className={styles.sections}>

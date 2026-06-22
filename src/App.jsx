@@ -1,22 +1,5 @@
-import { Routes, Route, Navigate, Link } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { Plus, MagnifyingGlass } from '@phosphor-icons/react'
-
-const newInvoiceBtn = (
-  <Link to="/invoices/new" className="app-btn-primary">
-    <Plus size={15} /> New invoice
-  </Link>
-)
-
-const dashboardActions = (
-  <>
-    <div className="topbar-search">
-      <MagnifyingGlass size={15} className="topbar-search__icon" />
-      <input type="search" placeholder="Search…" aria-label="Search" className="topbar-search__input" />
-    </div>
-    {newInvoiceBtn}
-  </>
-)
 
 // Pages
 import LandingPage from '@/pages/LandingPage'
@@ -59,19 +42,19 @@ export default function App() {
       <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
 
       {/* Private — wrapped in AppShell */}
-      <Route path="/dashboard" element={<PrivateRoute><AppShell title="Dashboard" description="Overview of your invoicing activity" actions={dashboardActions}><DashboardPage /></AppShell></PrivateRoute>} />
-      <Route path="/invoices" element={<PrivateRoute><AppShell title="Invoices" description="Create, manage, and track every invoice in one place."><InvoicesPage /></AppShell></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><AppShell><DashboardPage /></AppShell></PrivateRoute>} />
+      <Route path="/invoices" element={<PrivateRoute><AppShell><InvoicesPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/new" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell><InvoicePreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute><AppShell><ClientsPage /></AppShell></PrivateRoute>} />
       <Route path="/clients/:id/invoices" element={<PrivateRoute><AppShell hideTabbar><ClientInvoicesPage /></AppShell></PrivateRoute>} />
-      <Route path="/proposals" element={<PrivateRoute><AppShell title="Proposals" description="Build and send project proposals."><ProposalsPage /></AppShell></PrivateRoute>} />
+      <Route path="/proposals" element={<PrivateRoute><AppShell><ProposalsPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals/new"      element={<PrivateRoute><AppShell hideTabbar><ProposalEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals/:id/edit" element={<PrivateRoute><AppShell hideTabbar><ProposalEditorPage /></AppShell></PrivateRoute>} />
-      <Route path="/time"     element={<PrivateRoute><AppShell title="Time" description="Log hours and convert them to invoice line items."><TimeTrackerPage /></AppShell></PrivateRoute>} />
-      <Route path="/settings" element={<PrivateRoute><AppShell title="Settings" description="Manage your business profile, security, and notifications."><SettingsPage /></AppShell></PrivateRoute>} />
+      <Route path="/time"     element={<PrivateRoute><AppShell><TimeTrackerPage /></AppShell></PrivateRoute>} />
+      <Route path="/settings" element={<PrivateRoute><AppShell><SettingsPage /></AppShell></PrivateRoute>} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

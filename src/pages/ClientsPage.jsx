@@ -373,12 +373,12 @@ export default function ClientsPage() {
         {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
 
         {/* Sticky header */}
-        <div className={styles.deskHeader}>
-          <div className={styles.deskHeaderLeft}>
-            <h1 className={styles.deskTitle}>Clients</h1>
-            <p className={styles.deskDesc}>Everyone you bill, with their history at a glance.</p>
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Clients</h1>
+            <p className="page-header__desc">Everyone you bill, with their history at a glance.</p>
           </div>
-          <div className={styles.deskHeaderRight}>
+          <div className="page-header__right">
             <div className={styles.searchWrap}>
               <MagnifyingGlass size={15} className={styles.searchIcon} />
               <input

@@ -1,0 +1,35 @@
+/* ── Typography tokens ─────────────────────────────────────
+   Three families. A compact size ramp tuned for a dense,
+   information-rich productivity UI — most body text is 13–14px.
+   ───────────────────────────────────────────────────────── */
+:root {
+  /* ── Families ── */
+  --font-body:    'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-base:    var(--font-body);
+
+  /* ── Sizes ── */
+  --text-xs:   10px;   /* pills, badges, meta, table headers */
+  --text-sm:   11px;   /* uppercase eyebrows, section labels */
+  --text-body: 13px;   /* secondary body, hints, card descriptions */
+  --text-md:   14px;   /* primary body, card titles, row labels */
+  --text-lg:   15px;   /* form inputs, CTA text */
+  --text-xl:   16px;   /* modal + sheet titles */
+  --text-2xl:  20px;   /* sub-headings */
+  --text-3xl:  22px;   /* page titles, empty-state headings */
+  --text-4xl:  28px;   /* large page hero title */
+  --text-display: 40px;/* marketing display (paired w/ Instrument Serif) */
+
+  /* ── Weights ── Plus Jakarta carries 400–800 */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+
+  /* ── Semantic line-heights ── */
+  --leading-tight: 1.15;  /* large titles */
+  --leading-snug:  1.45;  /* card titles, UI text */
+  --leading-body:  1.6;   /* paragraphs */
+}

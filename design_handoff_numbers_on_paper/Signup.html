@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Numbers on Paper — Create your account</title>
+<link rel="icon" href="numbers-on-paper-assets/favicon/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/fonts.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/colors.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/typography.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/spacing.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/effects.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/base.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/components/ui.css" />
+<link rel="stylesheet" href="app/app.css" />
+<link rel="stylesheet" href="app/forms.css" />
+<link rel="stylesheet" href="app/auth.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  (function () { const real = ReactDOM.createRoot.bind(ReactDOM);
+    ReactDOM.createRoot = function () { return { render() {}, unmount() {} }; };
+    window.__restoreCreateRoot = function () { ReactDOM.createRoot = real; }; })();
+</script>
+<script src="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/_ds_bundle.js"></script>
+<script>window.__restoreCreateRoot();</script>
+<script type="text/babel" src="app/auth.jsx"></script>
+<script type="text/babel">
+const { Button } = window.TaskmasterProDesignSystem_b94546;
+const { useState } = React;
+
+function Signup() {
+  const [first, setFirst] = useState('');
+  const [last, setLast]   = useState('');
+  const [email, setEmail] = useState('');
+  const [pw, setPw]       = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoad] = useState(false);
+  const [done, setDone]   = useState(false);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!first.trim() || !last.trim()) { setError('Please enter your first and last name.'); return; }
+    if (!email.trim()) { setError('Please enter your email address.'); return; }
+    if (pw.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (pw !== confirm) { setError('Passwords do not match.'); return; }
+    setError(''); setLoad(true);
+    setTimeout(() => { setLoad(false); setDone(true); }, 700);
+  };
+
+  return (
+    <div className="auth-split">
+      <window.AuthBrand />
+      <div className="auth-right">
+        <div className="auth-card">
+          <a className="auth-card-logo" href="Landing Page.html"><img src="numbers-on-paper-assets/lockup/logo-horizontal.svg" alt="Numbers on Paper" /></a>
+
+          {done ? (
+            <div className="auth-success">
+              <div className="auth-success-icon"><i className="ph ph-envelope-open"></i></div>
+              <h1 className="auth-title">Check your email</h1>
+              <p className="auth-sub" style={{ marginBottom: 'var(--space-5)' }}>We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account.</p>
+              <Button variant="primary" block onClick={() => location.href = 'Dashboard.html'}>Continue to dashboard</Button>
+              <p className="auth-switch"><a href="Login.html">Back to sign in</a></p>
+            </div>
+          ) : (
+            <>
+              <div className="auth-badge"><i className="ph ph-sparkle"></i> Free forever — no card needed</div>
+              <h1 className="auth-title">Create your account</h1>
+              <p className="auth-sub">Start sending professional invoices in minutes.</p>
+
+              <form className="auth-form" onSubmit={submit} noValidate>
+                <div className="auth-name-row">
+                  <window.AuthField label="First name" value={first} onChange={setFirst} placeholder="Jane" autoComplete="given-name" autoFocus />
+                  <window.AuthField label="Last name" value={last} onChange={setLast} placeholder="Smith" autoComplete="family-name" />
+                </div>
+                <window.AuthField label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" autoComplete="email" />
+                <window.AuthPasswordField label="Password" value={pw} onChange={setPw} placeholder="Min. 8 characters" autoComplete="new-password" />
+                <window.AuthPasswordField label="Confirm password" value={confirm} onChange={setConfirm} placeholder="Repeat password" autoComplete="new-password" />
+                {error ? <div className="auth-error"><i className="ph ph-warning-circle"></i>{error}</div> : null}
+                <Button type="submit" variant="primary" block disabled={loading}>
+                  {loading ? 'Creating account…' : 'Create free account'}
+                </Button>
+              </form>
+
+              <div className="auth-divider">or</div>
+              <window.GoogleButton>Sign up with Google</window.GoogleButton>
+
+              <p className="auth-switch">Already have an account? <a href="Login.html">Sign in</a></p>
+              <p className="auth-legal">By creating an account you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Signup />);
+</script>
+</body>
+</html>

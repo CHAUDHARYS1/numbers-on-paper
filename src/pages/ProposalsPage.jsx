@@ -125,11 +125,16 @@ export default function ProposalsPage() {
 
       {/* ── Desktop ──────────────────────────────────────────────── */}
       <div className={`d-only ${styles.page}`}>
-        <div className={styles.toolbar}>
-          <Button variant="primary" onClick={() => navigate('/proposals/new')}>
-            <Plus size={16} />
-            New Proposal
-          </Button>
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Proposals</h1>
+            <p className="page-header__desc">Build and send project proposals.</p>
+          </div>
+          <div className="page-header__right">
+            <Button variant="primary" onClick={() => navigate('/proposals/new')}>
+              <Plus size={16} /> New proposal
+            </Button>
+          </div>
         </div>
 
         {loading ? (

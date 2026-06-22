@@ -1,0 +1,13 @@
+/* ═══════════════════════════════════════════════════════════
+   Taskmaster Pro — Global stylesheet entry point.
+   Consumers link THIS one file. It is an @import manifest only —
+   every token + font-face the design system ships is reached
+   from the imports below. Do not add rules here directly.
+   ═══════════════════════════════════════════════════════════ */
+@import url('./tokens/fonts.css');
+@import url('./tokens/colors.css');
+@import url('./tokens/typography.css');
+@import url('./tokens/spacing.css');
+@import url('./tokens/effects.css');
+@import url('./tokens/base.css');
+@import url('./components/ui.css');

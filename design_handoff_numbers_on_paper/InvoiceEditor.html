@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Numbers on Paper — Invoice editor</title>
+<link rel="icon" href="numbers-on-paper-assets/favicon/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/fonts.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/colors.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/typography.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/spacing.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/effects.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/tokens/base.css" />
+<link rel="stylesheet" href="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/components/ui.css" />
+<link rel="stylesheet" href="app/app.css" />
+<link rel="stylesheet" href="app/forms.css" />
+<style>
+  .editor-wrap{ max-width:820px; }
+  .pv-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.32); display:flex; align-items:flex-start; justify-content:center; padding:var(--space-7); z-index:100; overflow:auto; animation:pvfade .2s ease; }
+  @keyframes pvfade{ from{ opacity:0 } to{ opacity:1 } }
+  .pv-modal{ width:100%; max-width:880px; }
+  .pv-modal-bar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-4); }
+  .pv-modal-bar .ttl{ color:#fff; font-size:var(--text-lg); font-weight:600; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.1em; }
+  .pv-close{ background:rgba(255,255,255,.14); border:none; color:#fff; width:36px; height:36px; border-radius:var(--radius); cursor:pointer; font-size:18px; display:grid; place-items:center; }
+  .pv-close:hover{ background:rgba(255,255,255,.26); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  (function () { const real = ReactDOM.createRoot.bind(ReactDOM);
+    ReactDOM.createRoot = function () { return { render() {}, unmount() {} }; };
+    window.__restoreCreateRoot = function () { ReactDOM.createRoot = real; }; })();
+</script>
+<script src="_ds/taskmaster-pro-design-system-b9454641-38e8-4179-9b0f-5f011489399c/_ds_bundle.js"></script>
+<script>window.__restoreCreateRoot();</script>
+<script src="app/data.js"></script>
+<script type="text/babel" src="app/shell.jsx"></script>
+<script type="text/babel" src="app/preview.jsx"></script>
+<script type="text/babel">
+const { Button } = window.TaskmasterProDesignSystem_b94546;
+const NOP = window.NOP;
+const { fmt } = NOP;
+const { useState, useMemo, useEffect } = React;
+
+const NOTE_SNIPPETS = [
+  { label: 'Net 14', text: 'Payment is due within 14 days of the invoice date. Thank you for your business!' },
+  { label: 'Net 30', text: 'Payment is due within 30 days. A 1.5% monthly fee applies to balances past due.' },
+  { label: 'Due on receipt', text: 'Payment is due upon receipt of this invoice.' },
+  { label: '50% deposit', text: 'A 50% deposit is required before work begins; the balance is due on completion.' },
+];
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const blankItem = () => ({ id: uid(), description: '', qty: 1, rate: 0 });
+
+function Field({ label, hint, children }) {
+  return <div className="fld"><label className="fld-label">{label}</label>{children}{hint ? <span className="fld-hint">{hint}</span> : null}</div>;
+}
+
+function Editor() {
+  const params = new URLSearchParams(location.search);
+  const existing = useMemo(() => NOP.invoices.find(i => i.id === params.get('id')), []);
+  const isNew = !existing;
+
+  const seedClient = existing ? existing.client : '';
+  const c0 = NOP.clients[seedClient] || {};
+
+  const [number] = useState(existing ? existing.invoice_number : 'INV-0044');
+  const [status, setStatus]   = useState(existing ? existing.status : 'draft');
+  const [issue, setIssue]     = useState(existing ? existing.issue_date : NOP.TODAY);
+  const [due, setDue]         = useState(existing ? existing.due_date : '2026-06-27');
+  const [clientKey, setClientKey] = useState(seedClient);
+  const [bill, setBill] = useState({ name: c0.name || '', contact: c0.contact || '', email: c0.email || '', city: c0.city || '' });
+  const [items, setItems] = useState(existing ? existing.items.map(it => ({ id: uid(), ...it })) : [blankItem()]);
+  const [showTax, setShowTax] = useState(existing ? (existing.tax || 0) > 0 : true);
+  const [taxRate, setTaxRate] = useState(existing ? Math.round((existing.tax || 0) * 100) : 7);
+  const [showNotes, setShowNotes] = useState(true);
+  const [notes, setNotes] = useState('Payment is due within 14 days of the invoice date. Thank you for your business!');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
+
+  useEffect(() => {
+    const h = e => { if (e.key === 'Escape') setPreviewOpen(false); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, []);
+
+  const pickClient = (key) => {
+    setClientKey(key);
+    const c = NOP.clients[key];
+    if (c) setBill({ name: c.name, contact: c.contact, email: c.email, city: c.city });
+  };
+
+  const setItem = (id, field, val) => setItems(its => its.map(it => it.id === id ? { ...it, [field]: val } : it));
+  const addItem = () => setItems(its => [...its, blankItem()]);
+  const delItem = (id) => setItems(its => its.length > 1 ? its.filter(it => it.id !== id) : its);
+
+  const lineItems = items.map(it => ({ ...it, qty: +it.qty || 0, rate: +it.rate || 0, amount: (+it.qty || 0) * (+it.rate || 0) }));
+  const subtotal = lineItems.reduce((s, it) => s + it.amount, 0);
+  const taxAmt = showTax ? +(subtotal * (taxRate / 100)).toFixed(2) : 0;
+  const total = +(subtotal + taxAmt).toFixed(2);
+
+  const docData = {
+    invoice_number: number, issue_date: issue, due_date: due, status,
+    billFrom: NOP.business, billTo: bill, items: lineItems,
+    subtotal, taxRate: taxRate / 100, taxAmt, total, showTax, notes: showNotes ? notes : '',
+  };
+
+  const save = () => { setSavedFlash(true); setTimeout(() => location.href = 'Invoices.html', 650); };
+
+  const actions = (
+    <>
+      <Button variant="ghost" onClick={() => setPreviewOpen(true)}><i className="ph ph-eye" style={{ fontSize: 15 }}></i> Preview</Button>
+      <Button variant="primary" onClick={save}>
+        <i className={'ph ' + (savedFlash ? 'ph-check' : 'ph-floppy-disk')} style={{ fontSize: 15 }}></i>
+        {savedFlash ? 'Saved' : (isNew ? 'Save invoice' : 'Save changes')}
+      </Button>
+    </>
+  );
+
+  return (
+    <window.AppShell active="invoices" title={isNew ? 'New invoice' : 'Edit invoice'}
+                     description={isNew ? 'Fill in the details, preview, and save.' : number + ' · ' + (bill.name || 'Client')} actions={actions} maxWidth={820}>
+      <div className="editor-wrap stack" style={{ gap: 'var(--space-6)' }}>
+        <a className="back-link" href="Invoices.html"><i className="ph ph-arrow-left"></i> Back to invoices</a>
+
+        {/* Invoice details */}
+        <section className="card">
+          <div className="card-head"><h2 className="card-title">Invoice details</h2></div>
+          <div className="card-body">
+            <div className="stack">
+              <div className="row2">
+                <Field label="Invoice number"><input className="fld-input fld-mono" value={number} readOnly /></Field>
+                <Field label="Status">
+                  <select className="fld-select" value={status} onChange={e => setStatus(e.target.value)}>
+                    <option value="draft">Draft</option><option value="unpaid">Unpaid</option>
+                    <option value="paid">Paid</option><option value="overdue">Overdue</option>
+                  </select>
+                </Field>
+              </div>
+              <div className="row2">
+                <Field label="Issue date"><input className="fld-input fld-mono" type="date" value={issue} onChange={e => setIssue(e.target.value)} /></Field>
+                <Field label="Due date"><input className="fld-input fld-mono" type="date" value={due} onChange={e => setDue(e.target.value)} /></Field>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bill to */}
+        <section className="card">
+          <div className="card-head"><h2 className="card-title">Bill to</h2></div>
+          <div className="card-body">
+            <div className="stack">
+              <Field label="Saved client" hint="Pick a saved client to autofill, or type a new one below.">
+                <select className="fld-select" value={clientKey} onChange={e => pickClient(e.target.value)}>
+                  <option value="">New client…</option>
+                  {Object.entries(NOP.clients).map(([k, c]) => <option key={k} value={k}>{c.name}</option>)}
+                </select>
+              </Field>
+              <div className="row2">
+                <Field label="Client name"><input className="fld-input" placeholder="Company or person" value={bill.name} onChange={e => setBill(b => ({ ...b, name: e.target.value }))} /></Field>
+                <Field label="Contact"><input className="fld-input" placeholder="Jane Smith" value={bill.contact} onChange={e => setBill(b => ({ ...b, contact: e.target.value }))} /></Field>
+              </div>
+              <div className="row2">
+                <Field label="Email"><input className="fld-input" type="email" placeholder="jane@company.com" value={bill.email} onChange={e => setBill(b => ({ ...b, email: e.target.value }))} /></Field>
+                <Field label="City"><input className="fld-input" placeholder="City, ST" value={bill.city} onChange={e => setBill(b => ({ ...b, city: e.target.value }))} /></Field>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Line items */}
+        <section className="card">
+          <div className="card-head">
+            <h2 className="card-title">Line items</h2>
+            <Button variant="ghost" size="sm" onClick={addItem}><i className="ph ph-plus"></i> Add item</Button>
+          </div>
+          <div className="card-body" style={{ padding: 0 }}>
+            <div className="li-table">
+              <div className="li-head">
+                <span>Description</span><span>Notes</span><span style={{ textAlign: 'right' }}>Qty</span>
+                <span style={{ textAlign: 'right' }}>Rate</span><span style={{ textAlign: 'right' }}>Amount</span><span></span>
+              </div>
+              {lineItems.map(it => (
+                <div className="li-row" key={it.id}>
+                  <input className="li-cell" placeholder="e.g. Brand identity system" value={it.description} onChange={e => setItem(it.id, 'description', e.target.value)} />
+                  <input className="li-cell" placeholder="Optional detail" value={it.note || ''} onChange={e => setItem(it.id, 'note', e.target.value)} />
+                  <input className="li-cell li-num" type="number" min="0" value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} />
+                  <input className="li-cell li-num" type="number" min="0" value={it.rate} onChange={e => setItem(it.id, 'rate', e.target.value)} />
+                  <span className="li-amount">{fmt(it.amount)}</span>
+                  <button className="li-del" onClick={() => delItem(it.id)} disabled={items.length === 1} aria-label="Remove item"><i className="ph ph-trash"></i></button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Totals & options */}
+        <section className="card">
+          <div className="card-head"><h2 className="card-title">Totals &amp; options</h2></div>
+          <div className="card-body">
+            <div className="opt-toggles">
+              <label className="opt-toggle"><window.Switch checked={showTax} onChange={setShowTax} /> Tax</label>
+              <label className="opt-toggle"><window.Switch checked={showNotes} onChange={setShowNotes} /> Notes &amp; terms</label>
+            </div>
+            {showTax && (
+              <div className="row2" style={{ maxWidth: 360 }}>
+                <Field label="Tax rate (%)"><input className="fld-input fld-mono" type="number" min="0" max="100" step="0.1" value={taxRate} onChange={e => setTaxRate(+e.target.value || 0)} /></Field>
+              </div>
+            )}
+            <div className="totals">
+              <div className="total-row"><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
+              {showTax && <div className="total-row"><span>Tax ({taxRate}%)</span><span>{fmt(taxAmt)}</span></div>}
+              <div className="total-row total-grand"><span>Grand total</span><span>{fmt(total)}</span></div>
+            </div>
+          </div>
+        </section>
+
+        {/* Notes */}
+        {showNotes && (
+          <section className="card">
+            <div className="card-head"><h2 className="card-title">Notes &amp; terms</h2></div>
+            <div className="card-body">
+              <textarea className="fld-textarea" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Payment terms, thank-you note, or any additional info…"></textarea>
+              <div className="snips">
+                <span className="snips-label">Quick fill:</span>
+                {NOTE_SNIPPETS.map(s => <button key={s.label} className="snip" onClick={() => setNotes(s.text)}>{s.label}</button>)}
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+
+      {previewOpen && (
+        <div className="pv-overlay" onClick={() => setPreviewOpen(false)}>
+          <div className="pv-modal" onClick={e => e.stopPropagation()}>
+            <div className="pv-modal-bar">
+              <span className="ttl">Preview</span>
+              <button className="pv-close" onClick={() => setPreviewOpen(false)} aria-label="Close"><i className="ph ph-x"></i></button>
+            </div>
+            <window.InvoiceDoc data={docData} />
+          </div>
+        </div>
+      )}
+    </window.AppShell>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Editor />);
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed } from '@phosphor-icons/react'
+import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, MagnifyingGlass } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import Badge from '@/components/ui/Badge'
@@ -200,6 +200,21 @@ export default function DashboardPage() {
 
       {/* ── Desktop layout ─────────────────────────────────────── */}
       <div className="d-only">
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Dashboard</h1>
+            <p className="page-header__desc">Overview of your invoicing activity.</p>
+          </div>
+          <div className="page-header__right">
+            <div className="topbar-search">
+              <MagnifyingGlass size={15} className="topbar-search__icon" />
+              <input type="search" placeholder="Search…" aria-label="Search" className="topbar-search__input" />
+            </div>
+            <Link to="/invoices/new" className="app-btn-primary">
+              <Plus size={15} /> New invoice
+            </Link>
+          </div>
+        </div>
         {/* Stats */}
         <div className={styles.statsGrid}>
           {STATS.map(({ label, value, Icon, color, sub }) => (

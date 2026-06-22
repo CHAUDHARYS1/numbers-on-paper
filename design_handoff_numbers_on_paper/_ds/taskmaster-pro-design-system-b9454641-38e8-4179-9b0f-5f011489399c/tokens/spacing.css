@@ -1,0 +1,22 @@
+/* ── Spacing & radius tokens ───────────────────────────────
+   An 8px-derived scale (with a 4px base step). Map every gap or
+   pad to the nearest token — never invent 10px / 18px values.
+   ───────────────────────────────────────────────────────── */
+:root {
+  --space-1: 4px;    /* tight gaps, badge padding */
+  --space-2: 8px;    /* icon-to-text, small row gaps */
+  --space-3: 12px;   /* row vertical pad, card internal gap */
+  --space-4: 16px;   /* page horizontal margin, section pad */
+  --space-5: 20px;   /* card horizontal padding */
+  --space-6: 24px;   /* large internal padding, sidebar pad */
+  --space-7: 28px;   /* between sections */
+  --space-8: 32px;   /* bottom scroll clearance */
+
+  /* ── Radius ── 5px is the universal card/button/pill radius.
+        Larger radii are reserved exceptions; circle for avatars. */
+  --radius-sm:     3px;   /* progress bars, drag handles, dots */
+  --radius:        5px;   /* cards, buttons, modals, pills */
+  --radius-md:     5px;   /* alias */
+  --radius-lg:     8px;   /* shortcut sheet, special input boxes */
+  --radius-circle: 50%;   /* avatars, circular buttons */
+}
