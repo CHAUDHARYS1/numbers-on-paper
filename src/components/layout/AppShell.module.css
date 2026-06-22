@@ -166,6 +166,36 @@
   flex-shrink: 0;
 }
 
+.topbarSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.topbarSearchIcon {
+  position: absolute;
+  left: 11px;
+  color: var(--ink-4);
+  pointer-events: none;
+}
+.topbarSearchInput {
+  height: 36px;
+  width: 220px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  padding: 0 12px 0 32px;
+  font-size: var(--text-md);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s, width .2s;
+}
+.topbarSearchInput::placeholder { color: var(--ink-4); }
+.topbarSearchInput:focus {
+  border-color: var(--accent);
+  width: 280px;
+}
+.topbarSearchInput::-webkit-search-cancel-button { display: none; }
+
 /* Content area */
 .content {
   padding: var(--space-7) var(--space-8) var(--space-8);
