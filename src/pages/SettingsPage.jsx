@@ -397,6 +397,7 @@ export default function SettingsPage() {
             <div>
               <div className="m-eyebrow">Account</div>
               <h1 className="m-title">Settings</h1>
+              <p className="m-sub">Manage your profile, security, and notifications.</p>
             </div>
           </div>
         </div>

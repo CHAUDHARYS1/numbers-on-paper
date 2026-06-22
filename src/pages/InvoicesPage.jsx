@@ -147,6 +147,7 @@ export default function InvoicesPage() {
             <div>
               <div className="m-eyebrow">Invoices</div>
               <h1 className="m-title">Invoices</h1>
+              <p className="m-sub">Create, manage, and track every invoice.</p>
             </div>
             <Link to="/invoices/new" className="m-iconbtn m-iconbtn--accent" aria-label="New invoice">
               <Plus size={22} weight="bold" />

@@ -72,6 +72,7 @@ export default function DashboardPage() {
             <div>
               <div className="m-eyebrow">{greeting()}</div>
               <h1 className="m-title">{firstName}</h1>
+              <p className="m-sub">Overview of your invoicing activity.</p>
             </div>
             <Link to="/invoices/new" className="m-iconbtn m-iconbtn--accent" aria-label="New invoice">
               <Plus size={22} weight="bold" />

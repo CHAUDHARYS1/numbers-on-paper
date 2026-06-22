@@ -271,6 +271,7 @@ export default function ClientsPage() {
             <div>
               <div className="m-eyebrow">Clients</div>
               <h1 className="m-title">Clients</h1>
+              <p className="m-sub">Everyone you bill, with their history at a glance.</p>
             </div>
             <button className="m-iconbtn m-iconbtn--accent" onClick={() => setAddOpen(true)} aria-label="Add client">
               <Plus size={22} weight="bold" />
