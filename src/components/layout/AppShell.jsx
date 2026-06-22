@@ -111,14 +111,16 @@ export default function AppShell({ children, bare, title, description, actions, 
           <>
             {(title || actions) && (
               <header className={styles.topbar}>
-                <div className={styles.topbarHead}>
-                  {title && <h1 className={styles.pageTitle}>{title}</h1>}
-                  {description && <p className={styles.pageDesc}>{description}</p>}
+                <div className={styles.topbarInner}>
+                  <div className={styles.topbarHead}>
+                    {title && <h1 className={styles.pageTitle}>{title}</h1>}
+                    {description && <p className={styles.pageDesc}>{description}</p>}
+                  </div>
+                  {actions && <div className={styles.topbarActions}>{actions}</div>}
                 </div>
-                {actions && <div className={styles.topbarActions}>{actions}</div>}
               </header>
             )}
-            <div className={styles.content} style={maxWidth ? { maxWidth, margin: '0 auto', width: '100%' } : {}}>
+            <div className={styles.content}>
               {children}
             </div>
           </>
