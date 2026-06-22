@@ -31,18 +31,11 @@
 
 /* ── Mobile layout ───────────────────────────────────────────── */
 .mobileBody {
+  /* extra clearance for the fixed action bar */
   padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important;
 }
 
-.statusBanner { margin-bottom: 16px; }
-
-.mobileDoc {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,.10);
-}
-
-/* Fixed bottom action bar (above tab bar) */
+/* Fixed bottom action bar */
 .mobileActionbar {
   position: fixed;
   left: 0; right: 0;
@@ -50,33 +43,31 @@
   z-index: 35;
   display: flex;
   gap: 10px;
-  padding: 12px 18px;
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  backdrop-filter: saturate(1.5) blur(14px);
-  -webkit-backdrop-filter: saturate(1.5) blur(14px);
+  padding: 14px 18px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  background: var(--card);
   border-top: 1px solid var(--line);
 }
 
 /* Actions sheet rows */
-.actList { display: flex; flex-direction: column; padding: 0 !important; }
+.actList { display: flex; flex-direction: column; }
 
 .actRow {
-  display: flex; align-items: center; gap: 14px;
-  width: 100%; padding: 12px 0; border: none; background: none;
-  font-family: var(--font-body); font-size: 16px; font-weight: 500;
-  color: var(--ink); cursor: pointer; border-radius: 0;
+  display: flex; align-items: center; gap: 16px;
+  width: 100%; padding: 16px 0; border: none; background: none;
+  font-family: var(--font-body); font-size: 17px; font-weight: 500;
+  color: var(--ink); cursor: pointer;
   border-bottom: 1px solid var(--line-soft);
   transition: opacity .12s; text-align: left;
 }
 .actList .actRow:last-child { border-bottom: none; }
-.actRow:active { opacity: .55; }
+.actRow:active { opacity: .5; }
 
 .actRowIc {
-  width: 40px; height: 40px; border-radius: 12px;
-  background: var(--paper-2);
+  width: 28px;
   display: grid; place-items: center;
   color: var(--ink-2); flex-shrink: 0;
 }
 
 .actRowDanger { color: var(--red); }
-.actRowIcDanger { background: var(--red-tint); color: var(--red); }
+.actRowIcDanger { color: var(--red); }
