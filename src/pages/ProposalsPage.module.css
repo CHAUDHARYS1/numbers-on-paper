@@ -91,3 +91,100 @@
 .iconBtn:hover { background: var(--paper-2); color: var(--ink); }
 .iconBtnDanger:hover { background: var(--red-tint); color: var(--red); }
 .iconBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Mobile card list (hidden on desktop) ──────────────────── */
+.cardList { display: none; flex-direction: column; gap: var(--space-3); }
+
+.propCard {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: background .12s;
+}
+.propCard:hover   { background: var(--paper-2); }
+.propCard:active  { background: var(--surface);  }
+.propCard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+
+.propCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.propCardNum {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  color: var(--ink-4);
+}
+.propCardTitle {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  line-height: 1.3;
+}
+.propCardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+.propCardClient {
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.propCardRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+.propCardDate {
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+.propCardDel {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--ink-4);
+  cursor: pointer;
+  transition: color .12s, background .12s;
+  flex-shrink: 0;
+}
+.propCardDel:hover { color: var(--red); background: var(--red-tint); }
+.propCardDel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Mobile breakpoint ─────────────────────────────────────── */
+@media (max-width: 880px) {
+  .page {
+    padding: var(--space-5) var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .toolbar {
+    justify-content: stretch;
+  }
+  .toolbar > * { width: 100%; justify-content: center; }
+
+  .tableWrap { display: none; }
+  .cardList   { display: flex; }
+
+  .empty { padding: 40px var(--space-5); }
+}

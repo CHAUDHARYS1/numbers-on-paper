@@ -66,6 +66,8 @@ export default function ProposalsPage() {
           </CardBody>
         </Card>
       ) : (
+        <>
+        {/* Desktop: table */}
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -109,6 +111,50 @@ export default function ProposalsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile: card list */}
+        <div className={styles.cardList}>
+          {proposals.map(p => {
+            const status = p.data?.status || 'draft'
+            const title  = p.data?.title || 'Untitled'
+            const client = p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || null
+            const date   = new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            const num    = `PROP-${String(p.proposal_no).padStart(4, '0')}`
+            return (
+              <div
+                key={p.id}
+                className={styles.propCard}
+                onClick={() => navigate(`/proposals/${p.id}/edit`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && navigate(`/proposals/${p.id}/edit`)}
+              >
+                <div className={styles.propCardTop}>
+                  <span className={styles.propCardNum}>{num}</span>
+                  <span className={`prop-badge prop-badge--${status}`}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </span>
+                </div>
+                <div className={styles.propCardTitle}>{title}</div>
+                <div className={styles.propCardMeta}>
+                  <span className={styles.propCardClient}>{client || <span style={{ color: 'var(--ink-4)' }}>No client</span>}</span>
+                  <div className={styles.propCardRight}>
+                    <span className={styles.propCardDate}>{date}</span>
+                    <button
+                      className={styles.propCardDel}
+                      onClick={e => { e.stopPropagation(); setDeleteTarget(p) }}
+                      aria-label="Delete proposal"
+                      type="button"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        </>
       )}
 
       <ConfirmModal
