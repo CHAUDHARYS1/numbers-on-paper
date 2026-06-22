@@ -207,6 +207,7 @@
   transition: color .15s;
 }
 .tabOn { color: var(--accent); }
+.tabbarHidden { display: none !important; }
 
 
 /* ── Responsive ────────────────────────────────────────────── */

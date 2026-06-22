@@ -36,7 +36,7 @@ function Avatar({ name, size = 'md' }) {
   )
 }
 
-export default function AppShell({ children, bare, title, description, actions, maxWidth }) {
+export default function AppShell({ children, bare, title, description, actions, maxWidth, hideTabbar }) {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
@@ -125,7 +125,7 @@ export default function AppShell({ children, bare, title, description, actions, 
         )}
 
         {/* Mobile bottom tab bar */}
-        <nav className={styles.tabbar} aria-label="Main navigation">
+        <nav className={`${styles.tabbar}${hideTabbar ? ` ${styles.tabbarHidden}` : ''}`} aria-label="Main navigation">
           {MOB_TABS.map(({ to, Icon, label }) => (
             <NavLink
               key={to}

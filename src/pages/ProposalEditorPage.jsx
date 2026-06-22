@@ -10,7 +10,7 @@ import { getProposal, createProposal, updateProposal } from '@/lib/proposals'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import Switch from '@/components/ui/Switch'
-import ProposalDoc from '@/components/proposal/ProposalPreview'
+import ProposalDoc, { MobileProposalDoc } from '@/components/proposal/ProposalPreview'
 
 // Business info shown in the paper header
 const BUSINESS = {
@@ -413,8 +413,13 @@ export default function ProposalEditorPage() {
           type="button"
           aria-label="Back to proposals"
         >
-          <ArrowLeft size={14} /> Proposals
+          <ArrowLeft size={14} /> Back
         </button>
+        {/* Mobile-only title block */}
+        <div className="pe-mob-head">
+          <h1 className="pe-mob-title">New proposal</h1>
+          <p className="pe-mob-desc">Fill in the details, toggle sections, preview.</p>
+        </div>
         <div className="pe-topbar-actions">
           <Button variant="ghost" size="sm" onClick={() => setPreviewOpen(true)}>
             <ArrowsOut size={15} /> Preview
@@ -618,7 +623,8 @@ export default function ProposalEditorPage() {
               </Button>
             }
           >
-            <div style={{ margin: '0 calc(-1 * var(--space-5))' }}>
+            {/* Desktop: table layout */}
+            <div className="m-desktop-only" style={{ margin: '0 calc(-1 * var(--space-5))' }}>
               <div className="li-table">
                 <div className="li-head">
                   <span>Description</span>
@@ -630,64 +636,55 @@ export default function ProposalEditorPage() {
                 </div>
                 {lineItems.map(it => (
                   <div className="li-row" key={it.id}>
-                    <input
-                      className="li-cell"
-                      placeholder="e.g. UX/UI design system"
-                      value={it.description}
-                      onChange={e => setItem(it.id, 'description', e.target.value)}
-                    />
-                    <input
-                      className="li-cell"
-                      placeholder="Optional detail"
-                      value={it.note || ''}
-                      onChange={e => setItem(it.id, 'note', e.target.value)}
-                    />
-                    <input
-                      className="li-cell li-num"
-                      type="number"
-                      min="0"
-                      value={it.qty}
-                      onChange={e => setItem(it.id, 'qty', e.target.value)}
-                    />
-                    <input
-                      className="li-cell li-num"
-                      type="number"
-                      min="0"
-                      value={it.rate}
-                      onChange={e => setItem(it.id, 'rate', e.target.value)}
-                    />
-                    <span className="li-amount">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(it.amount)}
-                    </span>
-                    <button
-                      className="li-del"
-                      onClick={() => delItem(it.id)}
-                      disabled={items.length === 1}
-                      aria-label="Remove item"
-                      type="button"
-                    >
-                      <Trash size={13} />
-                    </button>
+                    <input className="li-cell" placeholder="e.g. UX/UI design system" value={it.description} onChange={e => setItem(it.id, 'description', e.target.value)} />
+                    <input className="li-cell" placeholder="Optional detail" value={it.note || ''} onChange={e => setItem(it.id, 'note', e.target.value)} />
+                    <input className="li-cell li-num" type="number" min="0" value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} />
+                    <input className="li-cell li-num" type="number" min="0" value={it.rate} onChange={e => setItem(it.id, 'rate', e.target.value)} />
+                    <span className="li-amount">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(it.amount)}</span>
+                    <button className="li-del" onClick={() => delItem(it.id)} disabled={items.length === 1} aria-label="Remove item" type="button"><Trash size={13} /></button>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Mobile: stacked item cards */}
+            <div className="m-mobile-only">
+              {lineItems.map((it, idx) => (
+                <div className="m-li" key={it.id}>
+                  <div className="m-li-top">
+                    <span className="m-li-tag">Item {idx + 1}</span>
+                    <button className="m-li-x" onClick={() => delItem(it.id)} disabled={items.length === 1} aria-label="Remove item" type="button"><X size={14} /></button>
+                  </div>
+                  <div className="stack" style={{ gap: 'var(--space-3)' }}>
+                    <input className="fld-input" placeholder="e.g. UX/UI design system" value={it.description} onChange={e => setItem(it.id, 'description', e.target.value)} />
+                    <div className="row2">
+                      <Field label="Qty"><input className="fld-input fld-mono" type="number" min="0" value={it.qty} onChange={e => setItem(it.id, 'qty', e.target.value)} /></Field>
+                      <Field label="Rate"><input className="fld-input fld-mono" type="number" min="0" value={it.rate} onChange={e => setItem(it.id, 'rate', e.target.value)} /></Field>
+                    </div>
+                    <div className="m-li-foot">
+                      <span className="fld-hint" style={{ margin: 0 }}>Amount</span>
+                      <span className="m-li-amt">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(it.amount)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" size="sm" onClick={addItem} type="button" style={{ width: '100%', justifyContent: 'center' }}>
+                <Plus size={14} /> Add item
+              </Button>
+            </div>
+
             <div className="opt-toggles">
               <label className="opt-toggle">
-                <Switch checked={showTax} onChange={setShowTax} /> Apply tax
+                <Switch checked={showTax} onChange={setShowTax} />
+                <div>
+                  <div style={{ fontWeight: 500 }}>Add tax</div>
+                  <div className="fld-hint" style={{ margin: 0 }}>Apply a tax rate to the subtotal</div>
+                </div>
               </label>
               {showTax && (
                 <div style={{ maxWidth: 160 }}>
                   <Field label="Tax rate (%)">
-                    <input
-                      className="fld-input fld-mono"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.1"
-                      value={taxRate}
-                      onChange={e => setTaxRate(+e.target.value || 0)}
-                    />
+                    <input className="fld-input fld-mono" type="number" min="0" max="100" step="0.1" value={taxRate} onChange={e => setTaxRate(+e.target.value || 0)} />
                   </Field>
                 </div>
               )}
@@ -785,7 +782,7 @@ export default function ProposalEditorPage() {
 
       </div>
 
-      {/* ── Fullscreen preview overlay ──────────────────────────── */}
+      {/* ── Preview overlay (fullscreen desktop / bottom sheet mobile) ── */}
       {previewOpen && (
         <div
           className="pv-overlay"
@@ -798,7 +795,8 @@ export default function ProposalEditorPage() {
             <div className="pv-modal-bar">
               <span className="ttl">Preview</span>
               <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                <button className="pv-close" onClick={handlePrint} aria-label="Export PDF" title="Export PDF">
+                {/* Desktop: export PDF + close */}
+                <button className="pv-close m-desktop-only" onClick={handlePrint} aria-label="Export PDF" title="Export PDF">
                   <FilePdf size={18} />
                 </button>
                 <button className="pv-close" onClick={() => setPreviewOpen(false)} aria-label="Close preview">
@@ -806,10 +804,39 @@ export default function ProposalEditorPage() {
                 </button>
               </div>
             </div>
-            <ProposalDoc data={docData} />
+            {/* Desktop: scaled paper */}
+            <div className="pv-body m-desktop-only">
+              <ProposalDoc data={docData} />
+            </div>
+            {/* Mobile: flowing document */}
+            <div className="pv-body m-mobile-only">
+              <MobileProposalDoc data={docData} />
+            </div>
+            {/* Mobile: Export PDF footer */}
+            <div className="pv-foot m-mobile-only">
+              <Button variant="primary" onClick={handlePrint} style={{ width: '100%', height: 48, justifyContent: 'center' }}>
+                <FilePdf size={16} /> Export PDF
+              </Button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ── Mobile bottom action bar ────────────────────────────── */}
+      <div className="m-actionbar">
+        <button className="m-action-preview" onClick={() => setPreviewOpen(true)} type="button">
+          <Eye size={18} /> Preview
+        </button>
+        <button
+          className={`m-action-save${savedFlash ? ' m-action-save--done' : ''}`}
+          onClick={handleSave}
+          disabled={saving}
+          type="button"
+        >
+          {savedFlash ? <Check size={18} /> : <FloppyDisk size={18} />}
+          {savedFlash ? 'Saved' : saving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
     </>
   )
 }

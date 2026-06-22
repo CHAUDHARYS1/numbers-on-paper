@@ -210,3 +210,164 @@ export default function ProposalDoc({ data }) {
     </div>
   )
 }
+
+/* ── Mobile proposal paper ── flowing, no fixed width ───────────── */
+export function MobileProposalDoc({ data }) {
+  const d = data || {}
+  const sec = d.sections || {}
+  const bf = d.preparedBy || {}
+  const bt = d.preparedFor || {}
+  const items = d.items || []
+
+  const blocks = []
+
+  if (sec.intro && (d.introText || '').trim())
+    blocks.push({ key: 'intro', title: 'Introduction',
+      body: <p className="m-pp-text">{d.introText}</p> })
+
+  if (sec.scope && ((d.scopeText || '').trim() || (d.objectives || []).some(o => o.trim())))
+    blocks.push({ key: 'scope', title: 'Scope of work', body: (
+      <div className="m-pp-sec-body">
+        {(d.scopeText || '').trim() && <p className="m-pp-text">{d.scopeText}</p>}
+        {(d.objectives || []).filter(o => o.trim()).length > 0 && (
+          <ul className="m-pp-list m-pp-list--num">
+            {d.objectives.filter(o => o.trim()).map((o, i) => (
+              <li key={i}><span className="m-pp-n">{String(i + 1).padStart(2, '0')}</span><span>{o}</span></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )})
+
+  if (sec.deliverables && (d.deliverables || []).some(x => x.trim()))
+    blocks.push({ key: 'deliverables', title: 'Deliverables', body: (
+      <ul className="m-pp-list m-pp-list--check">
+        {d.deliverables.filter(x => x.trim()).map((x, i) => (
+          <li key={i}>
+            <svg width="14" height="14" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+            <span>{x}</span>
+          </li>
+        ))}
+      </ul>
+    )})
+
+  if (sec.investment)
+    blocks.push({ key: 'investment', title: 'Investment', body: (
+      <div>
+        {items.map((it, i) => (
+          <div className="m-paper-li" key={i}>
+            <div style={{ minWidth: 0 }}>
+              <div className="m-paper-li-desc">{it.description || '—'}</div>
+              <div className="m-paper-li-qty">{it.qty} × {fmt(it.rate)}</div>
+            </div>
+            <div className="m-paper-li-amt">{fmt(it.amount)}</div>
+          </div>
+        ))}
+        <div className="m-paper-tots">
+          <div className="m-paper-tot"><span>Subtotal</span><span>{fmt(d.subtotal)}</span></div>
+          {d.showTax && <div className="m-paper-tot"><span>Tax ({Math.round((d.taxRate || 0) * 100)}%)</span><span>{fmt(d.taxAmt)}</span></div>}
+          <div className="m-paper-tot m-paper-tot--grand"><span>Total</span><span>{fmt(d.total)}</span></div>
+        </div>
+      </div>
+    )})
+
+  if (sec.timeline && (d.timeline || []).some(m => m.phase.trim()))
+    blocks.push({ key: 'timeline', title: 'Timeline', body: (
+      <div className="m-pp-timeline">
+        {d.timeline.filter(m => m.phase.trim()).map((m, i) => (
+          <div className="m-pp-mile" key={i}>
+            <span className="m-pp-dot" aria-hidden="true" />
+            <span className="m-pp-mile-p">{m.phase}</span>
+            <span className="m-pp-mile-d">{m.duration || '—'}</span>
+          </div>
+        ))}
+      </div>
+    )})
+
+  if (sec.terms && (d.termsText || '').trim())
+    blocks.push({ key: 'terms', title: 'Terms & conditions',
+      body: <p className="m-pp-text m-pp-text--sm" style={{ whiteSpace: 'pre-wrap' }}>{d.termsText}</p> })
+
+  if (sec.acceptance)
+    blocks.push({ key: 'acceptance', title: 'Acceptance', body: (
+      <>
+        <p className="m-pp-text m-pp-text--sm">By signing below, you agree to the scope, investment, and terms outlined here.</p>
+        <div className="m-pp-sign">
+          <div className="m-pp-sign-col">
+            <div className="m-pp-sign-line" />
+            <div className="m-pp-sign-lbl">Signature · {bt.name || 'Client'}</div>
+          </div>
+          <div className="m-pp-sign-col">
+            <div className="m-pp-sign-line" />
+            <div className="m-pp-sign-lbl">Date</div>
+          </div>
+        </div>
+      </>
+    )})
+
+  return (
+    <div className="m-paper">
+      {/* Dark header */}
+      <div className="m-paper-top">
+        <div className="m-paper-brand">
+          <div className="m-paper-logo">
+            <img src="/mark/mark-white.svg" alt="" style={{ width: 22, height: 22 }} />
+          </div>
+          <div>
+            <div className="m-paper-biz">{bf.name || 'SC Design & Consultation'}</div>
+            <div className="m-paper-tag">Web Design &amp; Consultation</div>
+          </div>
+        </div>
+        <div className="m-paper-docrow">
+          <div>
+            <div className="m-paper-word">Proposal</div>
+            <div className="m-paper-num">{d.number || 'PROP-0000'}</div>
+          </div>
+          <StatusBadge status={d.status || 'draft'} />
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="m-paper-body">
+        {(d.title || '').trim() && <h2 className="m-pp-title">{d.title}</h2>}
+
+        <div className="m-paper-meta">
+          <div>
+            <div className="m-paper-meta-lab">Prepared for</div>
+            <div className="m-paper-meta-val">
+              <strong>{bt.name || '—'}</strong>
+              {bt.contact && <><br />{bt.contact}</>}
+              {bt.city    && <><br />{bt.city}</>}
+            </div>
+          </div>
+          <div>
+            <div className="m-paper-meta-lab">Prepared by</div>
+            <div className="m-paper-meta-val">
+              <strong>{bf.name}</strong>
+              {bf.line1 && <><br />{bf.line1}</>}
+              {bf.line2 && <><br />{bf.line2}</>}
+            </div>
+          </div>
+          <div>
+            <div className="m-paper-meta-lab">Date</div>
+            <div className="m-paper-meta-val"><strong>{fmtDate(d.issue_date)}</strong></div>
+          </div>
+          <div>
+            <div className="m-paper-meta-lab">Valid until</div>
+            <div className="m-paper-meta-val"><strong>{fmtDate(d.valid_until)}</strong></div>
+          </div>
+        </div>
+
+        {blocks.map((b, i) => (
+          <div className="m-pp-sec" key={b.key}>
+            <div className="m-pp-sec-h">
+              <span className="m-pp-sec-n">{String(i + 1).padStart(2, '0')}</span>
+              <span className="m-pp-sec-t">{b.title}</span>
+            </div>
+            {b.body}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
