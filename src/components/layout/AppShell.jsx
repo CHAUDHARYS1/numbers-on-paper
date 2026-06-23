@@ -98,7 +98,8 @@ export default function AppShell({ children, bare, title, description, actions, 
       {/* Desktop sidebar */}
       <aside className={styles.side}>
         <a href="/dashboard" className={styles.sideLogo} aria-label="Numbers on Paper home">
-          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" />
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoLight} />
+          <img src="/lockup/logo-horizontal-light.svg" alt="Numbers on Paper" className={styles.logoDark} />
         </a>
         {navLinks}
         {userFooter}

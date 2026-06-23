@@ -8,7 +8,7 @@
   gap: var(--space-4);
   padding: var(--space-6) var(--space-8) var(--space-5);
   margin: 0 calc(-1 * var(--space-8));
-  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  background: color-mix(in srgb, var(--bg) 65%, transparent);
   backdrop-filter: saturate(1.6) blur(8px);
   border-bottom: 1px solid var(--line);
   margin-bottom: var(--space-6);

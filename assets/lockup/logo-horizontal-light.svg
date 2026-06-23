@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2260 468" width="2260" height="468">
+  <defs></defs>
+  <g transform="translate(28 84) scale(3.125)">
+    <path d="M20 78 V44 A26 26 0 0 1 72 44 V78 H59 V46 A13 13 0 0 0 33 46 V78 Z" fill="#FFFFFF"></path>
+    <rect x="73" y="67" width="11" height="11" rx="2.5" fill="#0A5FFF"></rect>
+  </g>
+  <text x="424" y="384" font-family="'Space Grotesk',sans-serif" font-weight="600" font-size="210" letter-spacing="-6.3" fill="#FFFFFF">Numbers on Paper</text>
+  <rect x="2197.4" y="350" width="34" height="34" rx="8" fill="#0A5FFF"></rect>
+</svg>

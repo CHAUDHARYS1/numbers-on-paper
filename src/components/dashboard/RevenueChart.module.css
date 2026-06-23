@@ -75,6 +75,19 @@
   align-items: center;
   height: 100%;
   gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: default;
+}
+.barColClickable {
+  cursor: pointer;
+}
+.barColClickable:hover .barFill {
+  opacity: 0.85;
+}
+.barColClickable:hover .barTrack {
+  background: var(--line);
 }
 
 .barAmt {

@@ -1,3 +1,35 @@
+/* ── Month revenue banner ───────────────────────────────────── */
+.monthBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: var(--radius);
+  font-size: var(--text-md);
+  color: var(--ink-2);
+  margin-bottom: var(--space-4);
+}
+.monthBanner strong { color: var(--ink); font-weight: var(--weight-semibold); }
+.monthBannerDismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background .12s;
+  white-space: nowrap;
+}
+.monthBannerDismiss:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
 /* ── Filter bar ────────────────────────────────────────────── */
 .filterbar {
   display: flex;

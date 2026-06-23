@@ -24,7 +24,10 @@
   padding: 0 var(--space-2) var(--space-2);
   margin-bottom: var(--space-6);
 }
-.sideLogo img { height: 24px; width: auto; display: block; }
+.sideLogo img { height: 34px; width: auto; display: block; }
+.logoDark { display: none; }
+:global(html[data-theme="dark"]) .logoLight { display: none; }
+:global(html[data-theme="dark"]) .logoDark  { display: block; }
 
 /* ── Nav ───────────────────────────────────────────────────── */
 .nav {
