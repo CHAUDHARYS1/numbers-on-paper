@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, MagnifyingGlass, Briefcase } from '@phosphor-icons/react'
+import { Plus, MagnifyingGlass, Briefcase, FileText, Scroll } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { getProjects, createProject } from '@/lib/projects'
@@ -294,11 +294,11 @@ export default function ProjectsPage() {
                       <td>
                         {p.linked_invoice_number ? (
                           <span className={styles.linkedChip} onClick={e => { e.stopPropagation(); if (p.linked_invoice_id) navigate(`/invoices/${p.linked_invoice_id}/edit`) }}>
-                            {p.linked_invoice_number}
+                            <FileText size={11} weight="bold" aria-hidden="true" />{p.linked_invoice_number}
                           </span>
                         ) : p.linked_proposal_number ? (
                           <span className={`${styles.linkedChip} ${styles.linkedChipProposal}`} onClick={e => { e.stopPropagation(); if (p.linked_proposal_id) navigate(`/proposals/${p.linked_proposal_id}/edit`) }}>
-                            {p.linked_proposal_number}
+                            <Scroll size={11} weight="bold" aria-hidden="true" />{p.linked_proposal_number}
                           </span>
                         ) : <span className={styles.reminderNone}>—</span>}
                       </td>

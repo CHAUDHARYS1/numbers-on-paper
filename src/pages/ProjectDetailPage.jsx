@@ -17,6 +17,19 @@ function fmtDate(d) {
   if (!d) return '—'
   return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+function isThisWeek(d) {
+  if (!d) return false
+  const date = new Date(d + 'T00:00:00')
+  const today = new Date()
+  const dow = today.getDay()
+  const mon = new Date(today); mon.setDate(today.getDate() - ((dow + 6) % 7)); mon.setHours(0, 0, 0, 0)
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23, 59, 59, 999)
+  return date >= mon && date <= sun
+}
+function isOverdue(d) {
+  if (!d) return false
+  return new Date(d + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0))
+}
 function fmtDateTime(ts) {
   if (!ts) return ''
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -135,11 +148,17 @@ export default function ProjectDetailPage() {
   return (
     <div className={styles.page}>
       {/* ── Header ─────────────────────────────── */}
-      <div className={styles.topRow}>
-        <Link to="/projects" className={styles.backLink}>
-          <ArrowLeft size={14} />
-          <span>Back to projects</span>
-        </Link>
+      <div className={styles.titleRow}>
+        <div className={styles.titleLeft}>
+          <h1 className={styles.title}>{project.name}</h1>
+          {(project.client_name || project.start_date) && (
+            <p className={styles.subtitle}>
+              {project.client_name && <span>{project.client_name}</span>}
+              {project.client_name && project.start_date && <span className={styles.dot}>·</span>}
+              {project.start_date && <span>since {fmtDate(project.start_date)}</span>}
+            </p>
+          )}
+        </div>
         <div className={styles.headerRight}>
           <StatusBadge status={project.status} />
           <div className={styles.statusDropWrap} ref={statusRef}>
@@ -158,19 +177,10 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
-
-      <div className={styles.titleRow}>
-        <div>
-          <h1 className={styles.title}>{project.name}</h1>
-          {(project.client_name || project.start_date) && (
-            <p className={styles.subtitle}>
-              {project.client_name && <span>{project.client_name}</span>}
-              {project.client_name && project.start_date && <span className={styles.dot}>·</span>}
-              {project.start_date && <span>since {fmtDate(project.start_date)}</span>}
-            </p>
-          )}
-        </div>
-      </div>
+      <Link to="/projects" className={styles.backLink}>
+        <ArrowLeft size={14} />
+        <span>Back to projects</span>
+      </Link>
 
       {/* ── Two-column body ────────────────────── */}
       <div className={styles.body}>
@@ -211,12 +221,15 @@ export default function ProjectDetailPage() {
             <ul className={styles.remList}>
               {reminders.map(r => (
                 <li key={r.id} className={[styles.remRow, r.done ? styles.remDone : ''].join(' ')}>
-                  <button className={styles.remCheck} onClick={() => handleToggleReminder(r.id)} aria-label={r.done ? 'Mark incomplete' : 'Mark complete'} type="button">
+                  <button className={[styles.remCheck, r.done ? styles.remCheckDone : ''].join(' ')} onClick={() => handleToggleReminder(r.id)} aria-label={r.done ? 'Mark incomplete' : 'Mark complete'} type="button">
                     {r.done && <Check size={11} weight="bold" />}
                   </button>
                   <div className={styles.remMain}>
                     <span className={styles.remText}>{r.text}</span>
-                    <span className={styles.remDate}>{fmtDate(r.date)}</span>
+                    <span className={[styles.remDate, !r.done && isOverdue(r.date) ? styles.remDateOverdue : ''].join(' ')}>
+                      {fmtDate(r.date)}
+                      {!r.done && isThisWeek(r.date) && <span className={styles.thisWeekChip}>this week</span>}
+                    </span>
                   </div>
                   <button className={styles.remDelete} onClick={() => handleDeleteReminder(r.id)} aria-label="Delete reminder" type="button">
                     <Trash size={13} />

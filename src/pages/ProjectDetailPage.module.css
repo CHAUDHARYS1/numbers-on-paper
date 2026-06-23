@@ -1,27 +1,8 @@
 .loadWrap { display: flex; align-items: center; justify-content: center; padding: 80px; }
 
 .page {
-  max-width: 1016px;
-  padding: var(--space-6) var(--space-8) var(--space-12);
+  padding-bottom: var(--space-12);
 }
-
-/* ── Top row (back link + status controls) ─────────────────── */
-.topRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--text-body);
-  color: var(--ink-4);
-  transition: color .14s;
-}
-.backLink:hover { color: var(--ink); }
 
 .headerRight { display: flex; align-items: center; gap: var(--space-3); }
 
@@ -50,7 +31,14 @@
 .statusDropItemOn { color: var(--accent); font-weight: var(--weight-semibold); }
 
 /* ── Title ─────────────────────────────────────────────────── */
-.titleRow { margin-bottom: var(--space-6); }
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.titleLeft { flex: 1; min-width: 0; }
 .title {
   font-size: 26px;
   font-weight: var(--weight-bold);
@@ -64,6 +52,18 @@
   font-size: var(--text-md); color: var(--ink-4); margin-top: 4px;
 }
 .dot { color: var(--line); }
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  margin-bottom: var(--space-6);
+  margin-top: var(--space-2);
+  transition: color .14s;
+}
+.backLink:hover { color: var(--ink); }
 
 /* ── Two-column body ───────────────────────────────────────── */
 .body {
@@ -116,7 +116,7 @@
 .emptyHint { font-size: var(--text-body); color: var(--ink-4); margin-bottom: var(--space-3); }
 .remList { list-style: none; display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--space-4); }
 .remRow {
-  display: flex; align-items: center; gap: var(--space-3);
+  display: flex; align-items: flex-start; gap: var(--space-3);
   padding: 8px var(--space-3);
   border-radius: var(--radius-sm);
   transition: background .12s;
@@ -126,21 +126,32 @@
 .remDone .remDate { color: var(--ink-4); }
 
 .remCheck {
-  width: 18px; height: 18px; flex-shrink: 0;
+  width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;
   border: 1.5px solid var(--line); border-radius: 4px;
   background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: var(--accent); transition: background .12s, border-color .12s;
 }
 .remCheck:hover { border-color: var(--accent); background: var(--accent-tint); }
+.remCheckDone { background: var(--accent); border-color: var(--accent); color: #fff; }
+.remCheckDone:hover { background: var(--accent-2); border-color: var(--accent-2); }
 
 .remMain { flex: 1; min-width: 0; }
 .remText  { display: block; font-size: var(--text-md); color: var(--ink); }
-.remDate  { display: block; font-size: var(--text-body); color: var(--ink-4); margin-top: 1px; }
+.remDate  { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-body); color: var(--ink-4); margin-top: 2px; }
+.remDateOverdue { color: var(--red); }
+.thisWeekChip {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: var(--weight-bold);
+  padding: 1px 6px; border-radius: 10px;
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  color: var(--green);
+  text-transform: uppercase; letter-spacing: .04em;
+}
 
 .remDelete {
   color: var(--ink-4); background: none; border: none; cursor: pointer;
   opacity: 0; transition: opacity .12s, color .12s;
-  display: flex; align-items: center;
+  display: flex; align-items: center; margin-top: 2px;
 }
 .remRow:hover .remDelete { opacity: 1; }
 .remDelete:hover { color: var(--red); }
@@ -249,5 +260,4 @@
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 720px) {
   .body { grid-template-columns: 1fr; }
-  .page { padding: var(--space-5); }
 }
