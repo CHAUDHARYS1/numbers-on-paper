@@ -99,7 +99,8 @@ export default function AppShell({ children, bare, title, description, actions, 
       {/* Desktop sidebar */}
       <aside className={styles.side}>
         <a href="/dashboard" className={styles.sideLogo} aria-label="Numbers on Paper home">
-          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" />
+          <img src="/lockup/logo-horizontal.svg" alt="Numbers on Paper" className={styles.logoLight} />
+          <img src="/lockup/logo-horizontal-light.svg" alt="Numbers on Paper" className={styles.logoDark} />
         </a>
         {navLinks}
         {userFooter}
@@ -112,14 +113,16 @@ export default function AppShell({ children, bare, title, description, actions, 
           <>
             {(title || actions) && (
               <header className={styles.topbar}>
-                <div className={styles.topbarHead}>
-                  {title && <h1 className={styles.pageTitle}>{title}</h1>}
-                  {description && <p className={styles.pageDesc}>{description}</p>}
+                <div className={styles.topbarInner}>
+                  <div className={styles.topbarHead}>
+                    {title && <h1 className={styles.pageTitle}>{title}</h1>}
+                    {description && <p className={styles.pageDesc}>{description}</p>}
+                  </div>
+                  {actions && <div className={styles.topbarActions}>{actions}</div>}
                 </div>
-                {actions && <div className={styles.topbarActions}>{actions}</div>}
               </header>
             )}
-            <div className={styles.content} style={maxWidth ? { maxWidth, margin: '0 auto', width: '100%' } : {}}>
+            <div className={styles.content}>
               {children}
             </div>
           </>

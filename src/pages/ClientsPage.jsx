@@ -151,6 +151,24 @@ function ClientDetailSheet({ client, onClose }) {
             </div>
           )}
         </div>
+
+        {/* Actions */}
+        <div style={{ padding: '0 18px 28px', display: 'flex', gap: 10 }}>
+          <Link
+            to={`/clients/${client.id}/invoices`}
+            className="m-btn m-btn--ghost"
+            style={{ flex: 1 }}
+          >
+            View invoices
+          </Link>
+          <Link
+            to={`/invoices/new?client=${client.id}`}
+            className="m-btn m-btn--primary"
+            style={{ flex: 1 }}
+          >
+            <Plus size={16} weight="bold" /> New invoice
+          </Link>
+        </div>
       </div>
     </>
   )
@@ -354,7 +372,30 @@ export default function ClientsPage() {
       <div className="d-only">
         {addOpen && <AddClientModal onClose={() => setAddOpen(false)} onSave={handleSave} />}
 
-        {/* Summary bar */}
+        {/* Sticky header */}
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Clients</h1>
+            <p className="page-header__desc">Everyone you bill, with their history at a glance.</p>
+          </div>
+          <div className="page-header__right">
+            <div className={styles.searchWrap}>
+              <MagnifyingGlass size={15} className={styles.searchIcon} />
+              <input
+                className={styles.searchInput}
+                placeholder="Search clients…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                aria-label="Search clients"
+              />
+            </div>
+            <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
+              <Plus size={15} /> Add client
+            </button>
+          </div>
+        </div>
+
+        {/* Summary row */}
         <div className={styles.summary}>
           <div className={styles.summaryItem}>
             <span className={styles.summaryVal}>{enriched.length}</span>
@@ -370,23 +411,6 @@ export default function ClientsPage() {
             <span className={styles.summaryVal} style={{ color: totalOut ? 'var(--amber)' : 'var(--ink)' }}>{fmt0(totalOut)}</span>
             <span className={styles.summaryLbl}>Outstanding</span>
           </div>
-        </div>
-
-        {/* Filter row */}
-        <div className={styles.toolbar}>
-          <div className={styles.searchWrap}>
-            <MagnifyingGlass size={16} className={styles.searchIcon} />
-            <input
-              className={styles.searchInput}
-              placeholder="Search clients…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              aria-label="Search clients"
-            />
-          </div>
-          <button className={styles.btnPrimary} onClick={() => setAddOpen(true)}>
-            <Plus size={15} /> Add client
-          </button>
         </div>
 
         {loading ? (
@@ -433,7 +457,7 @@ export default function ClientsPage() {
                 </div>
                 <div className={styles.cardActions}>
                   <Link to={`/invoices/new?client=${c.id}`} className={styles.cardBtn}><Plus size={13} /> Invoice</Link>
-                  <Link to={`/invoices?client=${c.id}`} className={styles.cardBtn}>View invoices</Link>
+                  <Link to={`/clients/${c.id}/invoices`} className={styles.cardBtn}>View invoices</Link>
                 </div>
               </div>
             ))}

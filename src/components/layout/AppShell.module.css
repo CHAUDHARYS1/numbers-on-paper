@@ -24,7 +24,10 @@
   padding: 0 var(--space-2) var(--space-2);
   margin-bottom: var(--space-6);
 }
-.sideLogo img { height: 24px; width: auto; display: block; }
+.sideLogo img { height: 34px; width: auto; display: block; }
+.logoDark { display: none; }
+:global(html[data-theme="dark"]) .logoLight { display: none; }
+:global(html[data-theme="dark"]) .logoDark  { display: block; }
 
 /* ── Nav ───────────────────────────────────────────────────── */
 .nav {
@@ -128,14 +131,21 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
   padding: var(--space-6) var(--space-8) var(--space-5);
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: saturate(1.6) blur(8px);
   border-bottom: 1px solid var(--line);
+}
+
+.topbarInner {
+  max-width: 1016px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .topbarHead { flex: 1; min-width: 0; }
@@ -159,9 +169,15 @@
   flex-shrink: 0;
 }
 
+
 /* Content area */
 .content {
   padding: var(--space-7) var(--space-8) var(--space-8);
+  max-width: 1016px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .contentBare {

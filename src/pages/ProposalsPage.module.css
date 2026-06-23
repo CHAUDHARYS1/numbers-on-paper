@@ -4,11 +4,6 @@
   gap: var(--space-5);
 }
 
-.toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--space-1);
-}
 
 .loading {
   display: flex;

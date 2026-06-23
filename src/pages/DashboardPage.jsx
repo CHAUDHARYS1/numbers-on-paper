@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed } from '@phosphor-icons/react'
+import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, MagnifyingGlass } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import Badge from '@/components/ui/Badge'
@@ -19,6 +19,12 @@ function greeting() {
   if (h < 12) return 'Good morning'
   if (h < 18) return 'Good afternoon'
   return 'Good evening'
+}
+
+const _today = new Date(); _today.setHours(0, 0, 0, 0)
+function effStatus(inv) {
+  if (inv.status === 'unpaid' && inv.due_date && new Date(inv.due_date + 'T00:00:00') < _today) return 'overdue'
+  return inv.status
 }
 
 function MiniAvatar({ name }) {
@@ -45,22 +51,26 @@ export default function DashboardPage() {
       .then(({ data }) => { setInvoices(data || []); setLoading(false) })
   }, [user])
 
-  const totalPaid   = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total || 0), 0)
-  const totalUnpaid = invoices.filter(i => ['unpaid','overdue'].includes(i.status)).reduce((s, i) => s + (i.total || 0), 0)
-  const draftCount  = invoices.filter(i => i.status === 'draft').length
-  const totalAll    = invoices.reduce((s, i) => s + (i.total || 0), 0)
-  const overdueCount = invoices.filter(i => i.status === 'overdue').length
+  const totalPaid    = invoices.filter(i => effStatus(i) === 'paid').reduce((s, i) => s + (i.total || 0), 0)
+  const totalUnpaid  = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).reduce((s, i) => s + (i.total || 0), 0)
+  const draftCount   = invoices.filter(i => effStatus(i) === 'draft').length
+  const totalAll     = invoices.reduce((s, i) => s + (i.total || 0), 0)
+  const overdueCount = invoices.filter(i => effStatus(i) === 'overdue').length
+  const sentCount    = invoices.filter(i => effStatus(i) !== 'draft').length
+  const openCount    = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).length
+  const thisYear     = new Date().getFullYear().toString()
+  const paidThisYear = invoices.filter(i => effStatus(i) === 'paid' && (i.issue_date || '').startsWith(thisYear)).reduce((s, i) => s + (i.total || 0), 0)
 
-  const outstanding = invoices.filter(i => ['unpaid','overdue'].includes(i.status)).slice(0, 4)
+  const outstanding = invoices.filter(i => ['unpaid','overdue'].includes(effStatus(i))).slice(0, 4)
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'
   const firstName   = displayName.split(' ')[0]
 
   const STATS = [
-    { label: 'Total invoiced',  value: fmt(totalAll),    Icon: TrendUp,        color: 'brand'   },
-    { label: 'Collected',       value: fmt(totalPaid),   Icon: CurrencyDollar, color: 'green'   },
-    { label: 'Outstanding',     value: fmt(totalUnpaid), Icon: Hourglass,      color: 'amber'   },
-    { label: 'Drafts',          value: draftCount,       Icon: FileDashed,     color: 'neutral' },
+    { label: 'Total invoiced',  value: fmt(totalAll),    Icon: TrendUp,        color: 'brand',   sub: `${sentCount} sent`                                   },
+    { label: 'Collected',       value: fmt(totalPaid),   Icon: CurrencyDollar, color: 'green',   sub: `${fmt(paidThisYear)} this year`                      },
+    { label: 'Outstanding',     value: fmt(totalUnpaid), Icon: Hourglass,      color: 'amber',   sub: `${openCount} open`                                   },
+    { label: 'Drafts',          value: draftCount,       Icon: FileDashed,     color: 'neutral', sub: overdueCount > 0 ? `${overdueCount} overdue` : 'none overdue' },
   ]
 
   return (
@@ -140,7 +150,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
@@ -165,7 +175,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
@@ -190,11 +200,29 @@ export default function DashboardPage() {
 
       {/* ── Desktop layout ─────────────────────────────────────── */}
       <div className="d-only">
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Dashboard</h1>
+            <p className="page-header__desc">Overview of your invoicing activity.</p>
+          </div>
+          <div className="page-header__right">
+            <div className="topbar-search">
+              <MagnifyingGlass size={15} className="topbar-search__icon" />
+              <input type="search" placeholder="Search…" aria-label="Search" className="topbar-search__input" />
+            </div>
+            <Link to="/invoices/new" className="app-btn-primary">
+              <Plus size={15} /> New invoice
+            </Link>
+          </div>
+        </div>
         {/* Stats */}
         <div className={styles.statsGrid}>
-          {STATS.map(({ label, value, Icon, color }) => (
+          {STATS.map(({ label, value, Icon, color, sub }) => (
             <div key={label} className={[styles.statCard, styles[`stat_${color}`]].join(' ')}>
-              <div className={styles.statIcon}><Icon size={18} weight="duotone" /></div>
+              <div className={styles.statIconRow}>
+                <div className={styles.statIcon}><Icon size={18} weight="duotone" /></div>
+                {sub && <span className={styles.statSub}>{sub}</span>}
+              </div>
               <div className={styles.statVal}>{value}</div>
               <div className={styles.statLabel}>{label}</div>
             </div>
@@ -213,12 +241,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Outstanding */}
-          {outstanding.length > 0 && (
-            <div className={styles.card}>
-              <div className={styles.cardHead}>
-                <h2 className={styles.cardTitle}>Outstanding</h2>
+          <div className={styles.card}>
+            <div className={styles.cardHead}>
+              <h2 className={styles.cardTitle}>Outstanding</h2>
+              {outstanding.length > 0 && (
                 <Link to="/invoices?status=unpaid" className={styles.cardLink}>View all</Link>
-              </div>
+              )}
+            </div>
+            {outstanding.length > 0 ? (
               <div className={styles.outstandingList}>
                 {outstanding.map(inv => (
                   <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className={styles.outRow}>
@@ -228,13 +258,49 @@ export default function DashboardPage() {
                     </div>
                     <div className={styles.outRight}>
                       <div className={styles.outAmt}>{fmt(inv.total)}</div>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className={styles.caughtUp}>
+                <svg className={styles.catSvg} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  {/* Tail */}
+                  <path d="M72 98 Q90 108 86 90 Q82 76 72 82" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Body */}
+                  <ellipse cx="58" cy="88" rx="26" ry="20" fill="currentColor" opacity=".12"/>
+                  <ellipse cx="58" cy="88" rx="26" ry="20" stroke="currentColor" strokeWidth="3"/>
+                  {/* Head */}
+                  <circle cx="58" cy="58" r="26" fill="currentColor" opacity=".12"/>
+                  <circle cx="58" cy="58" r="26" stroke="currentColor" strokeWidth="3"/>
+                  {/* Left ear */}
+                  <path d="M38 38 L32 22 L48 32Z" fill="currentColor" opacity=".12" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+                  {/* Right ear */}
+                  <path d="M78 38 L84 22 L68 32Z" fill="currentColor" opacity=".12" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/>
+                  {/* Inner ears */}
+                  <path d="M39 36 L35 26 L46 33Z" fill="currentColor" opacity=".25"/>
+                  <path d="M77 36 L81 26 L70 33Z" fill="currentColor" opacity=".25"/>
+                  {/* Eyes — happy squint */}
+                  <path d="M47 55 Q50 51 53 55" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M63 55 Q66 51 69 55" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  {/* Nose */}
+                  <path d="M56 62 L58 60 L60 62 L58 64Z" fill="currentColor" opacity=".6"/>
+                  {/* Mouth */}
+                  <path d="M58 64 Q54 68 52 66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M58 64 Q62 68 64 66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  {/* Whiskers left */}
+                  <line x1="34" y1="61" x2="50" y2="63" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  <line x1="34" y1="65" x2="50" y2="65" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  {/* Whiskers right */}
+                  <line x1="82" y1="61" x2="66" y2="63" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                  <line x1="82" y1="65" x2="66" y2="65" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity=".5"/>
+                </svg>
+                <p className={styles.caughtUpTitle}>You're all caught up!</p>
+                <p className={styles.caughtUpSub}>No outstanding invoices.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Recent invoices */}
@@ -279,7 +345,7 @@ export default function DashboardPage() {
                       </td>
                       <td className={styles.tClient}>{inv.bill_to?.name || '—'}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.issue_date)}</td>
-                      <td><Badge variant={inv.status} /></td>
+                      <td><Badge variant={effStatus(inv)} /></td>
                       <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                     </tr>
                   ))}

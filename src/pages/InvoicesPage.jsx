@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Plus, MagnifyingGlass, Trash, Copy, CheckCircle,
-  Eye, ArrowUp, ArrowDown, ArrowsDownUp
+  Eye, ArrowUp, ArrowDown, ArrowsDownUp, X
 } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
@@ -14,6 +14,12 @@ import styles from './InvoicesPage.module.css'
 const TABS = ['all', 'draft', 'unpaid', 'overdue', 'paid']
 const TAB_LABELS = { all: 'All', draft: 'Drafts', unpaid: 'Due', overdue: 'Overdue', paid: 'Paid' }
 const STATUS_ORDER = { draft: 0, unpaid: 1, overdue: 2, paid: 3 }
+
+const _today = new Date(); _today.setHours(0, 0, 0, 0)
+function effStatus(inv) {
+  if (inv.status === 'unpaid' && inv.due_date && new Date(inv.due_date + 'T00:00:00') < _today) return 'overdue'
+  return inv.status
+}
 
 function fmt(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0)
@@ -38,11 +44,20 @@ export default function InvoicesPage() {
   const { user } = useAuth()
   const toast    = useToast()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const monthParam = searchParams.get('month') // "YYYY-MM" or null
+
+  const monthLabel = (() => {
+    if (!monthParam) return null
+    const [yr, mo] = monthParam.split('-').map(Number)
+    return new Date(yr, mo - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' })
+  })()
 
   const [invoices,      setInvoices]      = useState([])
   const [loading,       setLoading]       = useState(true)
   const [search,        setSearch]        = useState('')
-  const [tab,           setTab]           = useState('all')
+  const [tab,           setTab]           = useState(monthParam ? 'paid' : 'all')
   const [sortBy,        setSortBy]        = useState('created_at')
   const [sortDir,       setSortDir]       = useState('desc')
   const [toDelete,      setToDelete]      = useState(null)
@@ -91,17 +106,23 @@ export default function InvoicesPage() {
   }
 
   const counts = TABS.reduce((acc, t) => {
-    acc[t] = t === 'all' ? invoices.length : invoices.filter(i => i.status === t).length
+    acc[t] = t === 'all' ? invoices.length : invoices.filter(i => effStatus(i) === t).length
     return acc
   }, {})
 
   const filtered = invoices.filter(inv => {
-    const matchTab = tab === 'all' || inv.status === tab
+    const es = effStatus(inv)
+    const matchTab = tab === 'all' || es === tab
     const q = search.toLowerCase()
     const matchSearch = !q ||
       (inv.invoice_number || '').toLowerCase().includes(q) ||
       (inv.bill_to?.name || '').toLowerCase().includes(q)
-    return matchTab && matchSearch
+    const matchMonth = !monthParam || (() => {
+      const [yr, mo] = monthParam.split('-').map(Number)
+      const dt = new Date(inv.issue_date || inv.created_at)
+      return dt.getFullYear() === yr && dt.getMonth() === mo - 1
+    })()
+    return matchTab && matchSearch && matchMonth
   })
 
   const sorted = [...filtered].sort((a, b) => {
@@ -111,7 +132,7 @@ export default function InvoicesPage() {
       case 'client':         av = a.bill_to?.name || '';  bv = b.bill_to?.name || '';  break
       case 'issue_date':     av = a.issue_date || '';     bv = b.issue_date || '';     break
       case 'due_date':       av = a.due_date || '';       bv = b.due_date || '';       break
-      case 'status':         av = STATUS_ORDER[a.status] ?? 0; bv = STATUS_ORDER[b.status] ?? 0; break
+      case 'status':         av = STATUS_ORDER[effStatus(a)] ?? 0; bv = STATUS_ORDER[effStatus(b)] ?? 0; break
       case 'total':          av = Number(a.total) || 0;   bv = Number(b.total) || 0;  break
       default:               av = a.created_at || '';     bv = b.created_at || '';     break
     }
@@ -208,7 +229,7 @@ export default function InvoicesPage() {
             <div className="m-list m-card">
               {sorted.map(inv => {
                 const clientName = inv.bill_to?.name || '—'
-                const dateLabel = inv.due_date && ['unpaid','overdue'].includes(inv.status)
+                const dateLabel = inv.due_date && ['unpaid','overdue'].includes(effStatus(inv))
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
@@ -220,7 +241,7 @@ export default function InvoicesPage() {
                     </div>
                     <div className="m-row-end">
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={inv.status} />
+                      <Badge variant={effStatus(inv)} />
                     </div>
                   </Link>
                 )
@@ -232,6 +253,33 @@ export default function InvoicesPage() {
 
       {/* ── Desktop layout ──────────────────────────────────────── */}
       <div className="d-only">
+        <div className="page-header">
+          <div className="page-header__left">
+            <h1 className="page-header__title">Invoices</h1>
+            <p className="page-header__desc">Create, manage, and track every invoice in one place.</p>
+          </div>
+          <div className="page-header__right">
+            <Link to="/invoices/new" className="app-btn-primary">
+              <Plus size={15} /> New invoice
+            </Link>
+          </div>
+        </div>
+
+        {/* Month revenue banner */}
+        {monthParam && (
+          <div className={styles.monthBanner}>
+            <span>Showing paid invoices for <strong>{monthLabel}</strong></span>
+            <button
+              className={styles.monthBannerDismiss}
+              onClick={() => { setSearchParams({}); setTab('all') }}
+              aria-label="Clear month filter"
+              type="button"
+            >
+              <X size={14} /> Clear filter
+            </button>
+          </div>
+        )}
+
         {/* Filter bar */}
         <div className={styles.filterbar}>
           <div className={styles.searchWrap}>
@@ -258,9 +306,6 @@ export default function InvoicesPage() {
               </button>
             ))}
           </div>
-          <Link to="/invoices/new" className={styles.newBtn}>
-            <Plus size={15} /> New invoice
-          </Link>
         </div>
 
         {/* Table card */}
@@ -305,11 +350,11 @@ export default function InvoicesPage() {
                       <td className={styles.tClient}>{inv.bill_to?.name || '—'}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.issue_date)}</td>
                       <td className={[styles.tDate, styles.hideSmall].join(' ')}>{fmtDate(inv.due_date)}</td>
-                      <td><Badge variant={inv.status} /></td>
+                      <td><Badge variant={effStatus(inv)} /></td>
                       <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                       <td>
                         <div className={styles.rowActs}>
-                          {['unpaid','overdue'].includes(inv.status) && (
+                          {['unpaid','overdue'].includes(effStatus(inv)) && (
                             <button
                               className={styles.actPaid}
                               onClick={() => handleMarkPaid(inv)}

@@ -29,6 +29,13 @@
 .back:hover { color: var(--color-text-primary); }
 .topActions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 
+.unsavedBadge {
+  font-size: 12px; font-weight: 600;
+  color: var(--amber); background: var(--amber-tint);
+  padding: 3px 9px; border-radius: 999px;
+}
+.unsavedHint { color: var(--amber) !important; font-size: 13px; }
+
 /* Preview toggle — desktop only */
 .previewToggle {
   display: flex;
