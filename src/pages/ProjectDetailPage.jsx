@@ -1,0 +1,383 @@
+import { useEffect, useState, useRef } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  ArrowLeft, Plus, Trash, Check, CaretDown,
+  FileText, Scroll, UsersThree
+} from '@phosphor-icons/react'
+import { useAuth } from '@/context/AuthContext'
+import { useToast } from '@/context/ToastContext'
+import { getProject, updateProject } from '@/lib/projects'
+import { supabase } from '@/lib/supabase'
+import { STATUS_OPTS, StatusBadge } from './ProjectsPage'
+import styles from './ProjectDetailPage.module.css'
+
+function genId() { return Math.random().toString(36).slice(2, 10) }
+
+function fmtDate(d) {
+  if (!d) return '—'
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+function fmtDateTime(ts) {
+  if (!ts) return ''
+  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+export default function ProjectDetailPage() {
+  const { id } = useParams()
+  const { user } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  const [project,  setProject]  = useState(null)
+  const [client,   setClient]   = useState(null)
+  const [loading,  setLoading]  = useState(true)
+  const [saving,   setSaving]   = useState(false)
+
+  const [desc,      setDesc]      = useState('')
+  const [descDirty, setDescDirty] = useState(false)
+
+  const [reminders,   setReminders]   = useState([])
+  const [newRemDate,  setNewRemDate]   = useState('')
+  const [newRemText,  setNewRemText]   = useState('')
+  const [addingRem,   setAddingRem]    = useState(false)
+
+  const [notes,     setNotes]     = useState([])
+  const [noteText,  setNoteText]  = useState('')
+  const [addingNote, setAddingNote] = useState(false)
+
+  const [statusOpen, setStatusOpen] = useState(false)
+  const statusRef = useRef(null)
+
+  useEffect(() => {
+    if (!user) return
+    getProject(id).then(({ data, error }) => {
+      if (error || !data) { navigate('/projects'); return }
+      setProject(data)
+      setDesc(data.description || '')
+      setReminders(data.reminders || [])
+      setNotes(data.notes || [])
+      if (data.client_id) {
+        supabase.from('clients').select('id, name, city').eq('id', data.client_id).single()
+          .then(({ data: c }) => setClient(c))
+      }
+      setLoading(false)
+    })
+  }, [id, user, navigate])
+
+  useEffect(() => {
+    const handler = (e) => { if (statusRef.current && !statusRef.current.contains(e.target)) setStatusOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const save = async (patch) => {
+    setSaving(true)
+    const { data, error } = await updateProject(id, { ...patch, last_activity_at: new Date().toISOString() })
+    if (error) toast.error('Failed to save.')
+    else setProject(data)
+    setSaving(false)
+    return !error
+  }
+
+  const handleSaveDesc = async () => {
+    const ok = await save({ description: desc })
+    if (ok) { setDescDirty(false); toast.success('Description saved.') }
+  }
+
+  const handleStatusChange = async (status) => {
+    setStatusOpen(false)
+    const ok = await save({ status })
+    if (ok) setProject(p => ({ ...p, status }))
+  }
+
+  const handleToggleReminder = async (remId) => {
+    const updated = reminders.map(r => r.id === remId ? { ...r, done: !r.done } : r)
+    setReminders(updated)
+    await save({ reminders: updated })
+  }
+
+  const handleDeleteReminder = async (remId) => {
+    const updated = reminders.filter(r => r.id !== remId)
+    setReminders(updated)
+    await save({ reminders: updated })
+  }
+
+  const handleAddReminder = async () => {
+    if (!newRemText.trim() || !newRemDate) return
+    setAddingRem(true)
+    const newRem = { id: genId(), text: newRemText.trim(), date: newRemDate, done: false }
+    const updated = [...reminders, newRem].sort((a, b) => a.date > b.date ? 1 : -1)
+    setReminders(updated)
+    const ok = await save({ reminders: updated })
+    if (ok) { setNewRemText(''); setNewRemDate('') }
+    setAddingRem(false)
+  }
+
+  const handleAddNote = async () => {
+    if (!noteText.trim()) return
+    setAddingNote(true)
+    const newNote = { id: genId(), text: noteText.trim(), created_at: new Date().toISOString() }
+    const updated = [newNote, ...notes]
+    setNotes(updated)
+    const ok = await save({ notes: updated })
+    if (ok) setNoteText('')
+    setAddingNote(false)
+  }
+
+  if (loading) return (
+    <div className={styles.loadWrap}><span className="spinner" /></div>
+  )
+  if (!project) return null
+
+  const opt = STATUS_OPTS.find(s => s.value === project.status) || STATUS_OPTS[0]
+  const pendingReminders = reminders.filter(r => !r.done)
+
+  return (
+    <div className={styles.page}>
+      {/* ── Header ─────────────────────────────── */}
+      <div className={styles.topRow}>
+        <Link to="/projects" className={styles.backLink}>
+          <ArrowLeft size={14} />
+          <span>Back to projects</span>
+        </Link>
+        <div className={styles.headerRight}>
+          <StatusBadge status={project.status} />
+          <div className={styles.statusDropWrap} ref={statusRef}>
+            <button className={styles.statusDropBtn} onClick={() => setStatusOpen(v => !v)} type="button" aria-label="Change status">
+              {opt.label} <CaretDown size={12} />
+            </button>
+            {statusOpen && (
+              <div className={styles.statusDropMenu}>
+                {STATUS_OPTS.map(s => (
+                  <button key={s.value} className={[styles.statusDropItem, project.status === s.value ? styles.statusDropItemOn : ''].join(' ')} onClick={() => handleStatusChange(s.value)} type="button">
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.titleRow}>
+        <div>
+          <h1 className={styles.title}>{project.name}</h1>
+          {(project.client_name || project.start_date) && (
+            <p className={styles.subtitle}>
+              {project.client_name && <span>{project.client_name}</span>}
+              {project.client_name && project.start_date && <span className={styles.dot}>·</span>}
+              {project.start_date && <span>since {fmtDate(project.start_date)}</span>}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Two-column body ────────────────────── */}
+      <div className={styles.body}>
+        {/* Left column */}
+        <div className={styles.left}>
+
+          {/* About */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>About this project</h2>
+            <textarea
+              className={styles.descArea}
+              value={desc}
+              onChange={e => { setDesc(e.target.value); setDescDirty(true) }}
+              placeholder="What's this project about? Goals, scope, key details…"
+              rows={5}
+            />
+            {descDirty && (
+              <div className={styles.descActions}>
+                <button className={styles.btnGhost} onClick={() => { setDesc(project.description || ''); setDescDirty(false) }} type="button">Discard</button>
+                <button className={styles.btnPrimary} onClick={handleSaveDesc} disabled={saving} type="button">Save</button>
+              </div>
+            )}
+          </section>
+
+          {/* Reminders */}
+          <section className={styles.card}>
+            <div className={styles.cardHeaderRow}>
+              <h2 className={styles.cardTitle}>Reminders</h2>
+              {pendingReminders.length > 0 && (
+                <span className={styles.cardBadge}>{pendingReminders.length} open</span>
+              )}
+            </div>
+
+            {reminders.length === 0 && (
+              <p className={styles.emptyHint}>No reminders yet — add one below.</p>
+            )}
+
+            <ul className={styles.remList}>
+              {reminders.map(r => (
+                <li key={r.id} className={[styles.remRow, r.done ? styles.remDone : ''].join(' ')}>
+                  <button className={styles.remCheck} onClick={() => handleToggleReminder(r.id)} aria-label={r.done ? 'Mark incomplete' : 'Mark complete'} type="button">
+                    {r.done && <Check size={11} weight="bold" />}
+                  </button>
+                  <div className={styles.remMain}>
+                    <span className={styles.remText}>{r.text}</span>
+                    <span className={styles.remDate}>{fmtDate(r.date)}</span>
+                  </div>
+                  <button className={styles.remDelete} onClick={() => handleDeleteReminder(r.id)} aria-label="Delete reminder" type="button">
+                    <Trash size={13} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <div className={styles.addRemRow}>
+              <input
+                className={styles.remDateInput}
+                type="date"
+                value={newRemDate}
+                onChange={e => setNewRemDate(e.target.value)}
+                aria-label="Reminder date"
+              />
+              <input
+                className={styles.remTextInput}
+                placeholder="Add a reminder…"
+                value={newRemText}
+                onChange={e => setNewRemText(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddReminder()}
+                aria-label="Reminder text"
+              />
+              <button className={styles.btnPrimary} onClick={handleAddReminder} disabled={addingRem || !newRemText.trim() || !newRemDate} type="button">
+                <Plus size={14} /> Add
+              </button>
+            </div>
+          </section>
+
+          {/* Notes & activity */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Notes &amp; activity</h2>
+            <div className={styles.noteInputWrap}>
+              <textarea
+                className={styles.noteArea}
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Log a note — what happened, what was decided…"
+                rows={3}
+              />
+              <div className={styles.noteActions}>
+                <button className={styles.btnPrimary} onClick={handleAddNote} disabled={addingNote || !noteText.trim()} type="button">
+                  <Plus size={14} /> Add note
+                </button>
+              </div>
+            </div>
+
+            {notes.length > 0 && (
+              <ul className={styles.noteList}>
+                {notes.map(n => (
+                  <li key={n.id} className={styles.noteItem}>
+                    <div className={styles.noteDot} />
+                    <div>
+                      <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                      <div className={styles.noteText}>{n.text}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {/* Right sidebar */}
+        <div className={styles.right}>
+
+          {/* Details */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Details</h2>
+
+            {client && (
+              <div className={styles.clientRow}>
+                <div className={styles.clientAvatar} style={{ background: '#2563EB' }}>
+                  {(client.name || '?')[0].toUpperCase()}
+                </div>
+                <div>
+                  <div className={styles.clientName}>{client.name}</div>
+                  {client.city && <div className={styles.clientCity}>{client.city}</div>}
+                </div>
+              </div>
+            )}
+
+            <dl className={styles.detailList}>
+              <dt className={styles.detailLabel}>Status</dt>
+              <dd><StatusBadge status={project.status} /></dd>
+
+              {project.start_date && (
+                <>
+                  <dt className={styles.detailLabel}>Started</dt>
+                  <dd className={styles.detailVal}>{fmtDate(project.start_date)}</dd>
+                </>
+              )}
+
+              {project.budget && (
+                <>
+                  <dt className={styles.detailLabel}>Budget</dt>
+                  <dd className={styles.detailVal}>
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(project.budget)}
+                  </dd>
+                </>
+              )}
+
+              {project.linked_invoice_number && (
+                <>
+                  <dt className={styles.detailLabel}>Linked</dt>
+                  <dd>
+                    <span
+                      className={styles.linkedChip}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => project.linked_invoice_id && navigate(`/invoices/${project.linked_invoice_id}/edit`)}
+                      onKeyDown={e => e.key === 'Enter' && project.linked_invoice_id && navigate(`/invoices/${project.linked_invoice_id}/edit`)}
+                    >
+                      <FileText size={11} /> {project.linked_invoice_number}
+                    </span>
+                  </dd>
+                </>
+              )}
+
+              {project.linked_proposal_number && (
+                <>
+                  <dt className={styles.detailLabel}>Proposal</dt>
+                  <dd>
+                    <span
+                      className={`${styles.linkedChip} ${styles.linkedChipProposal}`}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => project.linked_proposal_id && navigate(`/proposals/${project.linked_proposal_id}/edit`)}
+                      onKeyDown={e => e.key === 'Enter' && project.linked_proposal_id && navigate(`/proposals/${project.linked_proposal_id}/edit`)}
+                    >
+                      <Scroll size={11} /> {project.linked_proposal_number}
+                    </span>
+                  </dd>
+                </>
+              )}
+            </dl>
+          </section>
+
+          {/* Quick actions */}
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Quick actions</h2>
+            <div className={styles.quickActions}>
+              <Link
+                to={project.client_id ? `/invoices/new?client=${project.client_id}` : '/invoices/new'}
+                className={styles.quickBtn}
+              >
+                <FileText size={14} /> New invoice
+              </Link>
+              <Link to="/proposals/new" className={styles.quickBtn}>
+                <Scroll size={14} /> New proposal
+              </Link>
+              {project.client_id && (
+                <Link to={`/clients/${project.client_id}/invoices`} className={styles.quickBtn}>
+                  <UsersThree size={14} /> View client
+                </Link>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -22,6 +22,8 @@ import TimeTrackerPage from '@/pages/TimeTrackerPage'
 import ProposalsPage from '@/pages/ProposalsPage'
 import ProposalEditorPage from '@/pages/ProposalEditorPage'
 import ClientsPage from '@/pages/ClientsPage'
+import ProjectsPage from '@/pages/ProjectsPage'
+import ProjectDetailPage from '@/pages/ProjectDetailPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 // Layout
@@ -54,6 +56,8 @@ export default function App() {
       <Route path="/invoices/:id/edit" element={<PrivateRoute><AppShell><InvoiceEditorPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/preview" element={<PrivateRoute><AppShell><InvoicePreviewPage /></AppShell></PrivateRoute>} />
       <Route path="/invoices/:id/email-preview" element={<PrivateRoute><AppShell><EmailPreviewPage /></AppShell></PrivateRoute>} />
+      <Route path="/projects"    element={<PrivateRoute><AppShell><ProjectsPage /></AppShell></PrivateRoute>} />
+      <Route path="/projects/:id" element={<PrivateRoute><AppShell><ProjectDetailPage /></AppShell></PrivateRoute>} />
       <Route path="/clients" element={<PrivateRoute><AppShell title="Clients" description="Everyone you bill, with their history at a glance."><ClientsPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals" element={<PrivateRoute><AppShell title="Proposals" description="Build and send project proposals."><ProposalsPage /></AppShell></PrivateRoute>} />
       <Route path="/proposals/new"      element={<PrivateRoute><AppShell hideTabbar><ProposalEditorPage /></AppShell></PrivateRoute>} />

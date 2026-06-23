@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   SquaresFour, FileText, UsersThree, GearSix,
-  Scroll, SignOut, Moon, Sun
+  Scroll, Briefcase, SignOut, Moon, Sun
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -11,15 +11,16 @@ const NAV_ITEMS = [
   { to: '/dashboard', Icon: SquaresFour, label: 'Dashboard' },
   { to: '/invoices',  Icon: FileText,    label: 'Invoices'  },
   { to: '/proposals', Icon: Scroll,      label: 'Proposals' },
+  { to: '/projects',  Icon: Briefcase,   label: 'Projects'  },
   { to: '/clients',   Icon: UsersThree,  label: 'Clients'   },
   { to: '/settings',  Icon: GearSix,     label: 'Settings'  },
 ]
 
-/* Mobile tab items: 5 regular tabs */
+/* Mobile tab items */
 const MOB_TABS = [
   { to: '/dashboard', Icon: SquaresFour, label: 'Home'      },
   { to: '/invoices',  Icon: FileText,    label: 'Invoices'  },
-  { to: '/proposals', Icon: Scroll,      label: 'Proposals' },
+  { to: '/projects',  Icon: Briefcase,   label: 'Projects'  },
   { to: '/clients',   Icon: UsersThree,  label: 'Clients'   },
   { to: '/settings',  Icon: GearSix,     label: 'Settings'  },
 ]
