@@ -6,7 +6,7 @@ import {
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
-import { getProject, updateProject } from '@/lib/projects'
+import { getProject, updateProject, deleteProject } from '@/lib/projects'
 import { supabase } from '@/lib/supabase'
 import { STATUS_OPTS, StatusBadge } from './ProjectsPage'
 import styles from './ProjectDetailPage.module.css'
@@ -58,7 +58,9 @@ export default function ProjectDetailPage() {
   const [noteText,  setNoteText]  = useState('')
   const [addingNote, setAddingNote] = useState(false)
 
-  const [statusOpen, setStatusOpen] = useState(false)
+  const [statusOpen,     setStatusOpen]     = useState(false)
+  const [confirmDelete,  setConfirmDelete]   = useState(false)
+  const [deleting,       setDeleting]        = useState(false)
   const statusRef = useRef(null)
 
   useEffect(() => {
@@ -135,6 +137,13 @@ export default function ProjectDetailPage() {
     const ok = await save({ notes: updated })
     if (ok) setNoteText('')
     setAddingNote(false)
+  }
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    const { error } = await deleteProject(id)
+    if (error) { toast.error('Failed to delete project.'); setDeleting(false); setConfirmDelete(false) }
+    else navigate('/projects')
   }
 
   if (loading) return (
@@ -386,6 +395,22 @@ export default function ProjectDetailPage() {
                 <Link to={`/clients/${project.client_id}/invoices`} className={styles.quickBtn}>
                   <UsersThree size={14} /> View client
                 </Link>
+              )}
+              <div className={styles.deleteDivider} />
+              {confirmDelete ? (
+                <div className={styles.deleteConfirm}>
+                  <span className={styles.deleteConfirmLabel}>Delete this project?</span>
+                  <div className={styles.deleteConfirmBtns}>
+                    <button className={styles.btnGhost} onClick={() => setConfirmDelete(false)} type="button" disabled={deleting}>Cancel</button>
+                    <button className={styles.btnDanger} onClick={handleDelete} type="button" disabled={deleting}>
+                      {deleting ? 'Deleting…' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button className={styles.quickBtnDanger} onClick={() => setConfirmDelete(true)} type="button">
+                  <Trash size={14} /> Delete project
+                </button>
               )}
             </div>
           </section>
