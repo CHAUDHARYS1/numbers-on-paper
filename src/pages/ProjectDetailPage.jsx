@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
-  ArrowLeft, Plus, Trash, Check, CaretDown,
+  ArrowLeft, CaretLeft, CaretRight, Plus, Trash, Check, CaretDown,
   FileText, Scroll, UsersThree
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
@@ -61,7 +61,8 @@ export default function ProjectDetailPage() {
   const [statusOpen,     setStatusOpen]     = useState(false)
   const [confirmDelete,  setConfirmDelete]   = useState(false)
   const [deleting,       setDeleting]        = useState(false)
-  const statusRef = useRef(null)
+  const statusRef  = useRef(null)
+  const mStatusRef = useRef(null)
 
   useEffect(() => {
     if (!user) return
@@ -80,7 +81,11 @@ export default function ProjectDetailPage() {
   }, [id, user, navigate])
 
   useEffect(() => {
-    const handler = (e) => { if (statusRef.current && !statusRef.current.contains(e.target)) setStatusOpen(false) }
+    const handler = (e) => {
+      const inDesktop = statusRef.current && statusRef.current.contains(e.target)
+      const inMobile  = mStatusRef.current && mStatusRef.current.contains(e.target)
+      if (!inDesktop && !inMobile) setStatusOpen(false)
+    }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
@@ -154,8 +159,256 @@ export default function ProjectDetailPage() {
   const opt = STATUS_OPTS.find(s => s.value === project.status) || STATUS_OPTS[0]
   const pendingReminders = reminders.filter(r => !r.done)
 
+  const statusDropdown = (
+    <div className={styles.statusDropWrap} ref={statusRef}>
+      <button className={styles.statusDropBtn} onClick={() => setStatusOpen(v => !v)} type="button" aria-label="Change status">
+        {opt.label} <CaretDown size={12} />
+      </button>
+      {statusOpen && (
+        <div className={styles.statusDropMenu}>
+          {STATUS_OPTS.map(s => (
+            <button key={s.value} className={[styles.statusDropItem, project.status === s.value ? styles.statusDropItemOn : ''].join(' ')} onClick={() => handleStatusChange(s.value)} type="button">
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
   return (
-    <div className={styles.page}>
+    <>
+    {/* ── Mobile ──────────────────────────────────────────────── */}
+    <div className="m-only">
+      <div className="m-head">
+        <button className="m-back" onClick={() => navigate('/projects')} type="button">
+          <CaretLeft size={16} weight="bold" /> Projects
+        </button>
+        <div className="m-head-top" style={{ marginTop: 6 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h1 className="m-title" style={{ fontSize: 24 }}>{project.name}</h1>
+            {(project.client_name || project.start_date) && (
+              <p className="m-sub">
+                {[project.client_name, project.start_date && `since ${fmtDate(project.start_date)}`].filter(Boolean).join(' · ')}
+              </p>
+            )}
+          </div>
+          <div className={styles.mStatusTrigger} ref={mStatusRef}>
+            <button className={styles.mStatusBtn} onClick={() => setStatusOpen(v => !v)} type="button" aria-label="Change status">
+              <StatusBadge status={project.status} />
+              <CaretDown size={11} />
+            </button>
+            {statusOpen && (
+              <div className={styles.statusDropMenu} style={{ right: 0, left: 'auto', top: 'calc(100% + 6px)' }}>
+                {STATUS_OPTS.map(s => (
+                  <button key={s.value} className={[styles.statusDropItem, project.status === s.value ? styles.statusDropItemOn : ''].join(' ')} onClick={() => handleStatusChange(s.value)} type="button">
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="m-body">
+
+        {/* Reminders */}
+        <p className="m-section-label">Reminders</p>
+        <div className="m-card">
+          <div className="m-card-h">
+            <h3 className="m-card-title">Upcoming</h3>
+            {pendingReminders.length > 0 && <span className={styles.cardBadge}>{pendingReminders.length} open</span>}
+          </div>
+          {reminders.length === 0 && (
+            <p className={styles.mEmptyHint}>No reminders yet.</p>
+          )}
+          <ul className={styles.mRemList}>
+            {reminders.map(r => (
+              <li key={r.id} className={[styles.mRemRow, r.done ? styles.mRemDone : ''].join(' ')}>
+                <button
+                  className={[styles.mRemChk, r.done ? styles.remCheckDone : ''].join(' ')}
+                  onClick={() => handleToggleReminder(r.id)}
+                  aria-label={r.done ? 'Mark incomplete' : 'Mark complete'}
+                  type="button"
+                >
+                  {r.done && <Check size={13} weight="bold" />}
+                </button>
+                <div className={styles.remMain}>
+                  <span className={styles.remText}>{r.text}</span>
+                  <span className={[styles.remDate, !r.done && isOverdue(r.date) ? styles.remDateOverdue : ''].join(' ')}>
+                    {fmtDate(r.date)}
+                    {!r.done && isThisWeek(r.date) && <span className={styles.thisWeekChip}>this week</span>}
+                  </span>
+                </div>
+                <button className={styles.mRemDelete} onClick={() => handleDeleteReminder(r.id)} aria-label="Delete reminder" type="button">
+                  <Trash size={16} />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className={styles.mAddRemForm}>
+            <input className={styles.mAddRemDate} type="date" value={newRemDate} onChange={e => setNewRemDate(e.target.value)} aria-label="Reminder date" />
+            <input className={styles.mAddRemText} placeholder="Add a reminder…" value={newRemText} onChange={e => setNewRemText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddReminder()} aria-label="Reminder text" />
+            <button className="m-btn m-btn--primary" onClick={handleAddReminder} disabled={addingRem || !newRemText.trim() || !newRemDate} type="button" style={{ height: 44 }}>
+              <Plus size={16} weight="bold" /> Add
+            </button>
+          </div>
+        </div>
+
+        {/* About */}
+        <p className="m-section-label">About</p>
+        <div className="m-card" style={{ padding: '14px 18px 18px' }}>
+          <textarea
+            className={styles.mDescArea}
+            value={desc}
+            onChange={e => { setDesc(e.target.value); setDescDirty(true) }}
+            placeholder="What's this project about? Goals, scope, key details…"
+            rows={4}
+          />
+          {descDirty && (
+            <div className={styles.mDescActions}>
+              <button className="m-btn m-btn--ghost" onClick={() => { setDesc(project.description || ''); setDescDirty(false) }} type="button">Discard</button>
+              <button className="m-btn m-btn--primary" onClick={handleSaveDesc} disabled={saving} type="button">Save</button>
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        <p className="m-section-label">Notes &amp; activity</p>
+        <div className="m-card" style={{ padding: '14px 18px 18px' }}>
+          <textarea className={styles.mNoteArea} value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="Log a note — what happened, what was decided…" rows={3} />
+          <button className="m-btn m-btn--primary" onClick={handleAddNote} disabled={addingNote || !noteText.trim()} type="button" style={{ height: 44, marginTop: 10 }}>
+            <Plus size={16} weight="bold" /> Add note
+          </button>
+          {notes.length > 0 && (
+            <ul className={styles.noteList} style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--line-soft)' }}>
+              {notes.map(n => (
+                <li key={n.id} className={styles.noteItem}>
+                  <div className={styles.noteDot} />
+                  <div>
+                    <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                    <div className={styles.noteText}>{n.text}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Details */}
+        <p className="m-section-label">Details</p>
+        <div className="m-card" style={{ overflow: 'hidden' }}>
+          {client && (
+            <div className="m-cdet-head" style={{ paddingBottom: 14, borderBottom: '1px solid var(--line-soft)' }}>
+              <div className="m-cdet-ava" style={{ background: '#2563EB', width: 40, height: 40, fontSize: 16 }}>
+                {(client.name || '?')[0].toUpperCase()}
+              </div>
+              <div>
+                <div className="m-cdet-name" style={{ fontSize: 17 }}>{client.name}</div>
+                {client.city && <div className="m-cdet-city">{client.city}</div>}
+              </div>
+            </div>
+          )}
+          {project.budget && (
+            <div className={styles.mDetailRow}>
+              <span className={styles.mDetailLabel}>Budget</span>
+              <span className={styles.mDetailVal}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(project.budget)}</span>
+            </div>
+          )}
+          {project.start_date && (
+            <div className={styles.mDetailRow}>
+              <span className={styles.mDetailLabel}>Started</span>
+              <span className={styles.mDetailVal}>{fmtDate(project.start_date)}</span>
+            </div>
+          )}
+          {project.linked_invoice_number && (
+            <div className={styles.mDetailRow}>
+              <span className={styles.mDetailLabel}>Invoice</span>
+              <span
+                className={styles.linkedChip}
+                role="link" tabIndex={0}
+                onClick={() => project.linked_invoice_id && navigate(`/invoices/${project.linked_invoice_id}/edit`)}
+                onKeyDown={e => e.key === 'Enter' && project.linked_invoice_id && navigate(`/invoices/${project.linked_invoice_id}/edit`)}
+              >
+                <FileText size={11} /> {project.linked_invoice_number}
+              </span>
+            </div>
+          )}
+          {project.linked_proposal_number && (
+            <div className={styles.mDetailRow}>
+              <span className={styles.mDetailLabel}>Proposal</span>
+              <span
+                className={`${styles.linkedChip} ${styles.linkedChipProposal}`}
+                role="link" tabIndex={0}
+                onClick={() => project.linked_proposal_id && navigate(`/proposals/${project.linked_proposal_id}/edit`)}
+                onKeyDown={e => e.key === 'Enter' && project.linked_proposal_id && navigate(`/proposals/${project.linked_proposal_id}/edit`)}
+              >
+                <Scroll size={11} /> {project.linked_proposal_number}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Quick actions */}
+        <p className="m-section-label">Actions</p>
+        <div className="m-card" style={{ overflow: 'hidden' }}>
+          <Link to={project.client_id ? `/invoices/new?client=${project.client_id}` : '/invoices/new'} className="m-cdet-row m-cdet-row--link">
+            <div className="m-cdet-row-ic" style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}>
+              <FileText size={17} />
+            </div>
+            <div>
+              <div className="m-cdet-row-v">New invoice</div>
+              <div className="m-cdet-row-l">Bill for this project</div>
+            </div>
+            <CaretRight size={16} style={{ color: 'var(--ink-4)', marginLeft: 'auto' }} />
+          </Link>
+          <Link to="/proposals/new" className="m-cdet-row m-cdet-row--link">
+            <div className="m-cdet-row-ic" style={{ background: 'rgba(124,58,237,.1)', color: '#7c3aed' }}>
+              <Scroll size={17} />
+            </div>
+            <div>
+              <div className="m-cdet-row-v">New proposal</div>
+              <div className="m-cdet-row-l">Draft a proposal</div>
+            </div>
+            <CaretRight size={16} style={{ color: 'var(--ink-4)', marginLeft: 'auto' }} />
+          </Link>
+          {project.client_id && (
+            <Link to={`/clients/${project.client_id}/invoices`} className="m-cdet-row m-cdet-row--link">
+              <div className="m-cdet-row-ic" style={{ background: 'var(--green-tint)', color: 'var(--green)' }}>
+                <UsersThree size={17} />
+              </div>
+              <div>
+                <div className="m-cdet-row-v">View client</div>
+                <div className="m-cdet-row-l">{project.client_name || 'Client history'}</div>
+              </div>
+              <CaretRight size={16} style={{ color: 'var(--ink-4)', marginLeft: 'auto' }} />
+            </Link>
+          )}
+        </div>
+
+        {/* Delete */}
+        {confirmDelete ? (
+          <div className={styles.mDeleteConfirm}>
+            <p className={styles.mDeleteMsg}>Permanently delete <strong>{project.name}</strong>? This cannot be undone.</p>
+            <div className={styles.mDeleteBtns}>
+              <button className="m-btn m-btn--ghost" onClick={() => setConfirmDelete(false)} type="button" disabled={deleting}>Cancel</button>
+              <button className="m-btn m-btn--danger" onClick={handleDelete} type="button" disabled={deleting}>
+                {deleting ? 'Deleting…' : 'Delete project'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className={`m-btn m-btn--danger ${styles.mDeleteBtn}`} onClick={() => setConfirmDelete(true)} type="button">
+            <Trash size={18} /> Delete project
+          </button>
+        )}
+
+      </div>
+    </div>
+
+    {/* ── Desktop ─────────────────────────────────────────────── */}
+    <div className={`d-only ${styles.page}`}>
       {/* ── Header ─────────────────────────────── */}
       <div className={styles.titleRow}>
         <div className={styles.titleLeft}>
@@ -170,20 +423,7 @@ export default function ProjectDetailPage() {
         </div>
         <div className={styles.headerRight}>
           <StatusBadge status={project.status} />
-          <div className={styles.statusDropWrap} ref={statusRef}>
-            <button className={styles.statusDropBtn} onClick={() => setStatusOpen(v => !v)} type="button" aria-label="Change status">
-              {opt.label} <CaretDown size={12} />
-            </button>
-            {statusOpen && (
-              <div className={styles.statusDropMenu}>
-                {STATUS_OPTS.map(s => (
-                  <button key={s.value} className={[styles.statusDropItem, project.status === s.value ? styles.statusDropItemOn : ''].join(' ')} onClick={() => handleStatusChange(s.value)} type="button">
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {statusDropdown}
         </div>
       </div>
       <Link to="/projects" className={styles.backLink}>
@@ -417,5 +657,6 @@ export default function ProjectDetailPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

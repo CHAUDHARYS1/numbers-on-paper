@@ -286,6 +286,115 @@
 }
 .btnGhost:hover { background: var(--paper-2); color: var(--ink); }
 
+/* ── Mobile-specific ─────────────────────────────────────── */
+
+/* Status trigger in mobile header */
+.mStatusTrigger { position: relative; flex-shrink: 0; }
+.mStatusBtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+}
+
+/* Reminder list on mobile */
+.mRemList { list-style: none; padding: 0 0 6px; }
+.mRemRow {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background .12s;
+}
+.mRemRow:last-child { border-bottom: none; }
+.mRemDone .remText { text-decoration: line-through; color: var(--ink-4); }
+.mRemDone .remDate { color: var(--ink-4); }
+
+.mRemChk {
+  width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px;
+  border: 1.5px solid var(--line); border-radius: 5px;
+  background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); transition: background .12s, border-color .12s;
+}
+.mRemChk:hover { border-color: var(--accent); background: var(--accent-tint); }
+
+.mRemDelete {
+  color: var(--ink-4); background: none; border: none; cursor: pointer;
+  margin-left: auto; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; padding: 2px;
+  transition: color .12s;
+}
+.mRemDelete:hover { color: var(--red); }
+
+.mEmptyHint { font-size: var(--text-body); color: var(--ink-4); padding: 4px 18px 8px; }
+
+/* Add reminder form on mobile — stacked */
+.mAddRemForm {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--line-soft);
+}
+.mAddRemDate {
+  height: 44px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px;
+  outline: none; transition: border-color .14s;
+}
+.mAddRemDate:focus { border-color: var(--accent); }
+.mAddRemText {
+  height: 44px; padding: 0 14px;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px;
+  outline: none; transition: border-color .14s;
+}
+.mAddRemText::placeholder { color: var(--ink-4); }
+.mAddRemText:focus { border-color: var(--accent); }
+
+/* Description textarea on mobile */
+.mDescArea {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding: 12px 14px; outline: none; resize: none;
+  transition: border-color .14s, box-shadow .14s;
+}
+.mDescArea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.mDescActions { display: flex; gap: 10px; margin-top: 10px; }
+.mDescActions > * { flex: 1; }
+
+/* Note textarea on mobile */
+.mNoteArea {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding: 12px 14px; outline: none; resize: none;
+  transition: border-color .14s, box-shadow .14s;
+}
+.mNoteArea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+
+/* Detail rows in the Details card */
+.mDetailRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.mDetailRow:last-child { border-bottom: none; }
+.mDetailLabel { font-size: 13px; font-weight: 600; color: var(--ink-4); }
+.mDetailVal { font-size: 15px; font-weight: 500; color: var(--ink); }
+
+/* Delete on mobile */
+.mDeleteBtn { margin-top: 8px; }
+.mDeleteConfirm {
+  background: var(--card); border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 20px 18px 18px; margin-top: 8px;
+}
+.mDeleteMsg { font-size: 14.5px; color: var(--ink-2); line-height: 1.5; margin: 0 0 16px; }
+.mDeleteBtns { display: flex; gap: 10px; }
+.mDeleteBtns > * { flex: 1; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 720px) {
   .body { grid-template-columns: 1fr; }
