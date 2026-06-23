@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2260 468" width="2260" height="468">
-  <defs></defs>
-  
-  <g transform="translate(28 84) scale(3.125)">
-    <path d="M20 78 V44 A26 26 0 0 1 72 44 V78 H59 V46 A13 13 0 0 0 33 46 V78 Z" fill="#0B1B34"></path>
-    <rect x="73" y="67" width="11" height="11" rx="2.5" fill="#0A5FFF"></rect>
-  </g>
-  <text x="424" y="384" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="600" font-size="210" letter-spacing="-6.3" fill="#0B1B34">Numbers on Paper</text>
-  <rect x="2197.4" y="350" width="34" height="34" rx="8" fill="#0A5FFF"></rect>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="2260" height="468" viewBox="0 0 2260 468"><g transform="translate(28 84) scale(3.125)"><path fill="#0B1B34" d="M20 78 V44 A26 26 0 0 1 72 44 V78 H59 V46 A13 13 0 0 0 33 46 V78 Z"/><rect width="11" height="11" x="73" y="67" fill="#0A5FFF" rx="2.5"/></g><text x="424" y="384" fill="#0B1B34" font-family="'Space Grotesk',sans-serif" font-size="210" font-weight="600" letter-spacing="-6.3">Numbers on Paper</text><rect width="34" height="34" x="2197.4" y="350" fill="#0A5FFF" rx="8"/></svg>
