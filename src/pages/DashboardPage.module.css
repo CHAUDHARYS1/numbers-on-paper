@@ -262,3 +262,62 @@
   .statVal { font-size: var(--text-xl); }
   .hideSmall { display: none; }
 }
+
+/* ── Mobile proposals / cat card ─────────────────────────── */
+.mCatCard {
+  margin-top: 18px;
+  overflow: hidden;
+}
+
+.mCatWrap {
+  text-align: center;
+  padding: 28px 24px 20px;
+}
+
+.mCatSvg {
+  width: 120px;
+  height: auto;
+}
+
+.mCatLabel {
+  font-size: 13px;
+  color: var(--ink-4);
+  margin: 10px 0 0;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.mCatDivider {
+  height: 1px;
+  background: var(--line-soft);
+  margin: 0 16px;
+}
+
+.mCatAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: background .12s;
+}
+.mCatAction:hover { background: var(--surface); }
+.mCatAction:active { background: var(--paper-2); }
+
+.mCatActionIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.mCatActionLabel {
+  flex: 1;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}

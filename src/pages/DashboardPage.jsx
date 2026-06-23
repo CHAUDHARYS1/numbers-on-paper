@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, MagnifyingGlass } from '@phosphor-icons/react'
+import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, MagnifyingGlass, Scroll, CaretRight } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import Badge from '@/components/ui/Badge'
@@ -195,6 +195,87 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* ── Proposals quick-link card ── */}
+          <div className={`m-card ${styles.mCatCard}`}>
+            <div className={styles.mCatWrap}>
+            <svg
+              viewBox="0 0 160 176"
+              aria-hidden="true"
+              focusable="false"
+              className={styles.mCatSvg}
+            >
+              {/* shadow */}
+              <ellipse cx="80" cy="171" rx="36" ry="5" fill="var(--ink)" opacity=".06" />
+
+              {/* tail */}
+              <path d="M 40 148 C 16 138 10 112 28 100 C 38 94 48 106 40 118" stroke="var(--ink)" strokeWidth="6" strokeLinecap="round" fill="none" />
+
+              {/* body */}
+              <ellipse cx="80" cy="138" rx="44" ry="30" fill="var(--card)" stroke="var(--ink)" strokeWidth="2.5" />
+
+              {/* left front paw */}
+              <ellipse cx="60" cy="162" rx="13" ry="7" fill="var(--card)" stroke="var(--ink)" strokeWidth="2" />
+              <path d="M 52 159 Q 54 155 56 159" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 57 157 Q 59.5 153 62 157" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 63 159 Q 65 155 67 159" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+              {/* right arm raised */}
+              <path d="M 110 126 C 130 108 132 88 124 74" stroke="var(--ink)" strokeWidth="6" strokeLinecap="round" fill="none" />
+
+              {/* head */}
+              <circle cx="80" cy="78" r="36" fill="var(--card)" stroke="var(--ink)" strokeWidth="2.5" />
+
+              {/* left ear outer */}
+              <polygon points="56,56 46,24 74,52" fill="var(--card)" stroke="var(--ink)" strokeWidth="2" strokeLinejoin="round" />
+              {/* left ear inner */}
+              <polygon points="59,53 51,30 71,50" fill="var(--accent)" opacity=".15" />
+
+              {/* right ear outer */}
+              <polygon points="104,56 114,24 86,52" fill="var(--card)" stroke="var(--ink)" strokeWidth="2" strokeLinejoin="round" />
+              {/* right ear inner */}
+              <polygon points="101,53 109,30 89,50" fill="var(--accent)" opacity=".15" />
+
+              {/* eyes — happy squint arches */}
+              <path d="M 62 74 Q 70.5 66 79 74" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+              <path d="M 81 74 Q 89.5 66 98 74" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+              {/* nose */}
+              <path d="M 77 87 L 80 91 L 83 87 Z" fill="var(--ink)" />
+
+              {/* mouth */}
+              <path d="M 80 91 Q 73 96 71 94" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 80 91 Q 87 96 89 94" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+              {/* whiskers left */}
+              <line x1="18" y1="81" x2="58" y2="84" stroke="var(--ink)" strokeWidth="1.2" opacity=".3" strokeLinecap="round" />
+              <line x1="18" y1="87" x2="58" y2="87" stroke="var(--ink)" strokeWidth="1.2" opacity=".3" strokeLinecap="round" />
+              <line x1="18" y1="93" x2="58" y2="91" stroke="var(--ink)" strokeWidth="1.2" opacity=".3" strokeLinecap="round" />
+
+              {/* whiskers right — shorter, arm is raised */}
+              <line x1="102" y1="84" x2="118" y2="81" stroke="var(--ink)" strokeWidth="1.2" opacity=".3" strokeLinecap="round" />
+              <line x1="102" y1="88" x2="116" y2="86" stroke="var(--ink)" strokeWidth="1.2" opacity=".3" strokeLinecap="round" />
+
+              {/* right paw at face — drawn last so it sits in front */}
+              <ellipse cx="118" cy="70" rx="13" ry="8" fill="var(--card)" stroke="var(--ink)" strokeWidth="2" transform="rotate(-35 118 70)" />
+              <path d="M 110 65 Q 112 60 115 65" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 116 63 Q 118.5 58 121 63" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              <path d="M 122 66 Q 124 61 127 66" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+
+              {/* tongue */}
+              <ellipse cx="94" cy="83" rx="6.5" ry="4.5" fill="#EC4899" opacity=".9" transform="rotate(-20 94 83)" />
+            </svg>
+            <p className={styles.mCatLabel}>Your books are in good paws.</p>
+            </div>
+            <div className={styles.mCatDivider} />
+            <Link to="/proposals" className={styles.mCatAction}>
+              <span className={styles.mCatActionIcon}>
+                <Scroll size={16} weight="bold" />
+              </span>
+              <span className={styles.mCatActionLabel}>Proposals</span>
+              <CaretRight size={14} weight="bold" style={{ color: 'var(--ink-4)' }} />
+            </Link>
+          </div>
         </div>
       </div>
 

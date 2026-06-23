@@ -311,7 +311,7 @@ function DeleteAccountModal({ user, onCancel, toast, navigate, signOut }) {
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+  const { theme, preference, setThemePreference } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
   const [saving,             setSaving]             = useState(false)
@@ -474,9 +474,10 @@ export default function SettingsPage() {
             <div className="m-set-row" style={{ cursor: 'default', alignItems: 'center' }}>
               <div className="m-set-ic ic-accent"><MoonStars size={17} /></div>
               <div className="m-set-main"><div className="m-set-t">Theme</div></div>
-              <div className="m-seg" style={{ width: 148 }}>
-                <button className={theme === 'light' ? 'on' : ''} onClick={() => { if (theme !== 'light') toggleTheme() }}>Light</button>
-                <button className={theme === 'dark'  ? 'on' : ''} onClick={() => { if (theme !== 'dark')  toggleTheme() }}>Dark</button>
+              <div className="m-seg">
+                <button className={preference === 'light'  ? 'on' : ''} onClick={() => setThemePreference('light')}>Light</button>
+                <button className={preference === 'dark'   ? 'on' : ''} onClick={() => setThemePreference('dark')}>Dark</button>
+                <button className={preference === 'system' ? 'on' : ''} onClick={() => setThemePreference('system')}>Auto</button>
               </div>
             </div>
           </div>

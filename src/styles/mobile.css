@@ -272,7 +272,7 @@
 }
 .m-chip:active { transform: scale(.96); }
 .m-chip .m-chip-ct { font-family: var(--font-mono); font-size: 11px; opacity: .6; }
-.m-chip--on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.m-chip--on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .m-chip--on .m-chip-ct { opacity: .7; }
 
 /* ── Full-width buttons ─────────────────────────────────────── */

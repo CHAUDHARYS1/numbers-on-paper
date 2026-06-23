@@ -27,7 +27,7 @@ function buildMonths(invoices, count) {
 }
 
 export default function RevenueChart({ invoices }) {
-  const [range, setRange] = useState(12)
+  const [range, setRange] = useState(6)
   const navigate = useNavigate()
 
   const data   = useMemo(() => buildMonths(invoices, range), [invoices, range])
