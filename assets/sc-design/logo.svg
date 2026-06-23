@@ -1,3 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160">
-  <text x="24" y="113" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="84"><tspan font-weight="800" fill="#0B1B3B">S</tspan><tspan font-weight="800" fill="#0057FF">C</tspan><tspan font-weight="500" fill="#0B1B3B"> Design</tspan></text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="160" viewBox="0 0 600 160"><text x="24" y="113" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="84"><tspan fill="#0B1B3B" font-weight="800">S</tspan><tspan fill="#0057FF" font-weight="800">C</tspan><tspan fill="#0B1B3B" font-weight="500"> Design</tspan></text></svg>
