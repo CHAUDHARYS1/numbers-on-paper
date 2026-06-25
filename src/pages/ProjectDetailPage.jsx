@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   ArrowLeft, CaretLeft, CaretRight, Plus, Trash, Check, CaretDown,
-  FileText, Scroll, UsersThree
+  FileText, Scroll, UsersThree, PencilSimple
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -58,6 +58,11 @@ export default function ProjectDetailPage() {
   const [notes,     setNotes]     = useState([])
   const [noteText,  setNoteText]  = useState('')
   const [addingNote, setAddingNote] = useState(false)
+
+  const [editingNoteId,      setEditingNoteId]      = useState(null)
+  const [editNoteText,       setEditNoteText]        = useState('')
+  const [editNoteDate,       setEditNoteDate]        = useState('')
+  const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState(null)
 
   const [files, setFiles] = useState([])
 
@@ -146,6 +151,37 @@ export default function ProjectDetailPage() {
     const ok = await save({ notes: updated })
     if (ok) setNoteText('')
     setAddingNote(false)
+  }
+
+  const handleNoteEditStart = (note) => {
+    const d = new Date(note.created_at)
+    const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    setEditNoteText(note.text)
+    setEditNoteDate(localDate)
+    setEditingNoteId(note.id)
+    setConfirmDeleteNoteId(null)
+  }
+
+  const handleNoteEditSave = async () => {
+    if (!editNoteText.trim()) return
+    const original = notes.find(n => n.id === editingNoteId)
+    const updatedAt = editNoteDate
+      ? new Date(editNoteDate + 'T00:00:00').toISOString()
+      : original?.created_at
+    const updated = notes.map(n =>
+      n.id === editingNoteId ? { ...n, text: editNoteText.trim(), created_at: updatedAt } : n
+    )
+    setNotes(updated)
+    const ok = await save({ notes: updated })
+    if (ok) { setEditingNoteId(null); toast.success('Note updated.') }
+  }
+
+  const handleNoteDelete = async (noteId) => {
+    const updated = notes.filter(n => n.id !== noteId)
+    setNotes(updated)
+    await save({ notes: updated })
+    setConfirmDeleteNoteId(null)
+    toast.success('Note deleted.')
   }
 
   const handleFilesChange = async (updated) => {
@@ -295,9 +331,38 @@ export default function ProjectDetailPage() {
               {notes.map(n => (
                 <li key={n.id} className={styles.noteItem}>
                   <div className={styles.noteDot} />
-                  <div>
-                    <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                    <div className={styles.noteText}>{n.text}</div>
+                  <div className={styles.noteContent}>
+                    {editingNoteId === n.id ? (
+                      <div className={styles.noteEditForm}>
+                        <input type="date" className={styles.noteEditDate} value={editNoteDate} onChange={e => setEditNoteDate(e.target.value)} aria-label="Note date" />
+                        <textarea className={styles.noteEditArea} value={editNoteText} onChange={e => setEditNoteText(e.target.value)} rows={3} autoFocus aria-label="Note text" />
+                        <div className={styles.noteEditActions}>
+                          <button className="m-btn m-btn--ghost" onClick={() => setEditingNoteId(null)} type="button">Cancel</button>
+                          <button className="m-btn m-btn--primary" onClick={handleNoteEditSave} disabled={!editNoteText.trim()} type="button">Save</button>
+                        </div>
+                      </div>
+                    ) : confirmDeleteNoteId === n.id ? (
+                      <>
+                        <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                        <div className={styles.noteText}>{n.text}</div>
+                        <div className={styles.noteDeleteConfirm}>
+                          <span className={styles.noteDeleteMsg}>Delete this note?</span>
+                          <button className="m-btn m-btn--ghost" onClick={() => setConfirmDeleteNoteId(null)} type="button" style={{ height: 40 }}>Cancel</button>
+                          <button className="m-btn m-btn--danger" onClick={() => handleNoteDelete(n.id)} type="button" style={{ height: 40 }}>Delete</button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className={styles.noteHead}>
+                          <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                          <div className={styles.noteItemBtns}>
+                            <button className={styles.noteEditBtn} onClick={() => handleNoteEditStart(n)} type="button" aria-label="Edit note"><PencilSimple size={14} /></button>
+                            <button className={styles.noteDeleteBtn} onClick={() => setConfirmDeleteNoteId(n.id)} type="button" aria-label="Delete note"><Trash size={14} /></button>
+                          </div>
+                        </div>
+                        <div className={styles.noteText}>{n.text}</div>
+                      </>
+                    )}
                   </div>
                 </li>
               ))}
@@ -551,9 +616,38 @@ export default function ProjectDetailPage() {
                 {notes.map(n => (
                   <li key={n.id} className={styles.noteItem}>
                     <div className={styles.noteDot} />
-                    <div>
-                      <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                      <div className={styles.noteText}>{n.text}</div>
+                    <div className={styles.noteContent}>
+                      {editingNoteId === n.id ? (
+                        <div className={styles.noteEditForm}>
+                          <input type="date" className={styles.noteEditDate} value={editNoteDate} onChange={e => setEditNoteDate(e.target.value)} aria-label="Note date" />
+                          <textarea className={styles.noteEditArea} value={editNoteText} onChange={e => setEditNoteText(e.target.value)} rows={3} autoFocus aria-label="Note text" />
+                          <div className={styles.noteEditActions}>
+                            <button className={styles.btnGhost} onClick={() => setEditingNoteId(null)} type="button">Cancel</button>
+                            <button className={styles.btnPrimary} onClick={handleNoteEditSave} disabled={!editNoteText.trim()} type="button">Save</button>
+                          </div>
+                        </div>
+                      ) : confirmDeleteNoteId === n.id ? (
+                        <>
+                          <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                          <div className={styles.noteText}>{n.text}</div>
+                          <div className={styles.noteDeleteConfirm}>
+                            <span className={styles.noteDeleteMsg}>Delete this note?</span>
+                            <button className={styles.btnGhost} onClick={() => setConfirmDeleteNoteId(null)} type="button">Cancel</button>
+                            <button className={styles.btnDanger} onClick={() => handleNoteDelete(n.id)} type="button">Delete</button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className={styles.noteHead}>
+                            <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                            <div className={styles.noteItemBtns}>
+                              <button className={styles.noteEditBtn} onClick={() => handleNoteEditStart(n)} type="button" aria-label="Edit note"><PencilSimple size={12} /></button>
+                              <button className={styles.noteDeleteBtn} onClick={() => setConfirmDeleteNoteId(n.id)} type="button" aria-label="Delete note"><Trash size={12} /></button>
+                            </div>
+                          </div>
+                          <div className={styles.noteText}>{n.text}</div>
+                        </>
+                      )}
                     </div>
                   </li>
                 ))}
