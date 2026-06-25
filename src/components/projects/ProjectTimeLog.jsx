@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from '@phosphor-icons/react'
+import { Plus, Trash } from '@phosphor-icons/react'
 import styles from './ProjectTimeLog.module.css'
 
 const LAST_NAME_KEY = 'nop_checkin_name'
@@ -44,7 +44,8 @@ export default function ProjectTimeLog({ sessions = [], onSessionsChange, mobile
   const [checkOutTime, setCheckOutTime] = useState('')
   const [checkOutNote, setCheckOutNote] = useState('')
 
-  const [saving, setSaving] = useState(false)
+  const [saving,         setSaving]         = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   const active  = sessions.filter(s => !s.check_out_at)
   const history = sessions.filter(s =>  s.check_out_at)
@@ -77,6 +78,11 @@ export default function ProjectTimeLog({ sessions = [], onSessionsChange, mobile
     setCheckOutId(sessionId)
     setCheckOutTime(nowLocal())
     setCheckOutNote('')
+  }
+
+  const handleDelete = async (sessionId) => {
+    await onSessionsChange(sessions.filter(s => s.id !== sessionId))
+    setConfirmDeleteId(null)
   }
 
   const handleCheckOut = async () => {
@@ -175,9 +181,18 @@ export default function ProjectTimeLog({ sessions = [], onSessionsChange, mobile
               </div>
 
               {checkOutId !== s.id ? (
-                <button className={styles.checkOutBtn} onClick={() => openCheckOut(s.id)} type="button">
-                  Check out
-                </button>
+                confirmDeleteId === s.id ? (
+                  <div className={styles.deleteConfirm}>
+                    <span className={styles.deleteMsg}>Remove?</span>
+                    <button className={styles.btnGhostSm} onClick={() => setConfirmDeleteId(null)} type="button">Cancel</button>
+                    <button className={styles.btnDangerSm} onClick={() => handleDelete(s.id)} type="button">Delete</button>
+                  </div>
+                ) : (
+                  <div className={styles.activeActions}>
+                    <button className={styles.checkOutBtn} onClick={() => openCheckOut(s.id)} type="button">Check out</button>
+                    <button className={styles.deleteIconBtn} onClick={() => setConfirmDeleteId(s.id)} type="button" aria-label="Delete session"><Trash size={13} /></button>
+                  </div>
+                )
               ) : (
                 <div className={styles.checkOutForm}>
                   <input
@@ -240,7 +255,17 @@ export default function ProjectTimeLog({ sessions = [], onSessionsChange, mobile
                   </div>
                 )}
               </div>
-              <div className={styles.historyDuration}>{fmtDuration(s.check_in_at, s.check_out_at)}</div>
+              {confirmDeleteId === s.id ? (
+                <div className={styles.deleteConfirm}>
+                  <button className={styles.btnGhostSm} onClick={() => setConfirmDeleteId(null)} type="button">Cancel</button>
+                  <button className={styles.btnDangerSm} onClick={() => handleDelete(s.id)} type="button">Delete</button>
+                </div>
+              ) : (
+                <div className={styles.historyRight}>
+                  <div className={styles.historyDuration}>{fmtDuration(s.check_in_at, s.check_out_at)}</div>
+                  <button className={styles.deleteIconBtn} onClick={() => setConfirmDeleteId(s.id)} type="button" aria-label="Delete session"><Trash size={13} /></button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

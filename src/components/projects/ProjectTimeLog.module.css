@@ -269,15 +269,98 @@
   flex-shrink: 0;
 }
 
+/* ── Active session actions ────────────────────────────────── */
+.activeActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* ── History right column ──────────────────────────────────── */
+.historyRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
 .historyDuration {
   font-family: var(--font-mono);
   font-size: var(--text-md);
   font-weight: var(--weight-bold);
   color: var(--ink);
-  flex-shrink: 0;
   white-space: nowrap;
-  padding-top: 1px;
 }
+
+/* ── Delete icon button (hover-reveal on history) ──────────── */
+.deleteIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-4);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity .12s, background .12s, color .12s;
+  flex-shrink: 0;
+}
+.historyRow:hover .deleteIconBtn { opacity: 1; }
+.activeActions .deleteIconBtn { opacity: 1; }
+.deleteIconBtn:hover { background: var(--red-tint); color: var(--red); }
+
+/* ── Inline delete confirm ─────────────────────────────────── */
+.deleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.deleteMsg {
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.btnGhostSm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.btnGhostSm:hover { background: var(--paper-2); }
+
+.btnDangerSm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .12s;
+}
+.btnDangerSm:hover { opacity: .88; }
 
 /* ── Shared buttons ────────────────────────────────────────── */
 .btnPrimary {
