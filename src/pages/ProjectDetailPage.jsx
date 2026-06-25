@@ -9,6 +9,7 @@ import { useToast } from '@/context/ToastContext'
 import { getProject, updateProject, deleteProject } from '@/lib/projects'
 import { supabase } from '@/lib/supabase'
 import { STATUS_OPTS, StatusBadge } from './ProjectsPage'
+import ProjectFiles from '@/components/projects/ProjectFiles'
 import styles from './ProjectDetailPage.module.css'
 
 function genId() { return Math.random().toString(36).slice(2, 10) }
@@ -58,6 +59,8 @@ export default function ProjectDetailPage() {
   const [noteText,  setNoteText]  = useState('')
   const [addingNote, setAddingNote] = useState(false)
 
+  const [files, setFiles] = useState([])
+
   const [statusOpen,     setStatusOpen]     = useState(false)
   const [confirmDelete,  setConfirmDelete]   = useState(false)
   const [deleting,       setDeleting]        = useState(false)
@@ -72,6 +75,7 @@ export default function ProjectDetailPage() {
       setDesc(data.description || '')
       setReminders(data.reminders || [])
       setNotes(data.notes || [])
+      setFiles(data.files || [])
       if (data.client_id) {
         supabase.from('clients').select('id, name, city').eq('id', data.client_id).single()
           .then(({ data: c }) => setClient(c))
@@ -142,6 +146,11 @@ export default function ProjectDetailPage() {
     const ok = await save({ notes: updated })
     if (ok) setNoteText('')
     setAddingNote(false)
+  }
+
+  const handleFilesChange = async (updated) => {
+    setFiles(updated)
+    await save({ files: updated })
   }
 
   const handleDelete = async () => {
@@ -295,6 +304,16 @@ export default function ProjectDetailPage() {
             </ul>
           )}
         </div>
+
+        {/* Files */}
+        <p className="m-section-label">Files</p>
+        <ProjectFiles
+          userId={user.id}
+          projectId={id}
+          files={files}
+          onFilesChange={handleFilesChange}
+          mobile
+        />
 
         {/* Details */}
         <p className="m-section-label">Details</p>
@@ -541,6 +560,14 @@ export default function ProjectDetailPage() {
               </ul>
             )}
           </section>
+          {/* Files */}
+          <ProjectFiles
+            userId={user.id}
+            projectId={id}
+            files={files}
+            onFilesChange={handleFilesChange}
+          />
+
         </div>
 
         {/* Right sidebar */}
