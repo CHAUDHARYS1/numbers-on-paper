@@ -1,0 +1,402 @@
+/* ── Desktop card ──────────────────────────────────────────── */
+.section {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+}
+
+/* ── Mobile card ───────────────────────────────────────────── */
+.mSection {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px 18px;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  margin: 0;
+  flex: 1;
+}
+
+.mTitle {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  margin: 0;
+  flex: 1;
+}
+
+.totalBadge {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  color: var(--ink-3);
+  background: var(--paper-2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.activeBadge {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--green);
+  background: var(--green-tint);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.checkInBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .14s, color .14s;
+}
+.checkInBtn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.checkInBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Form panel (check-in) ─────────────────────────────────── */
+.formPanel {
+  background: var(--paper-2);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formLabel {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin: 0;
+}
+
+.formInput {
+  height: 34px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color .14s;
+}
+.formInput:focus { border-color: var(--accent); }
+.formInput::placeholder { color: var(--ink-4); }
+
+.formTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  padding: var(--space-2) var(--space-3);
+  outline: none;
+  resize: none;
+  transition: border-color .14s;
+}
+.formTextarea:focus { border-color: var(--accent); }
+.formTextarea::placeholder { color: var(--ink-4); }
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ── Active sessions ───────────────────────────────────────── */
+.activeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.activeRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  background: var(--green-tint);
+  border: 1px solid color-mix(in srgb, var(--green) 22%, transparent);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+/* Pulsing live indicator */
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  margin-top: 5px;
+  animation: livePulse 2.2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .45; transform: scale(.75); }
+}
+
+.activeMeta { flex: 1; min-width: 0; }
+.activeName { font-size: var(--text-md); font-weight: var(--weight-semibold); color: var(--ink); }
+.activeTime { font-size: var(--text-body); color: var(--ink-3); margin-top: 2px; }
+.activeNote { font-size: var(--text-body); color: var(--ink-3); margin-top: 4px; font-style: italic; }
+
+.checkOutBtn {
+  height: 28px;
+  padding: 0 var(--space-3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+  transition: border-color .14s, color .14s;
+}
+.checkOutBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Check-out form expands to full row width */
+.checkOutForm {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid color-mix(in srgb, var(--green) 22%, transparent);
+  margin-top: var(--space-1);
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.empty {
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  margin: 0;
+}
+
+/* ── History list ──────────────────────────────────────────── */
+.historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.historyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-1);
+  border-bottom: 1px solid var(--line-soft);
+}
+.historyRow:last-child { border-bottom: none; }
+
+.historyLeft { flex: 1; min-width: 0; }
+.historyName {
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+}
+.historyMeta {
+  font-size: var(--text-body);
+  color: var(--ink-4);
+  margin-top: 2px;
+}
+.historyNote {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  margin-top: 4px;
+  line-height: 1.45;
+}
+.noteTag {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ink-4);
+  background: var(--paper-2);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+
+/* ── Active session actions ────────────────────────────────── */
+.activeActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* ── History right column ──────────────────────────────────── */
+.historyRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.historyDuration {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ── Delete icon button (hover-reveal on history) ──────────── */
+.deleteIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-4);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity .12s, background .12s, color .12s;
+  flex-shrink: 0;
+}
+.historyRow:hover .deleteIconBtn { opacity: 1; }
+.activeActions .deleteIconBtn { opacity: 1; }
+.deleteIconBtn:hover { background: var(--red-tint); color: var(--red); }
+
+/* ── Inline delete confirm ─────────────────────────────────── */
+.deleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.deleteMsg {
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.btnGhostSm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.btnGhostSm:hover { background: var(--paper-2); }
+
+.btnDangerSm {
+  height: 24px;
+  padding: 0 var(--space-2);
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .12s;
+}
+.btnDangerSm:hover { opacity: .88; }
+
+/* ── Shared buttons ────────────────────────────────────────── */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 var(--space-3);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .14s;
+}
+.btnPrimary:hover:not(:disabled) { background: var(--accent-2); }
+.btnPrimary:disabled { opacity: .55; cursor: not-allowed; }
+
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--space-3);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--ink-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .14s, color .14s;
+}
+.btnGhost:hover { background: var(--paper-2); color: var(--ink); }

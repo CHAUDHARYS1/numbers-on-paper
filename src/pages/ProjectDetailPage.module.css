@@ -196,8 +196,52 @@
   width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
   flex-shrink: 0; margin-top: 6px;
 }
+.noteContent { flex: 1; min-width: 0; }
+.noteHead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .noteDate { font-size: var(--text-body); color: var(--ink-4); font-weight: var(--weight-medium); }
 .noteText { font-size: var(--text-md); color: var(--ink); margin-top: 2px; line-height: 1.5; }
+
+.noteItemBtns {
+  display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+  opacity: 0; transition: opacity .12s;
+}
+.noteItem:hover .noteItemBtns { opacity: 1; }
+
+.noteEditBtn, .noteDeleteBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; padding: 0;
+  background: none; border: none; cursor: pointer;
+  border-radius: var(--radius-sm); transition: background .12s, color .12s;
+}
+.noteEditBtn { color: var(--ink-4); }
+.noteEditBtn:hover { background: var(--accent-tint); color: var(--accent); }
+.noteDeleteBtn { color: var(--ink-4); }
+.noteDeleteBtn:hover { background: var(--red-tint); color: var(--red); }
+
+.noteDeleteConfirm {
+  display: flex; align-items: center; gap: var(--space-2);
+  flex-wrap: wrap; margin-top: var(--space-2);
+}
+.noteDeleteMsg { font-size: var(--text-body); color: var(--ink-3); font-weight: var(--weight-medium); flex: 1; }
+
+.noteEditForm { display: flex; flex-direction: column; gap: var(--space-2); }
+.noteEditDate {
+  height: 30px; padding: 0 var(--space-2); width: 160px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--text-body);
+  outline: none; transition: border-color .14s;
+}
+.noteEditDate:focus { border-color: var(--accent); }
+.noteEditArea {
+  width: 100%; box-sizing: border-box;
+  border: 1.5px solid var(--accent); border-radius: var(--radius);
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--text-md); line-height: 1.5;
+  padding: var(--space-2) var(--space-3); outline: none; resize: vertical;
+  box-shadow: 0 0 0 3px var(--accent-tint);
+}
+.noteEditActions { display: flex; gap: var(--space-2); justify-content: flex-end; }
 
 /* ── Sidebar: client ──────────────────────────────────────── */
 .clientRow { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
