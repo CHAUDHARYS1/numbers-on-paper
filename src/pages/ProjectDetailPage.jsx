@@ -10,6 +10,7 @@ import { getProject, updateProject, deleteProject } from '@/lib/projects'
 import { supabase } from '@/lib/supabase'
 import { STATUS_OPTS, StatusBadge } from './ProjectsPage'
 import ProjectFiles from '@/components/projects/ProjectFiles'
+import ProjectTimeLog from '@/components/projects/ProjectTimeLog'
 import styles from './ProjectDetailPage.module.css'
 
 function genId() { return Math.random().toString(36).slice(2, 10) }
@@ -64,7 +65,8 @@ export default function ProjectDetailPage() {
   const [editNoteDate,       setEditNoteDate]        = useState('')
   const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState(null)
 
-  const [files, setFiles] = useState([])
+  const [files,    setFiles]    = useState([])
+  const [sessions, setSessions] = useState([])
 
   const [statusOpen,     setStatusOpen]     = useState(false)
   const [confirmDelete,  setConfirmDelete]   = useState(false)
@@ -81,6 +83,7 @@ export default function ProjectDetailPage() {
       setReminders(data.reminders || [])
       setNotes(data.notes || [])
       setFiles(data.files || [])
+      setSessions(data.time_sessions || [])
       if (data.client_id) {
         supabase.from('clients').select('id, name, city').eq('id', data.client_id).single()
           .then(({ data: c }) => setClient(c))
@@ -187,6 +190,11 @@ export default function ProjectDetailPage() {
   const handleFilesChange = async (updated) => {
     setFiles(updated)
     await save({ files: updated })
+  }
+
+  const handleSessionsChange = async (updated) => {
+    setSessions(updated)
+    await save({ time_sessions: updated })
   }
 
   const handleDelete = async () => {
@@ -369,6 +377,14 @@ export default function ProjectDetailPage() {
             </ul>
           )}
         </div>
+
+        {/* Time log */}
+        <p className="m-section-label">Time log</p>
+        <ProjectTimeLog
+          sessions={sessions}
+          onSessionsChange={handleSessionsChange}
+          mobile
+        />
 
         {/* Files */}
         <p className="m-section-label">Files</p>
@@ -654,6 +670,12 @@ export default function ProjectDetailPage() {
               </ul>
             )}
           </section>
+          {/* Time log */}
+          <ProjectTimeLog
+            sessions={sessions}
+            onSessionsChange={handleSessionsChange}
+          />
+
           {/* Files */}
           <ProjectFiles
             userId={user.id}
