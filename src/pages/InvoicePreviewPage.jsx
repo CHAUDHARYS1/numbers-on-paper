@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, DownloadSimple, PencilSimple, Printer, PaperPlaneTilt, EnvelopeSimple } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
@@ -13,7 +13,9 @@ export default function InvoicePreviewPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const toast = useToast()
+  const backTo = new URLSearchParams(location.search).get('from') || '/invoices'
   const [invoice,     setInvoice]     = useState(null)
   const [profile,     setProfile]     = useState(null)
   const [loading,     setLoading]     = useState(true)
@@ -66,11 +68,11 @@ export default function InvoicePreviewPage() {
         />
       )}
       <div className={styles.toolbar}>
-        <button className={styles.back} onClick={() => navigate('/invoices')}>
+        <button className={styles.back} onClick={() => navigate(backTo)}>
           <ArrowLeft size={16} /> Invoices
         </button>
         <div className={styles.actions}>
-          <Link to={`/invoices/${id}/edit`}>
+          <Link to={`/invoices/${id}/edit${backTo !== '/invoices' ? `?from=${backTo}` : ''}`}>
             <Button variant="secondary" size="md" icon={<PencilSimple size={15} />}>Edit</Button>
           </Link>
           <Link to={`/invoices/${id}/email-preview`}>

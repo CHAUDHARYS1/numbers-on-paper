@@ -125,9 +125,9 @@ export default function InvoiceEditorPage() {
   const toast     = useToast()
   const isNew     = !id
   const duplicate = location.state?.duplicate ?? null
-  const presetClientId = isNew && !duplicate
-    ? new URLSearchParams(location.search).get('client')
-    : null
+  const searchParams = new URLSearchParams(location.search)
+  const presetClientId = isNew && !duplicate ? searchParams.get('client') : null
+  const backTo = searchParams.get('from') || '/invoices'
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
@@ -370,7 +370,7 @@ export default function InvoiceEditorPage() {
     } else {
       setIsDirty(false)
       toast.success(isNew ? 'Invoice created!' : 'Invoice updated!')
-      navigate('/invoices')
+      navigate(backTo)
     }
   }
   handleSaveRef.current = handleSave

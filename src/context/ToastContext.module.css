@@ -30,6 +30,24 @@
   line-height: 1.4;
 }
 
+.actionBtn {
+  background: none;
+  border: 1px solid currentColor;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  opacity: 0.85;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: opacity var(--transition-fast);
+  font-family: var(--font-body);
+}
+.actionBtn:hover { opacity: 1; }
+.actionBtn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
 .close {
   background: none;
   border: none;

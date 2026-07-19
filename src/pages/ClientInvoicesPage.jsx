@@ -154,7 +154,7 @@ export default function ClientInvoicesPage() {
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
-                  <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className="m-row">
+                  <Link key={inv.id} to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className="m-row">
                     <div className="m-row-main">
                       <div className="m-row-title">{inv.invoice_number || '—'}</div>
                       <div className="m-row-meta">{dateLabel}</div>
@@ -257,7 +257,7 @@ export default function ClientInvoicesPage() {
                 {filtered.map(inv => (
                   <tr key={inv.id}>
                     <td>
-                      <Link to={`/invoices/${inv.id}/edit`} className={styles.tNum}>
+                      <Link to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className={styles.tNum}>
                         {inv.invoice_number}
                       </Link>
                     </td>
@@ -267,10 +267,10 @@ export default function ClientInvoicesPage() {
                     <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                     <td>
                       <div className={styles.rowActs}>
-                        <Link to={`/invoices/${inv.id}/edit`} className={styles.actLink}>
+                        <Link to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className={styles.actLink}>
                           <PencilSimple size={13} /> Edit
                         </Link>
-                        <Link to={`/invoices/${inv.id}/preview`} className={styles.actLink}>
+                        <Link to={`/invoices/${inv.id}/preview?from=/clients/${id}/invoices`} className={styles.actLink}>
                           <Eye size={13} /> Preview
                         </Link>
                       </div>
