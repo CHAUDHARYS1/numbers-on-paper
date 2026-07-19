@@ -11,6 +11,7 @@ import Badge from '@/components/ui/Badge'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import InvoicePreview from '@/components/invoice/InvoicePreview'
 import ClientSelect from '@/components/invoice/ClientSelect'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import styles from './InvoiceEditorPage.module.css'
 
 // ── State sales-tax rates (base rate, %) ──────────────────────────
@@ -128,6 +129,7 @@ export default function InvoiceEditorPage() {
   const searchParams = new URLSearchParams(location.search)
   const presetClientId = isNew && !duplicate ? searchParams.get('client') : null
   const backTo = searchParams.get('from') || '/invoices'
+  const backLabel = backTo.includes('/clients/') ? 'Client invoices' : 'Invoices'
 
   const [profile,  setProfile]  = useState(null)
   const [clients,  setClients]  = useState([])
@@ -136,6 +138,7 @@ export default function InvoiceEditorPage() {
   const [savingClient, setSavingClient] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [isDirty,  setIsDirty]  = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   const [invoiceNumber, setInvoiceNumber] = useState('')
   const [issueDate,     setIssueDate]     = useState(new Date().toISOString().slice(0, 10))
@@ -358,11 +361,14 @@ export default function InvoiceEditorPage() {
   const handleSave = async () => {
     setSaving(true)
     const payload = { ...invoiceData, user_id: user.id, client_id: clientId || null }
-    let error
+    let error, savedId
     if (isNew) {
-      ({ error } = await supabase.from('invoices').insert(payload))
+      const { data, error: insertError } = await supabase.from('invoices').insert(payload).select('id').single()
+      error = insertError
+      savedId = data?.id
     } else {
       ({ error } = await supabase.from('invoices').update(payload).eq('id', id))
+      savedId = id
     }
     setSaving(false)
     if (error) {
@@ -370,10 +376,22 @@ export default function InvoiceEditorPage() {
     } else {
       setIsDirty(false)
       toast.success(isNew ? 'Invoice created!' : 'Invoice updated!')
-      navigate(backTo)
+      if (isNew) {
+        navigate(`/invoices/${savedId}/preview${backTo !== '/invoices' ? `?from=${backTo}` : ''}`)
+      } else {
+        navigate(backTo)
+      }
     }
   }
   handleSaveRef.current = handleSave
+
+  const handleBack = () => {
+    if (isDirty) {
+      setShowLeaveConfirm(true)
+    } else {
+      navigate(backTo)
+    }
+  }
 
   const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0)
 
@@ -384,8 +402,8 @@ export default function InvoiceEditorPage() {
       <div className={styles.mobileHead}>
         <div className="m-head">
           <div className="m-head-top">
-            <button className="m-back" onClick={() => navigate('/invoices')}>
-              <ArrowLeft size={19} /> Invoices
+            <button className="m-back" onClick={handleBack}>
+              <ArrowLeft size={19} /> {backLabel}
             </button>
             <Badge variant={status} />
           </div>
@@ -404,8 +422,8 @@ export default function InvoiceEditorPage() {
 
       {/* ── Top bar (desktop) ── */}
       <div className={styles.topBar}>
-        <button className={styles.back} onClick={() => navigate('/invoices')}>
-          <ArrowLeft size={16} /> Invoices
+        <button className={styles.back} onClick={handleBack}>
+          <ArrowLeft size={16} /> {backLabel}
         </button>
         <div className={styles.topActions}>
           <button
@@ -749,6 +767,16 @@ export default function InvoiceEditorPage() {
         </div>,
         document.body
       )}
+
+      <ConfirmModal
+        isOpen={showLeaveConfirm}
+        title="Leave without saving?"
+        message="You have unsaved changes. If you leave now, your changes will be lost."
+        confirmLabel="Leave"
+        cancelLabel="Keep editing"
+        onConfirm={() => navigate(backTo)}
+        onCancel={() => setShowLeaveConfirm(false)}
+      />
     </div>
   )
 }

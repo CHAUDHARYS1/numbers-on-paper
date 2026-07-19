@@ -138,10 +138,14 @@
   font-size: var(--text-body); font-weight: var(--weight-semibold);
   cursor: pointer; white-space: nowrap;
   transition: background .12s;
+  border: none;
+  font-family: var(--font-body);
 }
 .linkedChip:hover { background: var(--accent-muted); }
+.linkedChip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .linkedChipProposal { background: rgba(124,58,237,.1); color: #7c3aed; }
 .linkedChipProposal:hover { background: rgba(124,58,237,.16); }
+.linkedChipProposal:focus-visible { outline-color: #7c3aed; }
 
 .activityCell { font-size: var(--text-body); color: var(--ink-4); white-space: nowrap; }
 

@@ -169,6 +169,35 @@
 /* Mobile card list lives inside m-only so always flex when rendered */
 .cardList { display: flex; }
 
+/* ── Mobile search ─────────────────────────────────────────── */
+.mSearch {
+  position: relative;
+  margin-bottom: 12px;
+}
+.mSearchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-4);
+  pointer-events: none;
+}
+.mSearchInput {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  padding: 0 14px 0 38px;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+}
+.mSearchInput:focus { border-color: var(--accent); }
+.mSearchInput::placeholder { color: var(--ink-4); }
+
 /* ── Mobile breakpoint ─────────────────────────────────────── */
 @media (max-width: 880px) {
   .propCard { border-radius: 16px; }

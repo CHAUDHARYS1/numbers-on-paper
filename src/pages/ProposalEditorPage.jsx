@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft, ArrowsOut, FilePdf, FloppyDisk, Check,
   Plus, Trash, Eye, X, DotsSixVertical, UploadSimple,
@@ -169,6 +169,8 @@ function SectionCard({ sk, title, action, children, sections, onToggle }) {
 export default function ProposalEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo = new URLSearchParams(location.search).get('from') || '/proposals'
   const { user } = useAuth()
   const toast = useToast()
 
@@ -452,7 +454,7 @@ export default function ProposalEditorPage() {
       <div className="pe-topbar">
         <button
           className="pe-back"
-          onClick={() => navigate('/proposals')}
+          onClick={() => navigate(backTo)}
           type="button"
           aria-label="Back to proposals"
         >
@@ -460,7 +462,9 @@ export default function ProposalEditorPage() {
         </button>
         {/* Mobile-only title block */}
         <div className="pe-mob-head">
-          <h1 className="pe-mob-title">New proposal</h1>
+          <h1 className="pe-mob-title">
+            {id ? (proposalNo ? `PROP-${String(proposalNo).padStart(4, '0')}` : title || 'Edit proposal') : 'New proposal'}
+          </h1>
           <p className="pe-mob-desc">Fill in the details, toggle sections, preview.</p>
         </div>
         <div className="pe-topbar-actions">

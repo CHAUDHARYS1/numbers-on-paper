@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   CaretLeft, Plus, FileText, MagnifyingGlass, Eye, PencilSimple
 } from '@phosphor-icons/react'
@@ -37,6 +37,10 @@ export default function ClientInvoicesPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const backTo = new URLSearchParams(location.search).get('from') || '/clients'
+  const backLabel = backTo.includes('/projects/') ? 'Project' : 'Clients'
 
   const [client,   setClient]   = useState(null)
   const [invoices, setInvoices] = useState([])
@@ -70,7 +74,15 @@ export default function ClientInvoicesPage() {
   const totalOutstanding = invoices.filter(i => ['unpaid', 'overdue'].includes(effStatus(i))).reduce((s, i) => s + (i.total || 0), 0)
 
   if (loading) return <div className={styles.loading}>Loading…</div>
-  if (!client) return <div className={styles.loading}>Client not found.</div>
+  if (!client) return (
+    <div className={styles.empty}>
+      <p className={styles.emptyTitle}>Client not found</p>
+      <p className={styles.emptySub}>This client may have been deleted.</p>
+      <button className={styles.back} onClick={() => navigate('/clients')} style={{ marginTop: 16 }}>
+        ← Back to clients
+      </button>
+    </div>
+  )
 
   const newInvoiceUrl = `/invoices/new?client=${id}`
 
@@ -79,8 +91,8 @@ export default function ClientInvoicesPage() {
       {/* ── Mobile ── */}
       <div className="m-only">
         <div className="m-head">
-          <button className="m-back" onClick={() => navigate('/clients')}>
-            <CaretLeft size={16} weight="bold" /> Clients
+          <button className="m-back" onClick={() => navigate(backTo)}>
+            <CaretLeft size={16} weight="bold" /> {backLabel}
           </button>
           <div className="m-head-top" style={{ marginTop: 6 }}>
             <div>
@@ -154,7 +166,7 @@ export default function ClientInvoicesPage() {
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
-                  <Link key={inv.id} to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className="m-row">
+                  <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className="m-row">
                     <div className="m-row-main">
                       <div className="m-row-title">{inv.invoice_number || '—'}</div>
                       <div className="m-row-meta">{dateLabel}</div>
@@ -175,8 +187,8 @@ export default function ClientInvoicesPage() {
       <div className="d-only">
         {/* Top bar */}
         <div className={styles.topbar}>
-          <button className={styles.back} onClick={() => navigate('/clients')}>
-            <CaretLeft size={16} weight="bold" /> Clients
+          <button className={styles.back} onClick={() => navigate(backTo)}>
+            <CaretLeft size={16} weight="bold" /> {backLabel}
           </button>
           <Link to={newInvoiceUrl} className={styles.newBtn}>
             <Plus size={15} /> New invoice
@@ -257,7 +269,7 @@ export default function ClientInvoicesPage() {
                 {filtered.map(inv => (
                   <tr key={inv.id}>
                     <td>
-                      <Link to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className={styles.tNum}>
+                      <Link to={`/invoices/${inv.id}/edit`} className={styles.tNum}>
                         {inv.invoice_number}
                       </Link>
                     </td>
@@ -267,10 +279,10 @@ export default function ClientInvoicesPage() {
                     <td className={[styles.tAmt, styles.tRight].join(' ')}>{fmt(inv.total)}</td>
                     <td>
                       <div className={styles.rowActs}>
-                        <Link to={`/invoices/${inv.id}/edit?from=/clients/${id}/invoices`} className={styles.actLink}>
+                        <Link to={`/invoices/${inv.id}/edit`} className={styles.actLink}>
                           <PencilSimple size={13} /> Edit
                         </Link>
-                        <Link to={`/invoices/${inv.id}/preview?from=/clients/${id}/invoices`} className={styles.actLink}>
+                        <Link to={`/invoices/${inv.id}/preview`} className={styles.actLink}>
                           <Eye size={13} /> Preview
                         </Link>
                       </div>

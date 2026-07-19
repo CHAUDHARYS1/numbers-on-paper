@@ -319,6 +319,7 @@ export default function SettingsPage() {
   const [deleteOpen,         setDeleteOpen]         = useState(false)
   const [profileSheetOpen,   setProfileSheetOpen]   = useState(false)
   const [passwordSheetOpen,  setPasswordSheetOpen]  = useState(false)
+  const [passwordSheetDirty, setPasswordSheetDirty] = useState(false)
   const [twoFASheetOpen,     setTwoFASheetOpen]     = useState(false)
 
   const [profile, setProfile] = useState({
@@ -450,22 +451,24 @@ export default function SettingsPage() {
           {/* Invoice defaults */}
           <div className="m-section-label">Invoice defaults</div>
           <div className="m-settings-group">
-            <div className="m-set-row" style={{ cursor: 'default' }}>
+            <button className="m-set-row" onClick={() => setProfileSheetOpen(true)}>
               <div className="m-set-ic ic-gray"><CurrencyDollar size={17} /></div>
               <div className="m-set-main">
                 <div className="m-set-t">Default hourly rate</div>
                 <div className="m-set-v">Applied to new line items</div>
               </div>
               <span className="m-row-amt" style={{ fontSize: 14 }}>${profile.default_rate}/hr</span>
-            </div>
-            <div className="m-set-row" style={{ cursor: 'default' }}>
+              <CaretRight size={16} className="m-chev" />
+            </button>
+            <button className="m-set-row" onClick={() => setProfileSheetOpen(true)}>
               <div className="m-set-ic ic-gray"><CalendarBlank size={17} /></div>
               <div className="m-set-main">
                 <div className="m-set-t">Payment terms</div>
                 <div className="m-set-v">Default due window</div>
               </div>
               <span className="m-row-amt" style={{ fontSize: 14 }}>{profile.payment_terms || 'Net 30'}</span>
-            </div>
+              <CaretRight size={16} className="m-chev" />
+            </button>
           </div>
 
           {/* Appearance */}
@@ -511,7 +514,7 @@ export default function SettingsPage() {
           {/* Security */}
           <div className="m-section-label">Security</div>
           <div className="m-settings-group">
-            <button className="m-set-row" onClick={() => setPasswordSheetOpen(true)}>
+            <button className="m-set-row" onClick={() => { setPasswordSheetOpen(true); setPasswordSheetDirty(false) }}>
               <div className="m-set-ic ic-gray"><LockKey size={17} /></div>
               <div className="m-set-main"><div className="m-set-t">Change password</div></div>
               <CaretRight size={16} className="m-chev" />
@@ -600,14 +603,26 @@ export default function SettingsPage() {
 
         {/* ── Password sheet ── */}
         {passwordSheetOpen && (
-          <div className="m-scrim" onClick={() => setPasswordSheetOpen(false)}>
+          <div className="m-scrim" onClick={() => {
+            if (passwordSheetDirty) {
+              if (!window.confirm('Discard password changes?')) return
+            }
+            setPasswordSheetOpen(false)
+            setPasswordSheetDirty(false)
+          }}>
             <div className="m-sheet" onClick={e => e.stopPropagation()}>
               <div className="m-sheet-grip" />
               <div className="m-sheet-h">
                 <h3>Change password</h3>
-                <button className="m-iconbtn m-iconbtn--ghost" onClick={() => setPasswordSheetOpen(false)} aria-label="Close"><X size={20} /></button>
+                <button className="m-iconbtn m-iconbtn--ghost" onClick={() => {
+                  if (passwordSheetDirty) {
+                    if (!window.confirm('Discard password changes?')) return
+                  }
+                  setPasswordSheetOpen(false)
+                  setPasswordSheetDirty(false)
+                }} aria-label="Close"><X size={20} /></button>
               </div>
-              <div className="m-sheet-body">
+              <div className="m-sheet-body" onChange={() => setPasswordSheetDirty(true)}>
                 <PasswordSection user={user} toast={toast} onDone={() => setPasswordSheetOpen(false)} />
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, MagnifyingGlass, Scroll, CaretRight } from '@phosphor-icons/react'
+import { Plus, TrendUp, CurrencyDollar, Hourglass, FileDashed, Scroll, CaretRight } from '@phosphor-icons/react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import Badge from '@/components/ui/Badge'
@@ -158,15 +158,15 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Recent invoices */}
-          {invoices.length > 0 && (
+          {/* Recent invoices — excludes outstanding (unpaid/overdue) already shown above */}
+          {invoices.filter(i => !['unpaid','overdue'].includes(effStatus(i))).length > 0 && (
             <div style={{ marginTop: 18 }}>
               <div className="m-card-h" style={{ padding: '0 0 10px' }}>
                 <h2 className="m-card-title">Recent invoices</h2>
                 <Link to="/invoices" className="m-card-link">View all</Link>
               </div>
               <div className="m-list m-card">
-                {invoices.slice(0, 5).map(inv => (
+                {invoices.filter(i => !['unpaid','overdue'].includes(effStatus(i))).slice(0, 5).map(inv => (
                   <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className="m-row">
                     <MiniAvatar name={inv.bill_to?.name} />
                     <div className="m-row-main">
@@ -287,10 +287,6 @@ export default function DashboardPage() {
             <p className="page-header__desc">Overview of your invoicing activity.</p>
           </div>
           <div className="page-header__right">
-            <div className="topbar-search">
-              <MagnifyingGlass size={15} className="topbar-search__icon" />
-              <input type="search" placeholder="Search…" aria-label="Search" className="topbar-search__input" />
-            </div>
             <Link to="/invoices/new" className="app-btn-primary">
               <Plus size={15} /> New invoice
             </Link>

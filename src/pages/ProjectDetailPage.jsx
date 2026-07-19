@@ -1,16 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom'
 import {
   ArrowLeft, CaretLeft, CaretRight, Plus, Trash, Check, CaretDown,
-  FileText, Scroll, UsersThree, PencilSimple
+  FileText, Scroll, UsersThree
 } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { getProject, updateProject, deleteProject } from '@/lib/projects'
 import { supabase } from '@/lib/supabase'
 import { STATUS_OPTS, StatusBadge } from './ProjectsPage'
-import ProjectFiles from '@/components/projects/ProjectFiles'
-import ProjectTimeLog from '@/components/projects/ProjectTimeLog'
 import styles from './ProjectDetailPage.module.css'
 
 function genId() { return Math.random().toString(36).slice(2, 10) }
@@ -42,6 +40,9 @@ export default function ProjectDetailPage() {
   const { user } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo = new URLSearchParams(location.search).get('from') || '/projects'
+  const backLabel = backTo.includes('/clients/') ? 'Client' : 'Projects'
 
   const [project,  setProject]  = useState(null)
   const [client,   setClient]   = useState(null)
@@ -60,14 +61,6 @@ export default function ProjectDetailPage() {
   const [noteText,  setNoteText]  = useState('')
   const [addingNote, setAddingNote] = useState(false)
 
-  const [editingNoteId,      setEditingNoteId]      = useState(null)
-  const [editNoteText,       setEditNoteText]        = useState('')
-  const [editNoteDate,       setEditNoteDate]        = useState('')
-  const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState(null)
-
-  const [files,    setFiles]    = useState([])
-  const [sessions, setSessions] = useState([])
-
   const [statusOpen,     setStatusOpen]     = useState(false)
   const [confirmDelete,  setConfirmDelete]   = useState(false)
   const [deleting,       setDeleting]        = useState(false)
@@ -82,8 +75,6 @@ export default function ProjectDetailPage() {
       setDesc(data.description || '')
       setReminders(data.reminders || [])
       setNotes(data.notes || [])
-      setFiles(data.files || [])
-      setSessions(data.time_sessions || [])
       if (data.client_id) {
         supabase.from('clients').select('id, name, city').eq('id', data.client_id).single()
           .then(({ data: c }) => setClient(c))
@@ -156,47 +147,6 @@ export default function ProjectDetailPage() {
     setAddingNote(false)
   }
 
-  const handleNoteEditStart = (note) => {
-    const d = new Date(note.created_at)
-    const localDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-    setEditNoteText(note.text)
-    setEditNoteDate(localDate)
-    setEditingNoteId(note.id)
-    setConfirmDeleteNoteId(null)
-  }
-
-  const handleNoteEditSave = async () => {
-    if (!editNoteText.trim()) return
-    const original = notes.find(n => n.id === editingNoteId)
-    const updatedAt = editNoteDate
-      ? new Date(editNoteDate + 'T00:00:00').toISOString()
-      : original?.created_at
-    const updated = notes.map(n =>
-      n.id === editingNoteId ? { ...n, text: editNoteText.trim(), created_at: updatedAt } : n
-    )
-    setNotes(updated)
-    const ok = await save({ notes: updated })
-    if (ok) { setEditingNoteId(null); toast.success('Note updated.') }
-  }
-
-  const handleNoteDelete = async (noteId) => {
-    const updated = notes.filter(n => n.id !== noteId)
-    setNotes(updated)
-    await save({ notes: updated })
-    setConfirmDeleteNoteId(null)
-    toast.success('Note deleted.')
-  }
-
-  const handleFilesChange = async (updated) => {
-    setFiles(updated)
-    await save({ files: updated })
-  }
-
-  const handleSessionsChange = async (updated) => {
-    setSessions(updated)
-    await save({ time_sessions: updated })
-  }
-
   const handleDelete = async () => {
     setDeleting(true)
     const { error } = await deleteProject(id)
@@ -234,8 +184,8 @@ export default function ProjectDetailPage() {
     {/* ── Mobile ──────────────────────────────────────────────── */}
     <div className="m-only">
       <div className="m-head">
-        <button className="m-back" onClick={() => navigate('/projects')} type="button">
-          <CaretLeft size={16} weight="bold" /> Projects
+        <button className="m-back" onClick={() => navigate(backTo)} type="button">
+          <CaretLeft size={16} weight="bold" /> {backLabel}
         </button>
         <div className="m-head-top" style={{ marginTop: 6 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -339,62 +289,15 @@ export default function ProjectDetailPage() {
               {notes.map(n => (
                 <li key={n.id} className={styles.noteItem}>
                   <div className={styles.noteDot} />
-                  <div className={styles.noteContent}>
-                    {editingNoteId === n.id ? (
-                      <div className={styles.noteEditForm}>
-                        <input type="date" className={styles.noteEditDate} value={editNoteDate} onChange={e => setEditNoteDate(e.target.value)} aria-label="Note date" />
-                        <textarea className={styles.noteEditArea} value={editNoteText} onChange={e => setEditNoteText(e.target.value)} rows={3} autoFocus aria-label="Note text" />
-                        <div className={styles.noteEditActions}>
-                          <button className="m-btn m-btn--ghost" onClick={() => setEditingNoteId(null)} type="button">Cancel</button>
-                          <button className="m-btn m-btn--primary" onClick={handleNoteEditSave} disabled={!editNoteText.trim()} type="button">Save</button>
-                        </div>
-                      </div>
-                    ) : confirmDeleteNoteId === n.id ? (
-                      <>
-                        <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                        <div className={styles.noteText}>{n.text}</div>
-                        <div className={styles.noteDeleteConfirm}>
-                          <span className={styles.noteDeleteMsg}>Delete this note?</span>
-                          <button className="m-btn m-btn--ghost" onClick={() => setConfirmDeleteNoteId(null)} type="button" style={{ height: 40 }}>Cancel</button>
-                          <button className="m-btn m-btn--danger" onClick={() => handleNoteDelete(n.id)} type="button" style={{ height: 40 }}>Delete</button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className={styles.noteHead}>
-                          <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                          <div className={styles.noteItemBtns}>
-                            <button className={styles.noteEditBtn} onClick={() => handleNoteEditStart(n)} type="button" aria-label="Edit note"><PencilSimple size={14} /></button>
-                            <button className={styles.noteDeleteBtn} onClick={() => setConfirmDeleteNoteId(n.id)} type="button" aria-label="Delete note"><Trash size={14} /></button>
-                          </div>
-                        </div>
-                        <div className={styles.noteText}>{n.text}</div>
-                      </>
-                    )}
+                  <div>
+                    <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                    <div className={styles.noteText}>{n.text}</div>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
-
-        {/* Time log */}
-        <p className="m-section-label">Time log</p>
-        <ProjectTimeLog
-          sessions={sessions}
-          onSessionsChange={handleSessionsChange}
-          mobile
-        />
-
-        {/* Files */}
-        <p className="m-section-label">Files</p>
-        <ProjectFiles
-          userId={user.id}
-          projectId={id}
-          files={files}
-          onFilesChange={handleFilesChange}
-          mobile
-        />
 
         {/* Details */}
         <p className="m-section-label">Details</p>
@@ -526,10 +429,10 @@ export default function ProjectDetailPage() {
           {statusDropdown}
         </div>
       </div>
-      <Link to="/projects" className={styles.backLink}>
+      <button type="button" className={styles.backLink} onClick={() => navigate(backTo)}>
         <ArrowLeft size={14} />
-        <span>Back to projects</span>
-      </Link>
+        <span>Back to {backLabel.toLowerCase()}</span>
+      </button>
 
       {/* ── Two-column body ────────────────────── */}
       <div className={styles.body}>
@@ -632,58 +535,15 @@ export default function ProjectDetailPage() {
                 {notes.map(n => (
                   <li key={n.id} className={styles.noteItem}>
                     <div className={styles.noteDot} />
-                    <div className={styles.noteContent}>
-                      {editingNoteId === n.id ? (
-                        <div className={styles.noteEditForm}>
-                          <input type="date" className={styles.noteEditDate} value={editNoteDate} onChange={e => setEditNoteDate(e.target.value)} aria-label="Note date" />
-                          <textarea className={styles.noteEditArea} value={editNoteText} onChange={e => setEditNoteText(e.target.value)} rows={3} autoFocus aria-label="Note text" />
-                          <div className={styles.noteEditActions}>
-                            <button className={styles.btnGhost} onClick={() => setEditingNoteId(null)} type="button">Cancel</button>
-                            <button className={styles.btnPrimary} onClick={handleNoteEditSave} disabled={!editNoteText.trim()} type="button">Save</button>
-                          </div>
-                        </div>
-                      ) : confirmDeleteNoteId === n.id ? (
-                        <>
-                          <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                          <div className={styles.noteText}>{n.text}</div>
-                          <div className={styles.noteDeleteConfirm}>
-                            <span className={styles.noteDeleteMsg}>Delete this note?</span>
-                            <button className={styles.btnGhost} onClick={() => setConfirmDeleteNoteId(null)} type="button">Cancel</button>
-                            <button className={styles.btnDanger} onClick={() => handleNoteDelete(n.id)} type="button">Delete</button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className={styles.noteHead}>
-                            <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
-                            <div className={styles.noteItemBtns}>
-                              <button className={styles.noteEditBtn} onClick={() => handleNoteEditStart(n)} type="button" aria-label="Edit note"><PencilSimple size={12} /></button>
-                              <button className={styles.noteDeleteBtn} onClick={() => setConfirmDeleteNoteId(n.id)} type="button" aria-label="Delete note"><Trash size={12} /></button>
-                            </div>
-                          </div>
-                          <div className={styles.noteText}>{n.text}</div>
-                        </>
-                      )}
+                    <div>
+                      <div className={styles.noteDate}>{fmtDateTime(n.created_at)}</div>
+                      <div className={styles.noteText}>{n.text}</div>
                     </div>
                   </li>
                 ))}
               </ul>
             )}
           </section>
-          {/* Time log */}
-          <ProjectTimeLog
-            sessions={sessions}
-            onSessionsChange={handleSessionsChange}
-          />
-
-          {/* Files */}
-          <ProjectFiles
-            userId={user.id}
-            projectId={id}
-            files={files}
-            onFilesChange={handleFilesChange}
-          />
-
         </div>
 
         {/* Right sidebar */}

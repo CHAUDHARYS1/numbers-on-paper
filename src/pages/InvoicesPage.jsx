@@ -233,17 +233,31 @@ export default function InvoicesPage() {
                   ? `Due ${fmtDateShort(inv.due_date)}`
                   : fmtDateShort(inv.issue_date)
                 return (
-                  <Link key={inv.id} to={`/invoices/${inv.id}/edit`} className="m-row">
-                    <MiniAvatar name={clientName} />
-                    <div className="m-row-main">
-                      <div className="m-row-title">{clientName}</div>
-                      <div className="m-row-meta">{inv.invoice_number} · {dateLabel}</div>
-                    </div>
-                    <div className="m-row-end">
+                  <div key={inv.id} className="m-row">
+                    <Link to={`/invoices/${inv.id}/edit`} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit' }}>
+                      <MiniAvatar name={clientName} />
+                      <div className="m-row-main">
+                        <div className="m-row-title">{clientName}</div>
+                        <div className="m-row-meta">{inv.invoice_number} · {dateLabel}</div>
+                      </div>
+                    </Link>
+                    <div className="m-row-end" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 4, minWidth: 0 }}>
                       <span className="m-row-amt">{fmt(inv.total)}</span>
-                      <Badge variant={effStatus(inv)} />
+                      {['unpaid', 'overdue'].includes(effStatus(inv)) ? (
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); handleMarkPaid(inv) }}
+                          disabled={markingPaidId === inv.id}
+                          style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', borderRadius: '4px', padding: '2px 7px', cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}
+                          aria-label={`Mark invoice ${inv.invoice_number} as paid`}
+                        >
+                          {markingPaidId === inv.id ? 'Saving…' : 'Mark paid'}
+                        </button>
+                      ) : (
+                        <Badge variant={effStatus(inv)} />
+                      )}
                     </div>
-                  </Link>
+                  </div>
                 )
               })}
             </div>

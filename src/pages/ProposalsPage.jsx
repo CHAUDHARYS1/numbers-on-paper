@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Scroll, PencilSimple, Trash } from '@phosphor-icons/react'
+import { Plus, Scroll, PencilSimple, Trash, MagnifyingGlass } from '@phosphor-icons/react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { getProposals, deleteProposal } from '@/lib/proposals'
@@ -17,6 +17,7 @@ export default function ProposalsPage() {
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -40,7 +41,15 @@ export default function ProposalsPage() {
     setDeleteTarget(null)
   }
 
-  const mobileCards = proposals.map(p => {
+  const filteredProposals = proposals.filter(p => {
+    const q = search.toLowerCase()
+    if (!q) return true
+    const title = (p.data?.title || '').toLowerCase()
+    const client = (p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || '').toLowerCase()
+    return title.includes(q) || client.includes(q)
+  })
+
+  const mobileCards = filteredProposals.map(p => {
     const status = p.data?.status || 'draft'
     const title  = p.data?.title || 'Untitled'
     const client = p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || null
@@ -116,9 +125,17 @@ export default function ProposalsPage() {
               </div>
             </div>
           ) : (
-            <div className={styles.cardList}>
-              {mobileCards}
-            </div>
+            <>
+              {proposals.length > 3 && (
+                <div className={styles.mSearch}>
+                  <MagnifyingGlass size={16} className={styles.mSearchIcon} />
+                  <input className={styles.mSearchInput} placeholder="Search proposals…" value={search} onChange={e => setSearch(e.target.value)} aria-label="Search proposals" />
+                </div>
+              )}
+              <div className={styles.cardList}>
+                {mobileCards}
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -162,26 +179,31 @@ export default function ProposalsPage() {
                   <th>Title</th>
                   <th>Client</th>
                   <th>Created</th>
+                  <th>Status</th>
                   <th aria-label="Actions"></th>
                 </tr>
               </thead>
               <tbody>
-                {proposals.map(p => (
-                  <tr key={p.id} className={styles.row} onClick={() => navigate(`/proposals/${p.id}/edit`)}>
-                    <td className={styles.mono}>PROP-{String(p.proposal_no).padStart(4, '0')}</td>
-                    <td className={styles.bold}>{p.data?.title || 'Untitled'}</td>
-                    <td>{p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || '—'}</td>
-                    <td>{new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td className={styles.actionsCell}>
-                      <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); navigate(`/proposals/${p.id}/edit`) }} aria-label="Edit proposal">
-                        <PencilSimple size={15} />
-                      </button>
-                      <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} onClick={e => { e.stopPropagation(); setDeleteTarget(p) }} aria-label="Delete proposal">
-                        <Trash size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {proposals.map(p => {
+                  const status = p.data?.status || 'draft'
+                  return (
+                    <tr key={p.id} className={styles.row} onClick={() => navigate(`/proposals/${p.id}/edit`)}>
+                      <td className={styles.mono}>PROP-{String(p.proposal_no).padStart(4, '0')}</td>
+                      <td className={styles.bold}>{p.data?.title || 'Untitled'}</td>
+                      <td>{p.data?.client?.name || p.data?.clientCompany || p.data?.clientName || '—'}</td>
+                      <td>{new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                      <td><span className={`prop-badge prop-badge--${status}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
+                      <td className={styles.actionsCell}>
+                        <button className={styles.iconBtn} onClick={e => { e.stopPropagation(); navigate(`/proposals/${p.id}/edit`) }} aria-label="Edit proposal">
+                          <PencilSimple size={15} />
+                        </button>
+                        <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} onClick={e => { e.stopPropagation(); setDeleteTarget(p) }} aria-label="Delete proposal">
+                          <Trash size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

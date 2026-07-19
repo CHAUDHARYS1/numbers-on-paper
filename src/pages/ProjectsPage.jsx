@@ -293,13 +293,23 @@ export default function ProjectsPage() {
                       </td>
                       <td>
                         {p.linked_invoice_number ? (
-                          <span className={styles.linkedChip} onClick={e => { e.stopPropagation(); if (p.linked_invoice_id) navigate(`/invoices/${p.linked_invoice_id}/edit`) }}>
+                          <button
+                            type="button"
+                            className={styles.linkedChip}
+                            onClick={e => { e.stopPropagation(); if (p.linked_invoice_id) navigate(`/invoices/${p.linked_invoice_id}/edit`) }}
+                            aria-label={`View invoice ${p.linked_invoice_number}`}
+                          >
                             <FileText size={11} weight="bold" aria-hidden="true" />{p.linked_invoice_number}
-                          </span>
+                          </button>
                         ) : p.linked_proposal_number ? (
-                          <span className={`${styles.linkedChip} ${styles.linkedChipProposal}`} onClick={e => { e.stopPropagation(); if (p.linked_proposal_id) navigate(`/proposals/${p.linked_proposal_id}/edit`) }}>
+                          <button
+                            type="button"
+                            className={`${styles.linkedChip} ${styles.linkedChipProposal}`}
+                            onClick={e => { e.stopPropagation(); if (p.linked_proposal_id) navigate(`/proposals/${p.linked_proposal_id}/edit`) }}
+                            aria-label={`View proposal ${p.linked_proposal_number}`}
+                          >
                             <Scroll size={11} weight="bold" aria-hidden="true" />{p.linked_proposal_number}
-                          </span>
+                          </button>
                         ) : <span className={styles.reminderNone}>—</span>}
                       </td>
                       <td className={styles.activityCell}>{lastAct}</td>
